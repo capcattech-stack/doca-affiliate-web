@@ -189,6 +189,11 @@ def main():
     supabase_url = os.environ.get('PUBLIC_SUPABASE_URL') or env.get('PUBLIC_SUPABASE_URL')
     supabase_key = os.environ.get('SUPABASE_SERVICE_ROLE_KEY') or env.get('SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('PUBLIC_SUPABASE_ANON_KEY') or env.get('PUBLIC_SUPABASE_ANON_KEY')
     
+    if supabase_url:
+        supabase_url = supabase_url.strip()
+    if supabase_key:
+        supabase_key = supabase_key.strip().replace('\r', '').replace('\n', '')
+        
     if not supabase_url or not supabase_key:
         print("Error: PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be defined.", file=sys.stderr)
         sys.exit(1)

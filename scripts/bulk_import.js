@@ -100,11 +100,32 @@ async function startImport() {
     console.log(`[${i + 1}/${imageFiles.length}] Đang xử lý: ${file}...`);
 
     try {
-      // 1. Nén ảnh bằng sharp (Max width 600px, JPEG chất lượng 70)
-      const compressedBuffer = await sharp(filePath)
+      // 1. Nén ảnh bằng sharp và lấy kích thước thực tế để tạo lưới so le
+      const sharpImg = sharp(filePath);
+      const metadata = await sharpImg.metadata();
+      
+      const compressedBuffer = await sharpImg
         .resize({ width: 600, withoutEnlargement: true })
         .jpeg({ quality: 70 })
         .toBuffer();
+      
+      const imgWidth = metadata.width || 600;
+      const imgHeight = metadata.height || 600;
+      const ratio = imgWidth / imgHeight;
+      let aspectRatio = '1/1';
+      if (ratio >= 0.72 && ratio <= 0.78) {
+        aspectRatio = '3/4';
+      } else if (ratio >= 0.78 && ratio <= 0.82) {
+        aspectRatio = '4/5';
+      } else if (ratio >= 0.90 && ratio <= 1.10) {
+        aspectRatio = '1/1';
+      } else if (ratio >= 1.20 && ratio <= 1.40) {
+        aspectRatio = '4/3';
+      } else if (ratio >= 1.45 && ratio <= 1.80) {
+        aspectRatio = '16/9';
+      } else {
+        aspectRatio = `${imgWidth}/${imgHeight}`;
+      }
       
       const base64Data = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
 
@@ -174,7 +195,7 @@ Yêu cầu viết nhật ký:
           image_url: base64Data,
           note: note,
           author_name: authorEmail,
-          aspect_ratio: '1/1',
+          aspect_ratio: aspectRatio,
           status: 'approved' // Vì được upload bởi Admin nên tự động xuất bản
         })
       });

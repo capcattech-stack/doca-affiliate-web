@@ -412,8 +412,8 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
             contributions.forEach((photo: any, index: number) => {
               // Tạo thẻ Polaroid
               const card = document.createElement('div');
-              // 14 tấm ảnh đầu tiên sẽ hiển thị ngay lập tức để lấp đầy grid, còn lại ẩn đi
-              const shouldHide = index >= 14;
+              // 12 tấm ảnh đầu tiên sẽ hiển thị ngay lập tức (2 hàng của layout 6 cột), còn lại ẩn đi
+              const shouldHide = index >= 12;
               card.className = `polaroid-card guest-contribution ${shouldHide ? 'hidden-card' : ''}`;
               card.setAttribute('data-id', photo.id.toString());
               card.setAttribute('data-type', 'contribution');
@@ -487,7 +487,7 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
         (window as any).gtag('event', 'click_load_more_moments');
       }
       
-      const nextBatch = Array.from(hiddenCards).slice(0, 10);
+      const nextBatch = Array.from(hiddenCards).slice(0, 12);
       nextBatch.forEach(card => {
         card.classList.remove('hidden-card');
       });

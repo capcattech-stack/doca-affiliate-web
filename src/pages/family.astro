@@ -1245,6 +1245,7 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
     height: 100%;
     padding: 1.15rem;
     display: flex;
+    flex-direction: column;
     box-sizing: border-box;
   }
 
@@ -1255,6 +1256,7 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
     flex-direction: column;
     justify-content: space-between;
     box-sizing: border-box;
+    flex-grow: 1;
   }
   .note-monospace {
     font-family: 'Space Mono', monospace;
@@ -1272,6 +1274,15 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
     text-align: right;
     padding-top: 0.5rem;
     border-top: 1px dashed var(--cozy-border-light);
+    margin-top: 0.5rem;
+  }
+
+  .note-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--cozy-wood-sugi);
+    letter-spacing: 0.5px;
   }
 
   .note-date {

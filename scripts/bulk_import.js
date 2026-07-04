@@ -100,31 +100,48 @@ async function startImport() {
     console.log(`[${i + 1}/${imageFiles.length}] Đang xử lý: ${file}...`);
 
     try {
-      // 1. Nén ảnh bằng sharp và lấy kích thước thực tế để tạo lưới so le
+      // 1. Phân tích kích thước gốc và thực hiện crop theo quy chuẩn:
+      // - Ngang: Crop về 1:1
+      // - Dọc: Crop về 3:4 hoặc 4:5 ngẫu nhiên để tạo lưới so le
       const sharpImg = sharp(filePath);
       const metadata = await sharpImg.metadata();
-      
-      const compressedBuffer = await sharpImg
-        .resize({ width: 600, withoutEnlargement: true })
-        .jpeg({ quality: 70 })
-        .toBuffer();
-      
       const imgWidth = metadata.width || 600;
       const imgHeight = metadata.height || 600;
       const ratio = imgWidth / imgHeight;
+      
       let aspectRatio = '1/1';
-      if (ratio >= 0.72 && ratio <= 0.78) {
-        aspectRatio = '3/4';
-      } else if (ratio >= 0.78 && ratio <= 0.82) {
-        aspectRatio = '4/5';
-      } else if (ratio >= 0.90 && ratio <= 1.10) {
+      let compressedBuffer;
+      
+      if (ratio > 1.05) {
+        // Ảnh ngang -> Crop về 1:1
         aspectRatio = '1/1';
-      } else if (ratio >= 1.20 && ratio <= 1.40) {
-        aspectRatio = '4/3';
-      } else if (ratio >= 1.45 && ratio <= 1.80) {
-        aspectRatio = '16/9';
+        compressedBuffer = await sharpImg
+          .resize(600, 600, { fit: 'cover', position: 'center' })
+          .jpeg({ quality: 70 })
+          .toBuffer();
+      } else if (ratio < 0.95) {
+        // Ảnh dọc -> Crop về 3:4 hoặc 4:5 ngẫu nhiên
+        const randomChoice = Math.random() < 0.5 ? '3/4' : '4/5';
+        aspectRatio = randomChoice;
+        
+        let targetHeight;
+        if (aspectRatio === '3/4') {
+          targetHeight = Math.round(600 * (4 / 3)); // 800px
+        } else {
+          targetHeight = Math.round(600 * (5 / 4)); // 750px
+        }
+        
+        compressedBuffer = await sharpImg
+          .resize(600, targetHeight, { fit: 'cover', position: 'center' })
+          .jpeg({ quality: 70 })
+          .toBuffer();
       } else {
-        aspectRatio = `${imgWidth}/${imgHeight}`;
+        // Ảnh vuông sẵn
+        aspectRatio = '1/1';
+        compressedBuffer = await sharpImg
+          .resize(600, 600, { fit: 'cover', position: 'center' })
+          .jpeg({ quality: 70 })
+          .toBuffer();
       }
       
       const base64Data = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;

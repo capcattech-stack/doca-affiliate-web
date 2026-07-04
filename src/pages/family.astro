@@ -1039,6 +1039,7 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
     gap: 0.65rem;
     width: 100%;
     align-items: flex-start;
+    padding-top: 1.5rem; /* Chừa khoảng trống cho cột chẵn nhô lên */
   }
 
   .masonry-col {
@@ -1047,6 +1048,12 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
     flex-direction: column;
     gap: 0.65rem;
     min-width: 0;
+    transition: transform 0.3s ease;
+  }
+
+  /* Các cột chẵn (2, 4, 6) nhô cao hơn một chút tạo cảm giác so le nhấp nhô */
+  .masonry-col:nth-child(even) {
+    transform: translateY(-20px);
   }
 
   /* Polaroid Card container (Card KHÔNG nghiêng) */

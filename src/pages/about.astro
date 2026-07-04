@@ -5,7 +5,7 @@ const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 ---
 
-<Layout title="Giới Thiệu Dự Án App DOCA | Sống Chậm Cùng Thú Cưng" description="Khám phá triết lý chữa lành (Iyashikei) của ứng dụng DOCA và đăng ký nhận slot trải nghiệm bản Beta sớm dành riêng cho Sen và Boss.">
+<Layout title="Giới Thiệu Dự Án App DOCA | Sống Chậm Cùng Thú Cưng" description="Khám phá triết lý chữa lành (Iyashikei) của ứng dụng DOCA và đăng ký nhận slot trải nghiệm bản Beta sớm dành riêng cho cô/chú và các bạn đồng Meo.">
   <script is:inline define:vars={{ supabaseUrl, supabaseKey }}>
     window.PUBLIC_SUPABASE_URL = supabaseUrl;
     window.PUBLIC_SUPABASE_ANON_KEY = supabaseKey;
@@ -27,7 +27,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             <img src="/images/about-illustration.png" alt="Góc bình yên cùng Boss" class="manifesto-image" />
           </div>
           <div class="about-manifesto cozy-card">
-            <h2 class="title-large">Thư gửi Sen từ mái nhà Doca 🐾</h2>
+            <h2 class="title-large">Thư gửi cô/chú từ mái nhà Doca 🐾</h2>
             <p>
               Chúng mình xây dựng <strong>DOCA</strong> không phải để tạo ra một chiếc app ghi chép số liệu cân nặng hay lịch tiêm phòng khô khan. Giữa lòng thành phố chật chội và vội vã này, tụi mình muốn tạo nên một góc trú ẩn nhỏ — một mái nhà ấm áp nơi những người đô thị cô đơn tìm thấy sự xoa dịu.
             </p>
@@ -48,13 +48,13 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
           <div class="cozy-card feature-item">
             <span class="feature-icon"><i class="ph-light ph-users"></i></span>
             <h3>PetTwin — Linh Hồn Bé Nhỏ</h3>
-            <p>Biến tính cách ngoài đời của Boss (Ngáo ngơ, Chảnh chọe, Đanh đá, Nịnh nọt) thành giọng nói AI ấm áp. Sen sẽ được nghe Boss cằn nhằn hay nịnh nọt dưới góc nhìn ngộ nghĩnh của riêng bé.</p>
+            <p>Biến tính cách ngoài đời của thú cưng (Ngáo ngơ, Chảnh chọe, Đanh đá, Nịnh nọt) thành giọng nói AI ấm áp. Cô/chú sẽ được nghe thú cưng cằn nhằn hay nịnh nọt dưới góc nhìn ngộ nghĩnh của riêng bé.</p>
           </div>
 
           <div class="cozy-card feature-item">
             <span class="feature-icon"><i class="ph-light ph-package"></i></span>
             <h3>Capsule — Chiếc Rương Ký Ức</h3>
-            <p>Nơi cất giữ những bức ảnh dìm hàng, những khoảnh khắc vụn vặt và những câu chuyện chỉ hai đứa biết. Boss ảo sẽ khắc ghi những kỷ niệm này sâu sắc vào tim để trò chuyện cùng Sen sau này.</p>
+            <p>Nơi cất giữ những bức ảnh dìm hàng, những khoảnh khắc vụn vặt và những câu chuyện chỉ hai đứa biết. Thú cưng ảo sẽ khắc ghi những kỷ niệm này sâu sắc vào tim để trò chuyện cùng cô/chú sau này.</p>
           </div>
 
           <div class="cozy-card feature-item">
@@ -74,9 +74,9 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
       <!-- Form đăng ký Waitlist -->
       <section class="waitlist-card cozy-card text-center">
         <span class="waitlist-icon"><i class="ph-light ph-envelope-simple"></i></span>
-        <h2 class="title-large">Sen muốn nhận thư từ Boss không?</h2>
+        <h2 class="title-large">Cô/chú muốn nhận thư từ bé cưng không?</h2>
         <p class="waitlist-desc">
-          Hãy để lại email tại đây nhé. Boss sẽ gửi tặng Sen cuốn Ebook <strong>"Nhật Ký Sống Chậm Cùng Boss (Cẩm nang 7 ngày chánh niệm)"</strong> bản PDF và một chiếc vé mời trải nghiệm sớm bản Beta khi app ra mắt.
+          Hãy để lại email tại đây nhé. Bé cưng sẽ gửi tặng cô/chú cuốn Ebook <strong>"Nhật Ký Sống Chậm Cùng Thú Cưng (Cẩm nang 7 ngày chánh niệm)"</strong> bản PDF và một chiếc vé mời trải nghiệm sớm bản Beta khi app ra mắt.
         </p>
 
         <form id="about-waitlist-form" class="waitlist-form" novalidate>
@@ -84,7 +84,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             type="email" 
             id="waitlist-email" 
             class="form-input" 
-            placeholder="Nhập email của Sen tại đây..." 
+            placeholder="Nhập email của cô/chú tại đây..." 
             required 
           />
           <button type="submit" class="cozy-btn cozy-btn-primary submit-btn">
@@ -95,13 +95,13 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
         <!-- Custom Friendly Error Notification -->
         <div id="about-error-msg" class="about-error-msg hidden">
           <i class="ph-light ph-warning-circle error-icon"></i>
-          <span id="about-error-text">Hình như email của Sen bị thiếu ký tự '@' hoặc sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾</span>
+          <span id="about-error-text">Hình như email của cô/chú bị thiếu ký tự '@' hoặc sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾</span>
         </div>
 
         <div id="waitlist-success" class="waitlist-success hidden">
           <span class="success-paw" style="color: var(--cozy-green-matcha);"><i class="ph-light ph-paw"></i></span>
-          <h4>Boss đã nhận được thư của Sen!</h4>
-          <p>Ebook quà tặng đang trên đường bay tới hòm thư của bạn. Sen nhớ kiểm tra cả hộp thư Spam/Quảng cáo nhé!</p>
+          <h4>Bé cưng đã nhận được thư của cô/chú!</h4>
+          <p>Ebook quà tặng đang trên đường bay tới hòm thư của bạn. Cô/chú nhớ kiểm tra cả hộp thư Spam/Quảng cáo nhé!</p>
         </div>
       </section>
     </div>
@@ -384,7 +384,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 
       if (!email) {
         if (errorMsg && errorText) {
-          errorText.textContent = "Hình như Sen chưa điền email kìa... Nhập email để tụi con gửi quà nhé! 🐾";
+          errorText.textContent = "Hình như cô/chú chưa điền email kìa... Nhập email để tụi con gửi quà nhé! 🐾";
           errorMsg.classList.remove('hidden');
         }
         return;
@@ -394,7 +394,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         if (errorMsg && errorText) {
-          errorText.textContent = "Hình như email của Sen bị thiếu ký tự '@' hoặc sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾";
+          errorText.textContent = "Hình như email của cô/chú bị thiếu ký tự '@' hoặc sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾";
           errorMsg.classList.remove('hidden');
         }
         return;
@@ -433,7 +433,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
             successMsg?.classList.remove('hidden');
           } else {
             if (errorMsg && errorText) {
-              errorText.textContent = "Có lỗi xảy ra khi đăng ký waitlist, Sen vui lòng thử lại nhé! 🐾";
+              errorText.textContent = "Có lỗi xảy ra khi đăng ký waitlist, cô/chú vui lòng thử lại nhé! 🐾";
               errorMsg.classList.remove('hidden');
             }
             if (submitBtn) submitBtn.disabled = false;
@@ -441,7 +441,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
         } catch (err) {
           console.error(err);
           if (errorMsg && errorText) {
-            errorText.textContent = "Không thể kết nối máy chủ. Sen hãy kiểm tra mạng nhé! 🐾";
+            errorText.textContent = "Không thể kết nối máy chủ. Cô/chú hãy kiểm tra mạng nhé! 🐾";
             errorMsg.classList.remove('hidden');
           }
           const submitBtn = form.querySelector('.submit-btn') as HTMLButtonElement;

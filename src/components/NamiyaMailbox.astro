@@ -13,7 +13,7 @@
   </div>
   
   <p class="mailbox-desc">
-    Lấy cảm hứng từ tiệm tạp hóa kỳ diệu Namiya, tụi con — ba chú mèo nhỏ ở đây — mở chiếc hòm gỗ này để nhận hết mọi âu lo của cô chú. Cô chú cứ trút bỏ muộn phiền vào đây nhé, tụi con sẽ giữ kín và hồi đáp xoa dịu qua hòm thư của cô chú trước khi nắng mai lên. 🐾
+    Lấy cảm hứng từ tiệm tạp hóa kỳ diệu Namiya, tụi con — ba chú mèo nhỏ ở đây — mở chiếc hòm gỗ này để nhận hết mọi âu lo của cô/chú. Cô/chú cứ trút bỏ muộn phiền vào đây nhé, tụi con sẽ giữ kín và hồi đáp xoa dịu qua hòm thư của cô/chú trước khi nắng mai lên. 🐾
   </p>
 
   <form id="namiya-confession-form" class="mailbox-form" novalidate>
@@ -46,13 +46,13 @@
   <!-- Custom Friendly Error Notification -->
   <div id="mailbox-error-msg" class="mailbox-error-msg hidden">
     <i class="ph-light ph-warning-circle error-icon"></i>
-    <span id="mailbox-error-text">Hình như cô chú chưa ghi tâm tư vào bức thư kìa... Viết vài dòng gửi tụi con nhé! 🐾</span>
+    <span id="mailbox-error-text">Hình như cô/chú chưa ghi tâm tư vào bức thư kìa... Viết vài dòng gửi tụi con nhé! 🐾</span>
   </div>
 
   <div id="mailbox-success-msg" class="mailbox-success hidden">
     <span class="success-icon" style="color: var(--cozy-green-matcha);"><i class="ph-light ph-paw"></i></span>
     <h4>Thư đã lọt thỏm vào hòm gỗ!</h4>
-    <p>Cảm ơn bạn đã tin tưởng chia sẻ nỗi lòng. Boss và ông già Namiya sẽ gửi thư hồi đáp sớm qua hòm thư của bạn nhé.</p>
+    <p>Cảm ơn bạn đã tin tưởng chia sẻ nỗi lòng. Tụi con và ông già Namiya sẽ gửi thư hồi đáp sớm qua hòm thư của bạn nhé.</p>
     <button id="reset-mailbox-btn" class="cozy-btn cozy-btn-secondary btn-sm">
       Gửi thêm lá thư khác
     </button>
@@ -299,7 +299,7 @@
 
       if (!content) {
         if (errorMsg && errorText) {
-          errorText.textContent = "Hình như cô chú chưa ghi tâm tư vào bức thư kìa... Viết vài dòng gửi tụi con nhé! 🐾";
+          errorText.textContent = "Hình như cô/chú chưa ghi tâm tư vào bức thư kìa... Viết vài dòng gửi tụi con nhé! 🐾";
           errorMsg.classList.remove('hidden');
         }
         return;
@@ -307,7 +307,7 @@
 
       if (!email) {
         if (errorMsg && errorText) {
-          errorText.textContent = "Hình như cô chú chưa để lại địa chỉ email kìa... Nhập email để tụi con gửi thư hồi đáp nhé! 🐾";
+          errorText.textContent = "Hình như cô/chú chưa để lại địa chỉ email kìa... Nhập email để tụi con gửi thư hồi đáp nhé! 🐾";
           errorMsg.classList.remove('hidden');
         }
         return;
@@ -317,7 +317,7 @@
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         if (errorMsg && errorText) {
-          errorText.textContent = "Hình như email của cô chú bị thiếu ký tự '@' hoặc sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾";
+          errorText.textContent = "Hình như email của cô/chú bị thiếu ký tự '@' hoặc sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾";
           errorMsg.classList.remove('hidden');
         }
         return;
@@ -353,7 +353,7 @@
             successMsg?.classList.remove('hidden');
           } else {
             if (errorMsg && errorText) {
-              errorText.textContent = "Có lỗi xảy ra khi gửi thư, cô chú vui lòng thử lại nhé! 🐾";
+              errorText.textContent = "Có lỗi xảy ra khi gửi thư, cô/chú vui lòng thử lại nhé! 🐾";
               errorMsg.classList.remove('hidden');
             }
             if (submitBtn) submitBtn.disabled = false;
@@ -361,7 +361,7 @@
         } catch (err) {
           console.error(err);
           if (errorMsg && errorText) {
-            errorText.textContent = "Không thể kết nối máy chủ. Cô chú hãy kiểm tra mạng internet nhé! 🐾";
+            errorText.textContent = "Không thể kết nối máy chủ. Cô/chú hãy kiểm tra mạng internet nhé! 🐾";
             errorMsg.classList.remove('hidden');
           }
           const submitBtn = form.querySelector('.submit-btn') as HTMLButtonElement;

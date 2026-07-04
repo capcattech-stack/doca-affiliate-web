@@ -1,0 +1,363 @@
+Loading environment variables from: /Users/ricyuan/CAPCAT/doca-affiliate-web/.env
+
+[Storage] Found 51 files to delete: ['Amazing_Grace__USAFB_jazz_vocal_.ogg', 'Arirang_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'As_I_Roved_Out_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Away_in_a_Manger_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'Birkin_Tree_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Black_Cat_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Black_Velvet_Band_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Blacksmith_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Bossa_Antigua__ISRC_USUAN1700069_.mp3', 'Coastline_State_of_Mind_-_Silver_Wings_-_United_States_Air_Force_Band.mp3', 'Cockles_and_Mussels_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Cool_Vibes__ISRC_USUAN1100863_.mp3', 'Dance_the_Night_Away_-_Silver_Wings_-_United_States_Air_Force_Band.mp3', 'Danny_Boy_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'December_Makes_Me_Feel_This_Way_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'Down_by_the_Salley_Gardens_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Go_Tell_It_on_the_Mountain_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'Hark__the_Herald_Angels_Sing_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'I_Tell_Me_Ma_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'I_Will_-_Silver_Wings_-_United_States_Air_Force_Band.mp3', 'Irish_Rover_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'It_s_a_Brand_New_Day_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'Jazz_Brunch__ISRC_USUAN1700074_.mp3', 'Johnny_Jump_Up_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Kevin_MacLeod_-_AcidJazz.ogg', 'Kevin_MacLeod_-_As_I_Figure.ogg', 'Kevin_MacLeod_-_Backed_Vibes_Clean.ogg', 'Kevin_MacLeod_-_Dances_and_Dames.ogg', 'Kevin_MacLeod_-_Faster_Does_It.ogg', 'Kevin_MacLeod_-_I_Knew_a_Guy.ogg', 'Kevin_MacLeod_-_Night_on_the_Docks_-_Sax.ogg', 'Kevin_MacLeod_-_Off_to_Osaka.ogg', 'Kevin_MacLeod_-_Vibe_Ace.ogg', 'Kool_Kats__MacLeod__Kevin___ISRC_USUAN1100601_.oga', 'Lobby_Time__ISRC_USUAN1600054_.mp3', 'Long_Stroll__ISRC_USUAN1100174_.mp3', 'Modern_Jazz_Samba__ISRC_USUAN1100153_.mp3', 'New_Beginnings_-_Silver_Wings_-_United_States_Air_Force_Band.mp3', 'O_Christmas_Tree_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'playlist.json', 'Sakura_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'Ship_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3', 'Still_in_Love_-_Silver_Wings_-_United_States_Air_Force_Band.mp3', 'Stole_Back_My_Soul_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3', 'Study_And_Relax_by_Kevin_MacLeod.ogg', 'US_Army_Blues_-_03_-_Dance_Of_The_Stargazer.ogg', 'US_Army_Blues_-_04_-_Not_On_The_Bus.ogg', 'US_Army_Blues_-_06_-_Oginiland.ogg', 'US_Army_Blues_-_08_-_Kellis_Number.ogg', 'US_Army_Blues_-_10_-_BugaBlue.ogg', 'We_Three_Kings_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3']
+[Storage] Successfully cleared all old files from the bucket.
+
+Starting fresh download of 50 curated seeds...
+
+[1/50] Processing: A Brand New Day 🌅 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/d/df/It%27s_a_Brand_New_Day_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 316s
+  Downloading...
+  Uploading as: It_s_a_Brand_New_Day_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[2/50] Processing: Stole Back My Soul 🎸 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/8/85/Stole_Back_My_Soul_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 495s
+  Downloading...
+  Uploading as: Stole_Back_My_Soul_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[3/50] Processing: Go Tell It on the Mountain 🏔️ (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/7/77/Go_Tell_It_on_the_Mountain_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 180s
+  Downloading...
+  Uploading as: Go_Tell_It_on_the_Mountain_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[4/50] Processing: Hark, the Herald Angels Sing 👼 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/4/44/Hark%2C_the_Herald_Angels_Sing_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 180s
+  Downloading...
+  Uploading as: Hark__the_Herald_Angels_Sing_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[5/50] Processing: As I Roved Out 🚶 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/c/cb/As_I_Roved_Out_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 240s
+  Downloading...
+  Uploading as: As_I_Roved_Out_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[6/50] Processing: Birkin Tree 🌳 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/b/bb/Birkin_Tree_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 191s
+  Downloading...
+  Uploading as: Birkin_Tree_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[7/50] Processing: I Tell Me Ma 💃 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/4/45/I_Tell_Me_Ma_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 134s
+  Downloading...
+  Uploading as: I_Tell_Me_Ma_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[8/50] Processing: Irish Rover ⛵ (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/b/bb/Irish_Rover_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 222s
+  Downloading...
+  Uploading as: Irish_Rover_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[9/50] Processing: Johnny Jump Up 🍻 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/8/83/Johnny_Jump_Up_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 308s
+  Downloading...
+  Uploading as: Johnny_Jump_Up_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[10/50] Processing: New Beginnings 🌅 (Silver Wings)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/0/05/New_Beginnings_-_Silver_Wings_-_United_States_Air_Force_Band.mp3
+  Duration: 378s
+  Downloading...
+  Uploading as: New_Beginnings_-_Silver_Wings_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[11/50] Processing: Down by the Salley Gardens 🌸 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/c/c9/Down_by_the_Salley_Gardens_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 279s
+  Downloading...
+  Uploading as: Down_by_the_Salley_Gardens_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[12/50] Processing: Black Cat 🐈 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/0/04/Black_Cat_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 334s
+  Downloading...
+  Uploading as: Black_Cat_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[13/50] Processing: Black Velvet Band 🎻 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/2/24/Black_Velvet_Band_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 280s
+  Downloading...
+  Uploading as: Black_Velvet_Band_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[14/50] Processing: Blacksmith ⚒️ (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/1/1d/Blacksmith_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 274s
+  Downloading...
+  Uploading as: Blacksmith_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[15/50] Processing: I Will 🌾 (Silver Wings)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/4/43/I_Will_-_Silver_Wings_-_United_States_Air_Force_Band.mp3
+  Duration: 298s
+  Downloading...
+  Uploading as: I_Will_-_Silver_Wings_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[16/50] Processing: Coastline State of Mind 🌊 (Silver Wings)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/3/3b/Coastline_State_of_Mind_-_Silver_Wings_-_United_States_Air_Force_Band.mp3
+  Duration: 332s
+  Downloading...
+  Uploading as: Coastline_State_of_Mind_-_Silver_Wings_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[17/50] Processing: Danny Boy 🍀 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/3/39/Danny_Boy_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 218s
+  Downloading...
+  Uploading as: Danny_Boy_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[18/50] Processing: Cockles and Mussels 🐚 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/b/b0/Cockles_and_Mussels_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 167s
+  Downloading...
+  Uploading as: Cockles_and_Mussels_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[19/50] Processing: Ship 🚢 (Celtic Aire)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/e/e0/Ship_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3
+  Duration: 325s
+  Downloading...
+  Uploading as: Ship_-_Celtic_Aire_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[20/50] Processing: Still in Love ❤️ (Silver Wings)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/d/d2/Still_in_Love_-_Silver_Wings_-_United_States_Air_Force_Band.mp3
+  Duration: 297s
+  Downloading...
+  Uploading as: Still_in_Love_-_Silver_Wings_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[21/50] Processing: Dance the Night Away 💃 (Silver Wings)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/1/17/Dance_the_Night_Away_-_Silver_Wings_-_United_States_Air_Force_Band.mp3
+  Duration: 176s
+  Downloading...
+  Uploading as: Dance_the_Night_Away_-_Silver_Wings_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[22/50] Processing: O Christmas Tree 🎄 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/5/5c/O_Christmas_Tree_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 180s
+  Downloading...
+  Uploading as: O_Christmas_Tree_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[23/50] Processing: Away in a Manger 👼 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/6/6c/Away_in_a_Manger_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 340s
+  Downloading...
+  Uploading as: Away_in_a_Manger_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[24/50] Processing: December Feel This Way ❄️ (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/2/2b/December_Makes_Me_Feel_This_Way_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 515s
+  Downloading...
+  Uploading as: December_Makes_Me_Feel_This_Way_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[25/50] Processing: We Three Kings 👑 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/9/90/We_Three_Kings_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 180s
+  Downloading...
+  Uploading as: We_Three_Kings_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[26/50] Processing: Amazing Grace ✨ (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/f/f0/Amazing_Grace_%28USAFB_jazz_vocal%29.ogg
+  Duration: 385s
+  Downloading...
+  Uploading as: Amazing_Grace__USAFB_jazz_vocal_.ogg ...
+  Upload successful!
+
+[27/50] Processing: Sakura 🌸 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/2/22/Sakura_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 353s
+  Downloading...
+  Uploading as: Sakura_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[28/50] Processing: Arirang 🌾 (The Airmen of Note)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/d/d6/Arirang_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3
+  Duration: 457s
+  Downloading...
+  Uploading as: Arirang_-_Airmen_of_Note_-_United_States_Air_Force_Band.mp3 ...
+  Upload successful!
+
+[29/50] Processing: Oginiland 🗺️ (U.S. Army Blues)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/e/e4/US_Army_Blues_-_06_-_Oginiland.ogg
+  Duration: 655s
+  Downloading...
+  Uploading as: US_Army_Blues_-_06_-_Oginiland.ogg ...
+  Upload successful!
+
+[30/50] Processing: BugaBlue 🎺 (U.S. Army Blues)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/f/f9/US_Army_Blues_-_10_-_BugaBlue.ogg
+  Duration: 500s
+  Downloading...
+  Uploading as: US_Army_Blues_-_10_-_BugaBlue.ogg ...
+  Upload successful!
+
+[31/50] Processing: Kellis Number 🔢 (U.S. Army Blues)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/7/7f/US_Army_Blues_-_08_-_Kellis_Number.ogg
+  Duration: 365s
+  Downloading...
+  Uploading as: US_Army_Blues_-_08_-_Kellis_Number.ogg ...
+  Upload successful!
+
+[32/50] Processing: Not On The Bus 🚌 (U.S. Army Blues)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/e/ee/US_Army_Blues_-_04_-_Not_On_The_Bus.ogg
+  Duration: 500s
+  Downloading...
+  Uploading as: US_Army_Blues_-_04_-_Not_On_The_Bus.ogg ...
+  Upload successful!
+
+[33/50] Processing: Dance of the Stargazer 🌌 (U.S. Army Blues)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/b/b9/US_Army_Blues_-_03_-_Dance_Of_The_Stargazer.ogg
+  Duration: 702s
+  Downloading...
+  Uploading as: US_Army_Blues_-_03_-_Dance_Of_The_Stargazer.ogg ...
+  Upload successful!
+
+[34/50] Processing: Acid Jazz ☕ (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/2/26/Kevin_MacLeod_-_AcidJazz.ogg
+  Duration: 208s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_AcidJazz.ogg ...
+  Upload successful!
+
+[35/50] Processing: Faster Does It 🚲 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/0/07/Kevin_MacLeod_-_Faster_Does_It.ogg
+  Duration: 181s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_Faster_Does_It.ogg ...
+  Upload successful!
+
+[36/50] Processing: Dances and Dames 💃 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/2/23/Kevin_MacLeod_-_Dances_and_Dames.ogg
+  Duration: 146s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_Dances_and_Dames.ogg ...
+  Upload successful!
+
+[37/50] Processing: Off to Osaka 🚄 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/5/52/Kevin_MacLeod_-_Off_to_Osaka.ogg
+  Duration: 109s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_Off_to_Osaka.ogg ...
+  Upload successful!
+
+[38/50] Processing: I Knew a Guy 🕵️ (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/0/02/Kevin_MacLeod_-_I_Knew_a_Guy.ogg
+  Duration: 166s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_I_Knew_a_Guy.ogg ...
+  Upload successful!
+
+[39/50] Processing: As I Figure 📐 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/b/b9/Kevin_MacLeod_-_As_I_Figure.ogg
+  Duration: 216s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_As_I_Figure.ogg ...
+  Upload successful!
+
+[40/50] Processing: Backed Vibes 🍃 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/4/4d/Kevin_MacLeod_-_Backed_Vibes_Clean.ogg
+  Duration: 228s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_Backed_Vibes_Clean.ogg ...
+  Upload successful!
+
+[41/50] Processing: Vibe Ace 🎹 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/7/7c/Kevin_MacLeod_-_Vibe_Ace.ogg
+  Duration: 61s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_Vibe_Ace.ogg ...
+  Upload successful!
+
+[42/50] Processing: Night on the Docks 🎷 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/2/2d/Kevin_MacLeod_-_Night_on_the_Docks_-_Sax.ogg
+  Duration: 174s
+  Downloading...
+  Uploading as: Kevin_MacLeod_-_Night_on_the_Docks_-_Sax.ogg ...
+  Upload successful!
+
+[43/50] Processing: Kool Kats 🐈 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/9/9f/Kool_Kats_%28MacLeod%2C_Kevin%29_%28ISRC_USUAN1100601%29.oga
+  Duration: 200s
+  Downloading...
+  Uploading as: Kool_Kats__MacLeod__Kevin___ISRC_USUAN1100601_.oga ...
+  Upload successful!
+
+[44/50] Processing: Study And Relax 📖 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/9/9c/Study_And_Relax_by_Kevin_MacLeod.ogg
+  Duration: 223s
+  Downloading...
+  Uploading as: Study_And_Relax_by_Kevin_MacLeod.ogg ...
+  Upload successful!
+
+[45/50] Processing: Jazz Brunch 🥞 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/9/9b/Jazz_Brunch_%28ISRC_USUAN1700074%29.mp3
+  Duration: 323s
+  Downloading...
+  Uploading as: Jazz_Brunch__ISRC_USUAN1700074_.mp3 ...
+  Upload successful!
+
+[46/50] Processing: Modern Jazz Samba 🌴 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/d/d4/Modern_Jazz_Samba_%28ISRC_USUAN1100153%29.mp3
+  Duration: 248s
+  Downloading...
+  Uploading as: Modern_Jazz_Samba__ISRC_USUAN1100153_.mp3 ...
+  Upload successful!
+
+[47/50] Processing: Long Stroll 🚶 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/9/9f/Long_Stroll_%28ISRC_USUAN1100174%29.mp3
+  Duration: 254s
+  Downloading...
+  Uploading as: Long_Stroll__ISRC_USUAN1100174_.mp3 ...
+  Upload successful!
+
+[48/50] Processing: Cool Vibes 😎 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/6/68/Cool_Vibes_%28ISRC_USUAN1100863%29.mp3
+  Duration: 218s
+  Downloading...
+  Uploading as: Cool_Vibes__ISRC_USUAN1100863_.mp3 ...
+  Upload successful!
+
+[49/50] Processing: Lobby Time ⏳ (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/e/e9/Lobby_Time_%28ISRC_USUAN1600054%29.mp3
+  Duration: 193s
+  Downloading...
+  Uploading as: Lobby_Time__ISRC_USUAN1600054_.mp3 ...
+  Upload successful!
+
+[50/50] Processing: Bossa Antigua 🍃 (Kevin MacLeod)
+  Download URL: https://upload.wikimedia.org/wikipedia/commons/6/60/Bossa_Antigua_%28ISRC_USUAN1700069%29.mp3
+  Duration: 283s
+  Downloading...
+  Uploading as: Bossa_Antigua__ISRC_USUAN1700069_.mp3 ...
+  Upload successful!
+
+Successfully synced 50 tracks to Supabase.
+
+Uploading final playlist.json to Supabase...
+
+=== CLEAN AND SYNC COMPLETED SUCCESSFULLY ===
+Uploaded 50 audio files and refreshed playlist.json.

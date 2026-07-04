@@ -1,6 +1,6 @@
 ---
-title: "Bí quyết Setup góc làm việc chuẩn Ghibli cùng chú mèo"
-description: "Cải tạo góc phòng làm việc ngổn ngang lông mèo thành không gian ấm cúng, tối giản chuẩn Ghibli để làm việc chánh niệm cùng thú cưng."
+title: "Bí quyết Setup góc làm việc chuẩn tối giản Iyashikei & MUJI cùng chú mèo"
+description: "Cải tạo góc phòng làm việc ngổn ngang lông mèo thành không gian ấm cúng, tối giản chuẩn Iyashikei & MUJI để làm việc chánh niệm cùng thú cưng."
 publishDate: "2026-06-24"
 coverImage: "/images/blog/setup-ghibli-cat.webp"
 category: "phu_kien"
@@ -10,7 +10,7 @@ relatedProducts: ["den-totoro-go"]
 
 Đối với những người làm việc tự do hoặc làm việc tại nhà (WFH), góc làm việc chính là thế giới thu nhỏ. Thế nhưng, nếu bạn nuôi thú cưng, góc nhỏ này thường xuyên ngập trong lông mèo rụng hoặc sự lộn xộn. 
 
-Hôm nay tụi con sẽ hướng dẫn bạn cách setup một góc làm việc tối giản phong cách gỗ ấm chuẩn hoạt hình Ghibli, vừa gọn gàng cho Sen, vừa ấm áp cho Boss.
+Hôm nay tụi con sẽ hướng dẫn bạn cách setup một góc làm việc tối giản phong cách gỗ ấm chuẩn triết lý Iyashikei & MUJI, vừa gọn gàng cho cô/chú, vừa ấm áp cho bé cưng.
 
 ---
 
@@ -31,4 +31,4 @@ Mèo thích nằm cạnh bạn không phải vì chúng muốn phá phím, mà v
 
 ## 🎁 Vật phẩm gợi ý dành cho góc phòng của bạn
 
-Để giúp bạn nhanh chóng biến đổi không gian, Boss đã lựa chọn ra chiếc đèn ngủ gỗ ấm áp nhất phong cách Ghibli dưới đây. Đừng quên nhấp vào nút **Gom mua chung** để Boss đo lường số lượng và tìm sỉ giá cực rẻ cho chúng mình nhé!
+Để giúp bạn nhanh chóng biến đổi không gian, bé cưng đã lựa chọn ra chiếc đèn ngủ gỗ ấm áp nhất phong cách tối giản Iyashikei & MUJI dưới đây. Đừng quên nhấp vào nút **Gom mua chung** để bé cưng đo lường số lượng và tìm sỉ giá cực rẻ cho chúng mình nhé!

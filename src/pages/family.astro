@@ -4,12 +4,29 @@ import familyData from '../data/family.json';
 
 // Tải danh sách hình ảnh gia đình từ JSON
 const familyPhotos = familyData;
+
+// Đọc thông tin kết nối Supabase và Gemini từ biến môi trường
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
 ---
+
 
 <Layout 
   title="Góc Nhỏ Gia Đình | doca.pet" 
-  description="Nơi cất giữ những khoảnh khắc ấm áp và mộc mạc của gia đình nhà DOCA. Mời cô chú lật xem từng bức ảnh chụp kỷ niệm của tụi con nhé. 🐾"
+  description="Nơi cất giữ những khoảnh khắc ấm áp và mộc mạc của gia đình nhà DOCA. Mời cô/chú và các bạn đồng Meo lật xem từng bức ảnh chụp kỷ niệm của tụi con nhé. 🐾"
 >
+  <!-- Truyền biến môi trường sang client-side -->
+  <script is:inline define:vars={{ supabaseUrl, supabaseAnonKey, geminiApiKey }}>
+    window.PUBLIC_SUPABASE_URL = supabaseUrl;
+    window.PUBLIC_SUPABASE_ANON_KEY = supabaseAnonKey;
+    window.PUBLIC_GEMINI_API_KEY = geminiApiKey;
+  </script>
+
+  <!-- Nhúng các script CDN phục vụ kiểm duyệt ảnh mèo -->
+  <script is:inline src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+
   <main class="family-page-view">
     <!-- Navbar -->
     <nav class="navbar">
@@ -51,15 +68,14 @@ const familyPhotos = familyData;
         <span class="family-tag">GÓC NHỎ DOCA</span>
         <h1 class="family-page-title">Góc Nhỏ Gia Đình</h1>
         <p class="family-page-subtitle animate-fade-in-delayed">
-          mỗi bức ảnh là một lát cắt thời gian dịu êm mẹ Lin chụp cho tụi con...<br />
-          cô chú nhấp nhẹ vào từng tấm ảnh để đọc những dòng nhật ký viết tay ở mặt sau nhé. 🐾
+          mỗi bức ảnh là một lát cắt thời gian dịu êm mẹ Lin chụp cho tụi con... 🐾
         </p>
       </div>
 
       <!-- Pinterest-style Masonry Grid (Khoảng cách mỏng hơn cho hình to ra) -->
-      <div class="family-masonry-grid">
+      <div class="family-masonry-grid" id="family-masonry-grid">
         {familyPhotos.map((photo, index) => (
-          <div class={`polaroid-card ${index >= 10 ? 'hidden-card' : ''}`} data-id={photo.id}>
+          <div class={`polaroid-card ${index >= 14 ? 'hidden-card' : ''}`} data-id={photo.id} data-type="static">
             <div class="polaroid-card-inner">
               
               <!-- Mặt trước: Thẻ ảnh Muji viền mỏng bo nhọn, watermark trên hình, chân hình trống -->
@@ -77,7 +93,9 @@ const familyPhotos = familyData;
               <div class="card-back">
                 <div class="note-paper">
                   <div class="note-content-wrapper">
-                    <p class="note-monospace">{photo.note}</p>
+                    {photo.note && <p class="note-monospace">{photo.note}</p>}
+
+
                     <div class="note-footer">
                       <span class="note-tag">#family</span>
                     </div>
@@ -97,11 +115,164 @@ const familyPhotos = familyData;
         </button>
       </div>
     </div>
+
+    <!-- Floating Action Button để đăng hình mới -->
+    <button id="upload-photo-trigger" class="floating-upload-btn" title="Gửi khoảnh khắc bé cưng 🐾">
+      <i class="ph-light ph-camera"></i>
+    </button>
+
+    <!-- Bottom Sheet Đăng Ảnh -->
+    <div id="upload-photo-modal" class="sheet-overlay">
+      <div class="polaroid-bottom-sheet-upload">
+        <!-- Thanh kéo chỉ báo vuốt/kéo phong cách native mobile -->
+        <div class="sheet-drag-handle"></div>
+        <button id="modal-close-btn" class="bottom-sheet-close-btn" aria-label="Đóng">
+          <i class="ph-light ph-x"></i>
+        </button>
+        <h3 class="bottom-sheet-title">Gửi Khoảnh Khắc Bé Cưng 🐾</h3>
+        
+        <form id="upload-photo-form">
+          <!-- Bấm trực tiếp vào Polaroid frame để chọn ảnh -->
+          <div class="polaroid-preview-area">
+            <div id="preview-frame" class="polaroid-frame-preview interactive-preview" title="Nhấp vào đây để chọn ảnh bé cưng 🐾">
+              <div id="preview-placeholder" class="photo-preview-placeholder">
+                <i class="ph-light ph-camera" style="font-size: 2rem;"></i>
+                <span style="font-size: 0.65rem; font-weight: 600; margin-top: 0.25rem;">Nhấp chọn ảnh bé...</span>
+              </div>
+              <img id="preview-img" class="hidden" alt="Preview ảnh bé cưng" />
+              <!-- Watermark hiển thị động dạng @username từ email -->
+              <span id="preview-watermark" class="photo-watermark hidden">@guest</span>
+            </div>
+          </div>
+
+          <!-- Input file ẩn hoàn toàn, trigger qua JS khi click Polaroid frame -->
+          <input type="file" id="photo-file" accept="image/*" style="display: none;" required />
+
+          <div class="form-group-item">
+            <label for="photo-email" class="form-label-custom">Email của bạn (Copyright ảnh)*</label>
+            <input type="email" id="photo-email" class="form-text-input" placeholder="email_cua_ban@example.com" required />
+          </div>
+
+          <div class="form-group-item">
+            <label for="photo-note" class="form-label-custom">Lời viết tay đằng sau ảnh*</label>
+            <textarea id="photo-note" class="form-textarea-custom" placeholder="Ví dụ: Bé nằm ngoan ngủ khò bên bậu cửa nắng ấm..." maxlength="150" required></textarea>
+            <div class="char-counter" id="char-counter">0/150</div>
+          </div>
+
+
+
+          <button type="submit" id="submit-photo-btn" class="submit-photo-btn">
+            Gửi lên bức tường <i class="ph-light ph-paper-plane"></i>
+          </button>
+        </form>
+
+        <div id="modal-status-msg" class="status-msg hidden">
+          <span class="status-icon"><i class="ph-light ph-spinner-gap spin"></i></span>
+          <span id="status-text" class="status-text">Đang chuẩn bị...</span>
+        </div>
+      </div>
+    </div>
+
   </main>
 </Layout>
 
 <script>
-  // Kích hoạt tính năng click/touch để lật ảnh (3D Flip toggle) và đóng mở mobile menu
+  // Định nghĩa các từ khóa thô tục để lọc offline
+  const BAD_WORDS = ['cút', 'đm', 'đéo', 'vcl', 'clm', 'chửi', 'ngu', 'chó', 'fuck', 'shit', 'asshole', 'bitch', 'dâm', 'khùng', 'điên', 'đần', 'cac', 'cc', 'cl'];
+  
+  function checkTextSafety(text: string): boolean {
+    const lower = text.toLowerCase();
+    return !BAD_WORDS.some(word => lower.includes(word));
+  }
+
+  // Nén ảnh bằng Canvas trước khi gửi
+  function compressImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          const MAX_WIDTH = 600; // Giới hạn chiều rộng nhỏ hơn để chuỗi Base64 nhẹ nhàng nhất
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Nén chất lượng JPEG 0.7
+          const compressed = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(compressed);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  }
+
+  // Kiểm duyệt bằng TensorFlow.js (MobileNet)
+  async function checkIsCatImage(imgElement: HTMLImageElement): Promise<boolean> {
+    try {
+      const model = await (window as any).mobilenet.load();
+      const predictions = await model.classify(imgElement);
+      console.log("TensorFlow predictions:", predictions);
+      
+      const catKeywords = ['cat', 'kitten', 'tabby', 'persian cat', 'siamese cat', 'egyptian mau', 'feline', 'maltese cat', 'tiger cat', 'angora', 'lynx', 'tiger', 'leopard', 'cougar'];
+      const isCat = predictions.some((pred: any) => {
+        const name = pred.className.toLowerCase();
+        return catKeywords.some(kw => name.includes(kw)) && pred.probability > 0.08; // 8% threshold
+      });
+      return isCat;
+    } catch (err) {
+      console.error("TF.js Error, bypass to true:", err);
+      return true; // Fallback
+    }
+  }
+
+  // Kiểm duyệt bằng Gemini API
+  async function moderateWithGemini(base64Image: string, note: string, title: string, apiKey: string): Promise<{valid: boolean, reason: string}> {
+    const base64Data = base64Image.split(',')[1] || base64Image;
+    const prompt = `Bạn là một AI kiểm duyệt nội dung của website chữa lành doca.pet. Hãy phân tích:
+1. Hình ảnh đính kèm có chứa một chú mèo hoặc hình vẽ mèo không? (Bắt buộc phải là hình mèo).
+2. Tiêu đề "${title}" và ghi chú "${note}" có lịch sự, lành mạnh, không chứa từ thô tục, công kích không?
+Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": string}. Không viết thêm bất kỳ từ nào khác.`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+          ]
+        }]
+      })
+    });
+    
+    if (!response.ok) throw new Error("Gemini API Error");
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const match = text.match(/\{[\s\S]*?\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error("Parse JSON failed");
+  }
+
+
+
+  function escapeHtml(str: string): string {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     // --- 1. MOBILE MENU TOGGLE ---
     const menuToggleBtn = document.getElementById('menu-toggle-btn');
@@ -114,7 +285,6 @@ const familyPhotos = familyData;
       mobileMenu?.classList.toggle('active');
     });
 
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (!menuToggleBtn?.contains(target) && !mobileMenu?.contains(target)) {
@@ -124,12 +294,18 @@ const familyPhotos = familyData;
       }
     });
 
-    // --- 2. POLAROID CARD FLIP (Chỉ lật duy nhất 1 card tại 1 thời điểm, lệch pha 150ms tự nhiên) ---
-    const cards = document.querySelectorAll('.polaroid-card');
-    cards.forEach(card => {
-      card.addEventListener('click', (e) => {
+    // --- 2. POLAROID CARD FLIP & COMMENTS TRIGGER ---
+    function setupCardFlip(card: HTMLElement) {
+      card.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
-        if (target.closest('a') || target.closest('button')) return;
+        // Bỏ qua lật ảnh nếu click vào form bình luận hoặc các phần tử trong bình luận
+        if (
+          target.closest('a') || 
+          target.closest('button') || 
+          target.closest('.comments-container') || 
+          target.closest('input') || 
+          target.closest('form')
+        ) return;
         
         const inner = card.querySelector('.polaroid-card-inner');
         if (inner) {
@@ -137,34 +313,22 @@ const familyPhotos = familyData;
           const cardId = card.getAttribute('data-id') || '';
           
           if (isFlipped) {
-            // Nếu đang lật thì úp ngược về cũ ngay lập tức
             inner.classList.remove('is-flipped');
-            
-            // Track GA4 unflipped event
             if (typeof (window as any).gtag === 'function') {
-              (window as any).gtag('event', 'flip_photo_card', {
-                photo_id: cardId,
-                state: 'unflipped'
-              });
+              (window as any).gtag('event', 'flip_photo_card', { photo_id: cardId, state: 'unflipped' });
             }
           } else {
             const otherFlipped = document.querySelectorAll('.polaroid-card-inner.is-flipped');
             
-            // Track GA4 flipped event
             if (typeof (window as any).gtag === 'function') {
-              (window as any).gtag('event', 'flip_photo_card', {
-                photo_id: cardId,
-                state: 'flipped'
-              });
+              (window as any).gtag('event', 'flip_photo_card', { photo_id: cardId, state: 'flipped' });
             }
             
             if (otherFlipped.length > 0) {
-              // 1. Úp card cũ xuống trước
               otherFlipped.forEach(flippedInner => {
                 flippedInner.classList.remove('is-flipped');
               });
               
-              // 2. Trì hoãn 150ms lệch pha rồi mới lật card mới lên tạo nhịp tự nhiên
               setTimeout(() => {
                 inner.classList.add('is-flipped');
               }, 150);
@@ -174,33 +338,411 @@ const familyPhotos = familyData;
           }
         }
       });
+    }
+
+    // Thiết lập cho 10 card tĩnh ban đầu
+    document.querySelectorAll('.polaroid-card').forEach(card => {
+      setupCardFlip(card as HTMLElement);
     });
 
-    // --- 3. LOAD MORE (Xem thêm mỗi lần 10 hình) ---
-    const loadMoreBtn = document.getElementById('load-more-btn');
+    // --- 3. FETCH AND DISPLAY GUEST CONTRIBUTIONS FROM SUPABASE ---
+    async function loadGuestPhotos() {
+      const url = (window as any).PUBLIC_SUPABASE_URL;
+      const key = (window as any).PUBLIC_SUPABASE_ANON_KEY;
+      if (!url || !key) return;
+
+      try {
+        const res = await fetch(`${url}/rest/v1/family_contributions?status=eq.approved&order=created_at.desc`, {
+          headers: {
+            'apikey': key,
+            'Authorization': `Bearer ${key}`
+          }
+        });
+        
+        if (res.ok) {
+          const contributions = await res.json();
+          const grid = document.getElementById('family-masonry-grid');
+          if (grid) {
+            contributions.forEach((photo: any) => {
+              // Tạo thẻ Polaroid
+              const card = document.createElement('div');
+              card.className = 'polaroid-card guest-contribution hidden-card'; // Mặc định ẩn, sẽ show khi bấm loadmore
+              card.setAttribute('data-id', photo.id.toString());
+              card.setAttribute('data-type', 'contribution');
+
+              // Trích xuất copyright name từ email tác giả
+              const authorEmail = photo.author_name || 'guest';
+              const copyrightName = authorEmail.includes('@') ? authorEmail.split('@')[0] : authorEmail;
+
+              // Dựng template HTML Polaroid
+              card.innerHTML = `
+                <div class="polaroid-card-inner">
+                  <div class="card-front">
+                    <div class="polaroid-frame">
+                      <div class="photo-wrapper" style="aspect-ratio: ${photo.aspect_ratio || '1/1'};">
+                        <img src="${photo.image_url}" alt="${escapeHtml(photo.title)}" class="polaroid-photo" loading="lazy" />
+                        <span class="photo-watermark">@${escapeHtml(copyrightName)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-back">
+                    <div class="note-paper">
+                      <div class="note-content-wrapper">
+                        ${photo.note ? `<p class="note-monospace">${escapeHtml(photo.note)}</p>` : ''}
+
+                        <div class="note-footer">
+                          <span class="note-tag">#guest_pet</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+
+              grid.appendChild(card);
+              setupCardFlip(card);
+            });
+            
+            // Cập nhật lại hidden cards
+            updateLoadMoreButtonState();
+          }
+        }
+      } catch (err) {
+        console.error("Load contributions error:", err);
+      }
+    }
+
+    loadGuestPhotos();
+
+    // --- 4. LOAD MORE (Xem thêm mỗi lần 10 hình) ---
+    const loadMoreBtn = document.getElementById('load-more-btn') as HTMLButtonElement;
+    
+    function updateLoadMoreButtonState() {
+      const hiddenCards = document.querySelectorAll('.polaroid-card.hidden-card');
+      if (hiddenCards.length === 0 && loadMoreBtn) {
+        loadMoreBtn.classList.add('disabled');
+        loadMoreBtn.innerHTML = 'Bạn đã xem hết khoảnh khắc rồi 🐾';
+        loadMoreBtn.setAttribute('disabled', 'true');
+      } else if (loadMoreBtn) {
+        loadMoreBtn.classList.remove('disabled');
+        loadMoreBtn.innerHTML = 'Xem thêm khoảnh khắc <i class="ph-light ph-caret-down"></i>';
+        loadMoreBtn.removeAttribute('disabled');
+      }
+    }
+
     loadMoreBtn?.addEventListener('click', () => {
       const hiddenCards = document.querySelectorAll('.polaroid-card.hidden-card');
-      
-      // Track GA4 event
       if (typeof (window as any).gtag === 'function') {
         (window as any).gtag('event', 'click_load_more_moments');
       }
       
-      // Lấy tối đa 10 hình tiếp theo để hiển thị
       const nextBatch = Array.from(hiddenCards).slice(0, 10);
       nextBatch.forEach(card => {
         card.classList.remove('hidden-card');
       });
       
-      // Kiểm tra xem còn hình ẩn nào không
-      const remainingHidden = document.querySelectorAll('.polaroid-card.hidden-card');
-      if (remainingHidden.length === 0) {
-        if (loadMoreBtn) {
-          loadMoreBtn.classList.add('disabled');
-          loadMoreBtn.innerHTML = 'Bạn đã xem hết khoảnh khắc rồi 🐾';
-          loadMoreBtn.setAttribute('disabled', 'true');
+      updateLoadMoreButtonState();
+    });
+
+    // --- 5. MODAL FOR UPLOADING PHOTO ---
+    const modal = document.getElementById('upload-photo-modal') as HTMLDivElement;
+    const triggerBtn = document.getElementById('upload-photo-trigger') as HTMLButtonElement;
+    const closeBtn = document.getElementById('modal-close-btn') as HTMLButtonElement;
+    const form = document.getElementById('upload-photo-form') as HTMLFormElement;
+    const fileInput = document.getElementById('photo-file') as HTMLInputElement;
+    const emailInput = document.getElementById('photo-email') as HTMLInputElement;
+    const noteInput = document.getElementById('photo-note') as HTMLTextAreaElement;
+    const previewImg = document.getElementById('preview-img') as HTMLImageElement;
+    const previewPlaceholder = document.getElementById('preview-placeholder') as HTMLDivElement;
+    const previewWatermark = document.getElementById('preview-watermark');
+    const previewFrame = document.getElementById('preview-frame');
+    const statusMsg = document.getElementById('modal-status-msg') as HTMLDivElement;
+    const statusText = document.getElementById('status-text') as HTMLSpanElement;
+    const submitBtn = document.getElementById('submit-photo-btn') as HTMLButtonElement;
+
+    // Click vào Polaroid preview để chọn ảnh
+    previewFrame?.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Cập nhật watermark copyright dạng @username thời gian thực
+    emailInput?.addEventListener('input', () => {
+      const email = emailInput.value.trim();
+      if (email) {
+        const username = email.split('@')[0] || 'guest';
+        if (previewWatermark) {
+          previewWatermark.textContent = `@${username}`;
+          previewWatermark.classList.remove('hidden');
+        }
+      } else {
+        if (previewWatermark) {
+          previewWatermark.classList.add('hidden');
         }
       }
+    });
+
+    // Show/Hide modal
+    triggerBtn?.addEventListener('click', () => {
+      modal.classList.add('open');
+    });
+
+    const hideModal = () => {
+      modal.classList.remove('open');
+      form.reset();
+      previewImg.classList.add('hidden');
+      previewPlaceholder.classList.remove('hidden');
+      if (previewWatermark) {
+        previewWatermark.classList.add('hidden');
+        previewWatermark.textContent = '@guest';
+      }
+      statusMsg.classList.add('hidden');
+      submitBtn.disabled = false;
+    };
+
+    closeBtn?.addEventListener('click', hideModal);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) hideModal();
+    });
+
+    // File Preview & Auto Ratio calculation
+    let currentFile: File | null = null;
+    let computedAspectRatio = '1/1';
+
+    fileInput?.addEventListener('change', (e) => {
+      const files = fileInput.files;
+      if (!files || files.length === 0) return;
+      
+      currentFile = files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (previewImg && previewPlaceholder) {
+          previewImg.src = event.target?.result as string;
+          previewImg.classList.remove('hidden');
+          previewPlaceholder.classList.add('hidden');
+          
+          // Show watermark khi đã load ảnh lên
+          const email = emailInput.value.trim();
+          const username = email ? (email.split('@')[0] || 'guest') : 'guest';
+          if (previewWatermark) {
+            previewWatermark.textContent = `@${username}`;
+            previewWatermark.classList.remove('hidden');
+          }
+          
+          // Tính toán aspect ratio tự nhiên của ảnh
+          const img = new Image();
+          img.src = event.target?.result as string;
+          img.onload = () => {
+            const ratio = img.width / img.height;
+            if (ratio > 1.2) {
+              computedAspectRatio = '4/3';
+            } else if (ratio < 0.8) {
+              computedAspectRatio = '3/4';
+            } else if (ratio < 0.9) {
+              computedAspectRatio = '4/5';
+            } else {
+              computedAspectRatio = '1/1';
+            }
+            if (previewFrame) {
+              previewFrame.style.aspectRatio = computedAspectRatio;
+            }
+          };
+        }
+      };
+      reader.readAsDataURL(currentFile);
+    });
+
+    // Hàm lưu đóng góp lên Supabase với trạng thái enum
+    async function saveContributionToSupabase(
+      title: string,
+      base64Data: string,
+      note: string,
+      author: string,
+      aspectRatio: string,
+      status: 'approved' | 'rejected' | 'pending'
+    ): Promise<boolean> {
+      const url = (window as any).PUBLIC_SUPABASE_URL;
+      const key = (window as any).PUBLIC_SUPABASE_ANON_KEY;
+      if (!url || !key) {
+        console.warn("Supabase credentials missing. Simulated submit success.");
+        return true;
+      }
+      
+      try {
+        const res = await fetch(`${url}/rest/v1/family_contributions`, {
+          method: 'POST',
+          headers: {
+            'apikey': key,
+            'Authorization': `Bearer ${key}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            title: title,
+            image_url: base64Data,
+            note: note,
+            author_name: author,
+            aspect_ratio: aspectRatio,
+            status: status
+          })
+        });
+        return res.ok;
+      } catch (e) {
+        console.error("Supabase save error:", e);
+        return false;
+      }
+    }
+
+    // Submit form với kiểm duyệt ngầm (Background moderation & instant close)
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // 1. Thu thập dữ liệu form trước khi đóng và reset
+      const fileToSend = currentFile;
+      const email = emailInput.value.trim();
+      const note = noteInput.value.trim();
+      
+      // 2. Đóng Bottom Sheet ngay lập tức
+      hideModal();
+      
+      // Reset counter ký tự về 0
+      const charCounter = document.getElementById('char-counter');
+      if (charCounter) charCounter.textContent = '0/150';
+      
+      // 3. Thông báo đang xử lý ngầm qua Toast toàn cục
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast("Đang tải lên và kiểm duyệt ngầm khoảnh khắc bé cưng... 🐾");
+      }
+      
+      // 4. Chạy tiến trình xử lý ngầm (Background Task)
+      (async () => {
+        try {
+          // A. Kiểm tra nhanh ở background
+          if (!fileToSend) {
+            if (typeof (window as any).showToast === 'function') {
+              (window as any).showToast("Lỗi gửi ảnh: Vui lòng chọn một bức ảnh bằng cách nhấp vào khung Polaroid! 🐾");
+            }
+            return;
+          }
+
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            if (typeof (window as any).showToast === 'function') {
+              (window as any).showToast("Lỗi gửi ảnh: Email không hợp lệ. Cô/chú kiểm tra lại nhé! 🐾");
+            }
+            return;
+          }
+
+          // B. Nén ảnh
+          const compressedBase64 = await compressImage(fileToSend);
+          const title = "Khoảnh khắc dễ thương";
+          const author = email;
+          
+          // C. Kiểm duyệt nội dung viết tay (Offline filter)
+          if (!checkTextSafety(email) || !checkTextSafety(note)) {
+            // Lưu vi phạm vào Supabase dạng 'rejected'
+            await saveContributionToSupabase(title, compressedBase64, note, author, computedAspectRatio, 'rejected');
+            if (typeof (window as any).showToast === 'function') {
+              (window as any).showToast("Khoảnh khắc bị từ chối: Lời viết tay hoặc email chứa từ ngữ chưa lành mạnh. 🐾");
+            }
+            return;
+          }
+
+          // D. Kiểm duyệt hình ảnh (Hybrid: Gemini AI hoặc TF.js)
+          let finalStatus: 'approved' | 'rejected' | 'pending' = 'pending';
+          let rejectReason = '';
+          
+          const geminiKey = (window as any).PUBLIC_GEMINI_API_KEY;
+          if (geminiKey) {
+            try {
+              // Gọi Gemini AI kiểm duyệt
+              const modResult = await moderateWithGemini(compressedBase64, note, title, geminiKey);
+              if (modResult.valid) {
+                finalStatus = 'approved';
+              } else {
+                finalStatus = 'rejected';
+                rejectReason = modResult.reason || "Nội dung hình ảnh chưa phù hợp.";
+              }
+            } catch (err) {
+              console.warn("Gemini moderating failed, fallback to TF.js:", err);
+              // Fallback sang TensorFlow.js offline
+              try {
+                const tempImg = new Image();
+                tempImg.src = compressedBase64;
+                await new Promise((resolve) => { tempImg.onload = resolve; });
+                
+                const isCat = await checkIsCatImage(tempImg);
+                if (isCat) {
+                  finalStatus = 'approved';
+                } else {
+                  finalStatus = 'rejected';
+                  rejectReason = "Ảnh này trông không giống một chú mèo. Cô/chú gửi lại ảnh mèo nha! 🐾";
+                }
+              } catch (tfErr) {
+                console.error("TF.js fallback failed:", tfErr);
+                // Khởi tạo cho trường hợp không duyệt tự động được -> pending
+                finalStatus = 'pending';
+              }
+            }
+          } else {
+            // Không có Gemini key -> Chạy TensorFlow.js offline
+            try {
+              const tempImg = new Image();
+              tempImg.src = compressedBase64;
+              await new Promise((resolve) => { tempImg.onload = resolve; });
+              
+              const isCat = await checkIsCatImage(tempImg);
+              if (isCat) {
+                finalStatus = 'approved';
+              } else {
+                finalStatus = 'rejected';
+                rejectReason = "Hình như ảnh này không chứa chú mèo nào cả... Cô/chú gửi lại ảnh bé mèo nhé! 🐾";
+              }
+            } catch (tfErr) {
+              console.error("TF.js check failed:", tfErr);
+              // Khởi tạo cho trường hợp không duyệt tự động được -> pending
+              finalStatus = 'pending';
+            }
+          }
+
+          // E. Gửi lên database
+          const success = await saveContributionToSupabase(title, compressedBase64, note, author, computedAspectRatio, finalStatus);
+          
+          if (success) {
+            if (finalStatus === 'approved') {
+              if (typeof (window as any).showToast === 'function') {
+                (window as any).showToast("Đăng khoảnh khắc thành công! Đang tải lại bức tường... 🎉");
+              }
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
+            } else if (finalStatus === 'rejected') {
+              if (typeof (window as any).showToast === 'function') {
+                (window as any).showToast(`Khoảnh khắc không được phê duyệt: ${rejectReason || 'Không hợp lệ.'} 🐾`);
+              }
+            } else {
+              // pending
+              if (typeof (window as any).showToast === 'function') {
+                (window as any).showToast("Gửi khoảnh khắc thành công! Hình ảnh đang chờ Admin duyệt nha cô/chú! 🐾");
+              }
+            }
+          } else {
+            if (typeof (window as any).showToast === 'function') {
+              (window as any).showToast("Có lỗi xảy ra khi lưu trữ ảnh lên hệ thống. Vui lòng thử lại! 🐾");
+            }
+          }
+
+        } catch (error) {
+          console.error("Background task failed:", error);
+          // Trường hợp lỗi bất khả kháng, lưu dưới dạng pending để admin duyệt
+          try {
+            await saveContributionToSupabase("Khoảnh khắc dễ thương", compressedBase64 || "", note, email, computedAspectRatio, 'pending');
+          } catch (e) {}
+          
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast("Gửi khoảnh khắc thành công! Đang chờ Admin duyệt thủ công nhé cô/chú! 🐾");
+          }
+        }
+      })();
     });
   });
 </script>
@@ -210,6 +752,29 @@ const familyPhotos = familyData;
     min-height: 100vh;
     background-color: var(--cozy-bg-beige); /* Đồng bộ background trang chủ */
     padding-bottom: 5rem;
+    position: relative;
+    z-index: 0;
+  }
+  .family-page-view::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.18; /* Độ mờ lý tưởng ẩn hiện thanh tao */
+    background: 
+      /* Khe ván nan gỗ dọc siêu mảnh đều đặn kiểu Nhật Bản (Slat wall) */
+      linear-gradient(90deg, rgba(139, 94, 60, 0.22) 1px, transparent 1px),
+      /* Bóng đổ 3D nhẹ của nan gỗ dọc tạo khối thanh tú */
+      linear-gradient(90deg, rgba(139, 94, 60, 0.04) 0%, transparent 15%, transparent 85%, rgba(139, 94, 60, 0.04) 100%),
+      /* Vân thớ dọc thanh tao của gỗ Hinoki Nhật Bản (sọc dọc siêu mịn) */
+      repeating-linear-gradient(90deg, rgba(139, 94, 60, 0.02) 0px, rgba(139, 94, 60, 0.02) 1px, transparent 1px, transparent 8px),
+      /* Vân sinh trưởng ngang mờ nhạt giao thoa tạo thớ gỗ Hinoki tự nhiên */
+      repeating-linear-gradient(0deg, rgba(139, 94, 60, 0.015) 0px, rgba(139, 94, 60, 0.015) 1px, transparent 1px, transparent 24px);
+    background-size: 60px 100%, 60px 100%, 60px 100%, 100% 120px;
   }
 
   /* Navbar Styles matching product.astro & index.astro */
@@ -378,6 +943,7 @@ const familyPhotos = familyData;
   /* Content view layout spacing */
   .content-container {
     padding-top: 2rem;
+    max-width: 1400px; /* Mở rộng chiều rộng tối đa để hiển thị 7 cột ảnh hoành tráng */
   }
 
   /* Header đồng bộ thiết kế hình ảnh minh họa */
@@ -418,12 +984,19 @@ const familyPhotos = familyData;
 
   /* Lưới so le Pinterest Masonry chuẩn (Gap mỏng lại để hình to ra) */
   .family-masonry-grid {
-    column-count: 5;
+    column-count: 7; /* Sử dụng 7 cột trên màn hình Desktop rộng */
     column-gap: 0.65rem;
     width: 100%;
   }
 
-  /* Breakpoints: Mobile 2, Tablet 3, Desktop 5 */
+  /* Breakpoints: Desktop vừa 5 cột, Tablet 3 cột, Mobile 2 cột */
+  @media (max-width: 1279px) {
+    .family-masonry-grid {
+      column-count: 5;
+      column-gap: 0.55rem;
+    }
+  }
+
   @media (max-width: 1023px) {
     .family-masonry-grid {
       column-count: 3;
@@ -688,5 +1261,316 @@ const familyPhotos = familyData;
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* --- STYLE MỚI CHO GIA DIỆN ĐĂNG ẢNH & BÌNH LUẬN --- */
+  
+  /* Floating Button */
+  .floating-upload-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #E2ECD2; /* Matcha milk */
+    color: var(--cozy-green-matcha-dark);
+    border: 1.5px solid rgba(74, 138, 46, 0.2);
+    box-shadow: 0 4px 16px rgba(74, 138, 46, 0.18), 0 2px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 95;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .floating-upload-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    background-color: var(--cozy-green-matcha);
+    color: white;
+    box-shadow: 0 8px 24px rgba(74, 138, 46, 0.25), 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+  .floating-upload-btn:active {
+    transform: translateY(0) scale(0.95);
+  }
+
+  /* Bottom Sheet Overlay & Content (Slide up from bottom) - Đồng bộ với PolaroidSheet.astro */
+  .sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(28, 28, 30, 0);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    backdrop-filter: blur(0px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  
+  .sheet-overlay.open {
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 1;
+    pointer-events: auto;
+    backdrop-filter: blur(3px);
+  }
+
+  .polaroid-bottom-sheet-upload {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #FFFFFF; /* Đồng bộ nền trắng của product sheet */
+    border-top-left-radius: 32px; /* Đồng bộ radius 32px */
+    border-top-right-radius: 32px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.08);
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1); /* Đồng bộ easing */
+    z-index: 1000;
+    padding: 2.25rem 1.75rem 2.5rem 1.75rem; /* Đồng bộ padding */
+    max-width: 480px; /* Đồng bộ width limit */
+    margin: 0 auto;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .sheet-overlay.open .polaroid-bottom-sheet-upload {
+    transform: translateY(0);
+  }
+
+  .sheet-drag-handle {
+    width: 40px;
+    height: 5px;
+    background-color: rgba(0, 0, 0, 0.1); /* Đồng bộ drag handle */
+    border-radius: 3px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .bottom-sheet-close-btn {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--cozy-text-obsidian);
+    opacity: 0.55;
+    transition: opacity 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .bottom-sheet-close-btn:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+  }
+  .bottom-sheet-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 750;
+    color: var(--cozy-text-obsidian);
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .form-group-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .form-label-custom {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    text-align: left;
+  }
+  .form-text-input, .form-textarea-custom, .form-file-input {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.6rem;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 6px;
+    background-color: var(--cozy-bg-pure);
+    outline: none;
+    transition: border-color 0.2s;
+    text-align: left;
+  }
+  .form-text-input:focus, .form-textarea-custom:focus {
+    border-color: var(--cozy-wood-sugi);
+  }
+  .form-textarea-custom {
+    min-height: 80px;
+    resize: vertical;
+  }
+  .char-counter {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    font-size: 0.7rem;
+    color: var(--cozy-wood-sugi);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  
+  /* Polaroid Preview */
+  .polaroid-preview-area {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .polaroid-frame-preview {
+    background-color: var(--cozy-bg-pure);
+    padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+    border: 0.5px solid rgba(139, 94, 60, 0.15);
+    border-radius: 4px;
+    width: 140px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    position: relative; /* Cho phép watermark absolute nằm đúng */
+  }
+  .interactive-preview {
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s, box-shadow 0.2s;
+  }
+  .interactive-preview:hover {
+    transform: scale(1.06) rotate(-2deg); /* Khẽ nghiêng và zoom nhẹ như ảnh Polaroid thật */
+    border-color: var(--cozy-green-matcha);
+    box-shadow: 0 8px 20px rgba(139, 94, 60, 0.1);
+  }
+  .interactive-preview:active {
+    transform: scale(0.98);
+  }
+  .shake {
+    animation: shake 0.4s ease-in-out;
+    border-color: #CC5200 !important;
+  }
+  @keyframes shake {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    15%, 55%, 85% { transform: scale(1.02) rotate(-3deg); }
+    35%, 75% { transform: scale(1.02) rotate(3deg); }
+  }
+  .photo-preview-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: var(--cozy-bg-beige);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: var(--cozy-wood-sugi);
+    padding: 1rem 0;
+    box-sizing: border-box;
+  }
+  .photo-preview-placeholder i {
+    font-size: 1.8rem;
+  }
+  .photo-preview-placeholder span {
+    font-size: 0.65rem;
+    font-weight: 500;
+  }
+  .polaroid-frame-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 2px;
+    display: block;
+  }
+
+  .submit-photo-btn {
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+    background-color: #1C1C1E; /* Đồng bộ màu đen hành động của sản phẩm */
+    border: none;
+    border-radius: 14px; /* Đồng bộ bo góc nút sản phẩm */
+    height: 50px; /* Đồng bộ chiều cao nút sản phẩm */
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(28, 28, 30, 0.15);
+  }
+  .submit-photo-btn:hover:not(:disabled) {
+    background-color: #2C2C2E;
+  }
+  .submit-photo-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Status message */
+  .status-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #F0F4E8;
+    color: var(--cozy-green-matcha-forest);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.6rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 1px solid rgba(74, 138, 46, 0.1);
+    word-break: break-word;
+    text-align: left;
+  }
+  .status-msg.error {
+    background-color: #FFF2E6;
+    color: #CC5200;
+    border-color: rgba(230, 100, 0, 0.1);
+  }
+  .status-icon {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .spin {
+    animation: rotate 1.5s linear infinite;
+  }
+  @keyframes rotate {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Comments Layout at back of Polaroid card */
+  .note-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.4rem;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  
+
+  .hidden {
+    display: none !important;
   }
 </style>

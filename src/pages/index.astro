@@ -69,7 +69,7 @@ const STATIC_PRODUCTS_FALLBACK = [
     min_group_size: 15,
     affiliate_url: 'https://shope.ee/fahasa-sach-tam-ly-meo-aff',
     image_url: '/images/products/sach-meo-polaroid.webp',
-    quote: 'Những trang sách thủ thỉ về tiếng "meo meo" kỳ lạ, để Sen thấu hiểu và thương Boss nhiều hơn nữa 📖'
+    quote: 'Những trang sách thủ thỉ về tiếng "meo meo" kỳ lạ, để cô/chú thấu hiểu và thương bé nhiều hơn nữa 📖'
   },
   {
     id: 'b7b25fc8-87e3-4c91-9e23-7fa98c3e4125',
@@ -153,7 +153,7 @@ const STATIC_PRODUCTS_FALLBACK = [
     min_group_size: 10,
     affiliate_url: 'https://s.shopee.vn/6Aj0fjxuS8',
     image_url: null,
-    quote: 'Chiếc phi thuyền thoáng đãng cùng Sen chu du khắp thế gian, ôm trọn tầm nhìn thế giới.'
+    quote: 'Chiếc phi thuyền thoáng đãng cùng cô/chú chu du khắp thế gian, ôm trọn tầm nhìn thế giới.'
   },
   {
     id: 'bc556d08-78fa-f4dc-f815-884830c8e1be',
@@ -165,7 +165,7 @@ const STATIC_PRODUCTS_FALLBACK = [
     min_group_size: 10,
     affiliate_url: 'https://s.shopee.vn/3B5P6t0T4d',
     image_url: null,
-    quote: 'Không gian sống trong lành, sạch mát để bảo vệ sức khỏe của Boss lẫn Sen thương yêu.'
+    quote: 'Không gian sống trong lành, sạch mát để bảo vệ sức khỏe của bé cưng lẫn cô/chú thương yêu.'
   },
   {
     id: '5884830c-8e1b-e577-51b2-5884830c8e1b',
@@ -227,7 +227,7 @@ const getCategoryLabel = (cat: string) => {
 };
 ---
 
-<Layout title="DOCA.pet - Sống Chậm Cùng Thú Cưng | App Chữa Lành Cho Sen & Boss" description="Trang chủ dự án DOCA.pet. Nơi lưu giữ ký ức Capsule, kết nối linh hồn AI PetTwin của Boss, và trút bầu tâm sự ẩn danh tại Hòm thư Namiya không quảng cáo.">
+<Layout title="DOCA.pet - Sống Chậm Cùng Thú Cưng | App Chữa Lành Cho Cô/Chú & các bạn đồng Meo" description="Trang chủ dự án DOCA.pet. Nơi lưu giữ ký ức Capsule, kết nối linh hồn AI PetTwin của bé cưng, và trút bầu tâm sự ẩn danh tại Hòm thư Namiya không quảng cáo.">
   <!-- Gán biến Supabase toàn cục cho client-side Javascript -->
   <script is:inline define:vars={{ supabaseUrl, supabaseKey }}>
     window.PUBLIC_SUPABASE_URL = supabaseUrl;
@@ -290,6 +290,18 @@ const getCategoryLabel = (cat: string) => {
         <h1 class="hero-title">Góc Nhỏ Bình Yên</h1>
         <p class="hero-subtitle">Nơi cùng thú cưng sống chậm lại một nhịp, mỗi ngày.</p>
         
+        <!-- Cozy Radio Host Card (Now outside, welcoming message for entering FM) -->
+        <div class="cozy-host-card" id="cozy-host-card">
+          <div class="host-content">
+            <div class="host-header" style="justify-content: center; margin-bottom: 4px;">
+              <span class="host-name">Tina's FM Station 🐾</span>
+            </div>
+            <p class="host-intro" id="host-intro-text">
+              Đang kết nối đài FM...
+            </p>
+          </div>
+        </div>
+
         <!-- Cozy Player Wrapper containing widget and playlist dropdown -->
         <div class="cozy-player-wrapper">
           <div class="cozy-music-player">
@@ -350,8 +362,6 @@ const getCategoryLabel = (cat: string) => {
               </button>
             </div>
 
-
-
             <!-- Right: Play/Pause button -->
             <button class="player-control-btn" aria-label="Play/Pause">
               <i class="ph-fill ph-play play-icon"></i>
@@ -364,6 +374,14 @@ const getCategoryLabel = (cat: string) => {
 
           <!-- Playlist Dropdown Container -->
           <div class="cozy-playlist-dropdown">
+            <!-- Playlist Title & Story description (Now inside the dropdown, above the tracks) -->
+            <div class="playlist-header-details" style="margin-bottom: 12px; border-bottom: 1px dashed rgba(0, 0, 0, 0.08); padding-bottom: 10px; text-align: center;">
+              <div class="playlist-focus-title" id="host-vibe-badge" style="font-weight: 700; font-size: 0.85rem; color: var(--cozy-green-matcha-forest); display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px;">
+                Đang tải bản tin...
+              </div>
+              <p class="playlist-focus-desc" id="host-story-text" style="font-size: 0.75rem; color: #6a6a66; margin: 0; line-height: 1.45; font-style: italic;"></p>
+            </div>
+
             <ul class="playlist-tracks-list" id="playlist-tracks-ul">
               <!-- Rendered dynamically by client-side JS -->
             </ul>
@@ -417,7 +435,7 @@ const getCategoryLabel = (cat: string) => {
           </a>
           <p class="shelf-support-note">
             Mỗi hộp quà nhỏ gửi trao là một chút tình thương vun vén cho tụi con,<br />
-            cô chú nếu thấy ưng ý thì ủng hộ nhà con nhé. 🐾
+            cô/chú nếu thấy ưng ý thì ủng hộ nhà con nhé. 🐾
           </p>
         </div>
       </div>
@@ -458,7 +476,7 @@ const getCategoryLabel = (cat: string) => {
           </div>
           <div class="blog-header-info">
             <h3 class="title-large blog-title">Nhật Ký Lối Sống</h3>
-            <span class="blog-subtitle">Nơi gom góp những mẩu chuyện nhỏ vỗ về tâm hồn Sen & Boss 🐾</span>
+            <span class="blog-subtitle">Nơi gom góp những mẩu chuyện nhỏ vỗ về tâm hồn cô/chú & các bạn đồng Meo 🐾</span>
           </div>
         </div>
         
@@ -480,7 +498,7 @@ const getCategoryLabel = (cat: string) => {
           ))}
         </div>
         <p class="blog-desc-bottom">
-          Những mẩu chuyện nhỏ giúp xoa dịu tâm hồn, thấu hiểu chú thú cưng và cùng cô chú đắp xây một cuộc sống thật bình yên. 🐾
+          Những mẩu chuyện nhỏ giúp xoa dịu tâm hồn, thấu hiểu chú thú cưng và cùng cô/chú đắp xây một cuộc sống thật bình yên. 🐾
         </p>
       </div>
     </section>
@@ -1004,7 +1022,7 @@ const getCategoryLabel = (cat: string) => {
   }
 
   .cozy-player-wrapper.expanded :global(.cozy-playlist-dropdown) {
-    max-height: 380px; /* Expand height */
+    max-height: 380px; /* Comfortably fits playlist details + track list */
     opacity: 1;
     pointer-events: auto;
     padding: 14px 12px 12px 12px;
@@ -1018,8 +1036,54 @@ const getCategoryLabel = (cat: string) => {
     flex-direction: column;
     gap: 4px;
     overflow-y: auto;
-    max-height: 280px;
+    max-height: 200px; /* Constrained tracklist height */
     padding-right: 4px;
+  }
+
+  /* Cozy Host Card Styles */
+  :global(.cozy-host-card) {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px dashed var(--cozy-green-matcha-light);
+    border-radius: 20px;
+    padding: 16px 28px;
+    margin: 0 auto 18px auto;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(0, 0, 0, 0.01);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 680px; /* Expanded horizontally even wider */
+    box-sizing: border-box;
+  }
+
+  :global(.host-content) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  :global(.host-header) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  :global(.host-name) {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--cozy-green-matcha-forest);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  :global(.host-intro) {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #5f5f5c;
+    margin: 0;
+    text-align: center;
+    font-style: italic;
   }
 
   /* Custom scrollbar for playlist dropdown */
@@ -1749,66 +1813,273 @@ const getCategoryLabel = (cat: string) => {
     const miniPlayIcon = document.querySelector('.mini-play-icon');
     const miniPauseIcon = document.querySelector('.mini-pause-icon');
 
-    const playlistA = [
-      { title: "Afternoon Glow ☕", start: 0, duration: 187 },
-      { title: "Coffee and Whiskers 🐾", start: 187, duration: 200 },
-      { title: "Porcelain and Purrs 🐈", start: 387, duration: 199 },
-      { title: "Golden Hour in a Quiet Café 🌅", start: 586, duration: 247 },
-      { title: "A Sip Before Sunset 🍹", start: 833, duration: 275 },
-      { title: "When the First Stars Appear ✨", start: 1108, duration: 248 },
-      { title: "Midnight Coffee Serenade 🌙", start: 1356, duration: 264 },
-      { title: "Echoes in the After Hours 🎻", start: 1620, duration: 269 },
-      { title: "Before the Morning Finds Us 🌅", start: 1889, duration: 279 },
-      { title: "Sunlit Cups and Swinging Steps 🎷", start: 2168, duration: 252 }
-    ];
-    const durationA = 2420;
-    const srcA = "/audio/cozy-living-jazz.m4a";
+    let fmPlaylist = [];
+    let totalPlaylistDuration = 0;
+    let isPlaylistLoaded = false;
+    let isDirectPlay = false;
+    let activeTrackIndex = 0;
 
-    const playlistB = [
-      { title: "Before the Morning Knows ☕", start: 0, duration: 319 },
-      { title: "Quiet Coffee, Gentle Light 🐾", start: 319, duration: 224 },
-      { title: "A Quiet Corner of the Day 🐈", start: 543, duration: 265 },
-      { title: "Where the Day Gently Slows 🌅", start: 808, duration: 272 },
-      { title: "A Cup and a Quiet Thought 🍹", start: 1080, duration: 207 },
-      { title: "Soft Afternoon in Amber Light ✨", start: 1287, duration: 168 },
-      { title: "Midnight in a Quiet Room 🌙", start: 1455, duration: 349 },
-      { title: "As If You Were Here 🎻", start: 1804, duration: 325 },
-      { title: "Between the Night and Day 🌅", start: 2129, duration: 330 },
-      { title: "A Gentle Morning Begins 🎷", start: 2459, duration: 349 }
-    ];
-    const durationB = 2808;
-    const srcB = "/audio/quiet-cafe-jazz.m4a";
-
-    // Alternate playlist based on day of month (Even days = Playlist A, Odd days = Playlist B)
-    const isEvenDay = new Date().getDate() % 2 === 0;
-    const fmPlaylist = isEvenDay ? playlistA : playlistB;
-    const totalPlaylistDuration = isEvenDay ? durationA : durationB;
-    const audioSrc = isEvenDay ? srcA : srcB;
-
-    // Dynamically render playlist items
-    const playlistUl = document.getElementById('playlist-tracks-ul');
-    if (playlistUl) {
-      playlistUl.innerHTML = fmPlaylist.map((track, idx) => {
-        const minutes = Math.floor(track.duration / 60);
-        const seconds = track.duration % 60;
-        const durationStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
-        return `
-          <li class="track-item" data-index="${idx}">
-            <span class="track-num">${numStr}</span>
-            <span class="track-name-text">${track.title}</span>
-            <div class="mini-wave">
-              <span class="mini-bar"></span>
-              <span class="mini-bar"></span>
-              <span class="mini-bar"></span>
-            </div>
-            <span class="track-duration">${durationStr}</span>
-          </li>
-        `;
-      }).join('');
+    const fallbackPlaylists = {};
+    for (let d = 0; d < 7; d++) {
+      (fallbackPlaylists as any)[d.toString()] = {
+        "morning": { title: `Nắng Sớm Bên Hiên (Thứ ${d===0?'Chủ Nhật':d+1}) ☕`, story_title: "Tách Trà Sớm Và Tiếng Đuôi Gõ Nhịp", story: "Mở đầu ngày mới bên tách trà sớm ấm áp và ngọt lành của bé cưng.", intro: "Chào cô/chú nhé! Sớm hôm nay ở Bình Hưng thật [thời tiết] đúng không? Tina đã dọn sẵn đĩa nhạc...", tracks: ["christmas", "amazing"] },
+        "afternoon": { title: `Góc Khuất Bình Yên (Thứ ${d===0?'Chủ Nhật':d+1}) 🍃`, story_title: "Nắng Trưa Đậu Trên Bộ Lông Khô Ráo", story: "Góc nằm lười trưa nắng bên cửa sổ đón ngọn gió mát lành.", intro: "Tina chào cả nhà nhé! Tiết trời trưa nay Bình Hưng đang [thời tiết], cùng nghe nhạc thư giãn nhé...", tracks: ["gutbucket", "margie"] },
+        "evening": { title: `Đèn Vàng Vĩ Tuyến (Thứ ${d===0?'Chủ Nhật':d+1}) 🌙`, story_title: "Đèn Đêm Vàng Và Giấc Mộng Màu Xanh", story: "Ánh đèn đêm ấm áp vang lên bản jazz êm đềm xoa dịu những nhọc nhằn.", intro: "cô/chú ơi, buổi tối Bình Hưng có chút [thời tiết] rồi đấy, gác lại âu lo và nằm xuống thôi...", tracks: ["dippermouth", "amazing"] }
+      };
     }
 
-    const trackItems = document.querySelectorAll('.track-item');
+    async function fetchWeather() {
+      // Check sessionStorage cache first (30 mins duration)
+      try {
+        const cachedData = sessionStorage.getItem('doca_weather_info');
+        const cachedTime = sessionStorage.getItem('doca_weather_time');
+        const now = Date.now();
+        if (cachedData && cachedTime && (now - parseInt(cachedTime, 10)) < 1800000) {
+          return JSON.parse(cachedData);
+        }
+      } catch (e) {}
+
+      const url = "https://api.open-meteo.com/v1/forecast?latitude=10.7222&longitude=106.6783&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Asia%2FSingapore";
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 1500);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.current && data.daily) {
+            const currentTemp = Math.round(data.current.temperature_2m);
+            const currentCode = data.current.weather_code;
+            const minTemp = Math.round(data.daily.temperature_2m_min[0]);
+            const maxTemp = Math.round(data.daily.temperature_2m_max[0]);
+            const dailyCode = data.daily.weather_code[0];
+
+            const weatherInfo = {
+              temp: currentTemp,
+              minTemp: minTemp,
+              maxTemp: maxTemp,
+              currentCode: currentCode,
+              dailyCode: dailyCode,
+              description: mapWeatherCode(currentCode)
+            };
+            
+            try {
+              sessionStorage.setItem('doca_weather_info', JSON.stringify(weatherInfo));
+              sessionStorage.setItem('doca_weather_time', Date.now().toString());
+            } catch (e) {}
+
+            return weatherInfo;
+          }
+        }
+      } catch (err) {
+        console.warn("Weather fetch failed or timed out, using fallback", err);
+      }
+      return { temp: 28, minTemp: 24, maxTemp: 32, currentCode: 1, dailyCode: 3, description: "trời mát mẻ" };
+    }
+
+    function mapWeatherCode(code: number) {
+      if (code === 0) return "trời trong xanh";
+      if ([1, 2, 3].includes(code)) return "mây nhẹ mát mẻ";
+      if ([45, 48].includes(code)) return "sương mù nhẹ";
+      if ([51, 53, 55].includes(code)) return "mưa phùn nhè nhẹ";
+      if ([61, 63, 65].includes(code)) return "mưa rào";
+      if ([71, 73, 75].includes(code)) return "lạnh dịu";
+      if ([80, 81, 82].includes(code)) return "mưa giông";
+      if ([95, 96, 99].includes(code)) return "giông bão";
+      return "mát mẻ";
+    }
+    function initPlaylist(tracksList: any[], playlistsConfig: any, weather: any) {
+      const now = new Date();
+      const today = now.getDay();
+      
+      const hour = now.getHours();
+      let activeSlot = "evening";
+      if (hour >= 6 && hour < 12) {
+        activeSlot = "morning";
+      } else if (hour >= 12 && hour < 18) {
+        activeSlot = "afternoon";
+      }
+      
+      const dayPlaylistConfig = playlistsConfig[today.toString()] || playlistsConfig["0"];
+      const todayPlaylist = dayPlaylistConfig[activeSlot];
+      
+      const vibeBadge = document.getElementById('host-vibe-badge');
+      const introText = document.getElementById('host-intro-text');
+      const storyTitle = document.getElementById('host-story-title');
+      const storyText = document.getElementById('host-story-text');
+      
+      if (vibeBadge) vibeBadge.textContent = todayPlaylist.title;
+      if (storyTitle) storyTitle.textContent = todayPlaylist.story_title || "Lý do lựa chọn playlist";
+      if (storyText) storyText.textContent = todayPlaylist.story;
+      
+      const getPoeticDayType = (d: number, selection: number) => {
+        const pools: Record<number, string[]> = {
+          0: ["chủ nhật bình yên", "ngày cuối tuần thảnh thơi"],
+          1: ["ngày đầu tuần êm ả", "thứ hai dịu nhẹ"],
+          2: ["ngày thứ ba lững lờ", "buổi chiều thứ ba tĩnh lặng"],
+          3: ["thứ tư dịu ngọt", "ngày giữa tuần bình yên"],
+          4: ["thứ năm lặng lẽ", "ngày thường êm ả"],
+          5: ["thứ sáu tự do", "ngày cận cuối tuần thong thả"],
+          6: ["thứ bảy ngọt ngào", "ngày cuối tuần dịu dàng"]
+        };
+        const pool = pools[d] || ["ngày thường bình yên"];
+        return pool[selection % pool.length];
+      };
+
+      const monthNames = ["tháng Giêng", "tháng Hai", "tháng Ba", "tháng Tư", "tháng Năm", "tháng Sáu", "tháng Bảy", "tháng Tám", "tháng Chín", "tháng Mười", "tháng Mười Một", "tháng Chạp"];
+      const currentMonth = monthNames[now.getMonth()];
+      
+      // Construct dynamic weather commentary
+      let weatherText = "";
+      const isCurrentlyRain = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weather.currentCode);
+      const isDailyRain = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weather.dailyCode);
+      const tempRange = weather.maxTemp - weather.minTemp;
+      const isHot = weather.temp >= 31;
+      const isCold = weather.temp <= 24;
+
+      // Select index based on day and current minute to ensure variety
+      const selectionIdx = (now.getMinutes() + today);
+
+      if (!isCurrentlyRain && isDailyRain) {
+        const pool = [
+          "trời se lạnh và xám mây. Lòng tự dưng muốn cuộn tròn bên bé cưng ngắm mưa lác đác sắp về... ☔",
+          "se lạnh và mây xám kéo về nhiều rồi. Giữa nốt nhạc trầm ấm bỗng thấy lòng thật tĩnh tại... 🌧️"
+        ];
+        weatherText = pool[selectionIdx % pool.length];
+      } else if (isCurrentlyRain) {
+        const pool = [
+          "mưa rơi tí tách ngoài hiên. Trong căn phòng ấm áp, nghe tiếng jazz thấy bình yên vô cùng... 🕯️",
+          "mưa trút mát rượi. Cô/chú trốn mưa cuộn tròn nghe những nốt nhạc ngọt ngào này nhé... 🐾"
+        ];
+        weatherText = pool[selectionIdx % pool.length];
+      } else if (tempRange >= 6) {
+        const pool = [
+          "nắng nhẹ nhưng se se gió. Giai điệu dịu ngọt này sẽ giữ cho tâm hồn cả nhà thật ấm áp... 🐾",
+          "hiu hiu gió mát. Đêm về trời sẽ lạnh hơn đấy, để tiếng kèn ngọt ngào ôm lấy cô/chú và bé cưng nhé... 🛌"
+        ];
+        weatherText = pool[selectionIdx % pool.length];
+      } else if (isHot) {
+        const pool = [
+          "nắng vàng rực rỡ ngoài ô cửa. Hãy tận hưởng làn gió mát cùng giai điệu thong thả này nhé... 🍃",
+          "trưa nắng oi ả, lòng chỉ muốn ghé lại góc quen, tìm chút thanh âm dịu mát tâm hồn... 🥛"
+        ];
+        weatherText = pool[selectionIdx % pool.length];
+      } else if (isCold) {
+        const pool = [
+          "se se lạnh dễ chịu ghê. Cuộn tròn cùng bé cưng nghe bản nhạc ấm áp này thì thật tuyệt... 🐾",
+          "lành lạnh mát mẻ. Bé cưng đã rúc sâu vào chiếc chăn ấm, khẽ gõ đuôi theo tiếng nhạc rồi kìa... 🛌"
+        ];
+        weatherText = pool[selectionIdx % pool.length];
+      } else {
+        const pool = [
+          "dịu mát, trong lành vô cùng. Một tách trà ấm và tiếng jazz êm dịu là đủ cho một ngày bình yên... 🍵",
+          "những cơn gió thoảng qua thật dễ chịu. Nghe tiếng nhạc ngân nga, lòng nhẹ bẫng đi bao nhiêu... 🎶"
+        ];
+        weatherText = pool[selectionIdx % pool.length];
+      }
+
+      const poeticDay = getPoeticDayType(today, selectionIdx);
+      let finalIntro = "";
+
+      if (activeSlot === "morning") {
+        const pool = [
+          `Chào cô/chú nhé! Sớm mai ${weatherText} Khởi đầu ngày ${poeticDay} thật thảnh thơi bên ly cà phê ấm và giai điệu dịu ngọt đầu ngày nhé... ☕`,
+          `Chào cả nhà! Nắng sớm ghé hiên rồi, ${weatherText} Giữa những ngày ${currentMonth} thế này, cùng bé cưng cuộn tròn lười biếng một chút bên bản jazz mộc mạc, cô/chú nhỉ... 🐾`
+        ];
+        finalIntro = pool[selectionIdx % pool.length];
+      } else if (activeSlot === "afternoon") {
+        const pool = [
+          `Tina chào cả nhà nhé! Trưa nay ${weatherText} Giữa ngày ${poeticDay} êm ả, cô/chú đã nghỉ ngơi chưa nhỉ? Ghé lại đây thả trôi mệt mỏi cùng giai điệu bình yên này nha... 🍃`,
+          `cô/chú ơi, không khí trưa nay ${weatherText} Một buổi trưa ${poeticDay} thật thong thả, hãy để những giai điệu êm đềm này xoa dịu và ôm ấp tâm hồn cô/chú nhé... 🐾`
+        ];
+        finalIntro = pool[selectionIdx % pool.length];
+      } else {
+        const pool = [
+          `cô/chú ơi, bóng tối dịu dàng buông xuống rồi. Đêm nay trời ${weatherText} Gác lại mọi lo toan bên ngoài ô cửa, đắp chăn ấm cho bé cưng và cùng ngủ một giấc thật ngon nha... 🌙`,
+          `Đêm nay ${weatherText} Khép lại một ngày ${poeticDay} nhẹ nhàng, cùng tắt bớt đèn và chìm vào không gian ấm áp bình yên này thôi nào... 🕯️`
+        ];
+        finalIntro = pool[selectionIdx % pool.length];
+      }
+        
+      if (introText) introText.textContent = finalIntro;
+      
+
+      
+      fmPlaylist = [];
+      totalPlaylistDuration = 0;
+      
+      todayPlaylist.tracks.forEach((trackId: string) => {
+        const track = tracksList.find(t => t.id === trackId);
+        if (track) {
+          const start = totalPlaylistDuration;
+          totalPlaylistDuration += track.duration;
+          fmPlaylist.push({
+            title: track.title,
+            artist: track.artist,
+            url: track.url,
+            start: start,
+            duration: track.duration
+          });
+        }
+      });
+      
+      const playlistUl = document.getElementById('playlist-tracks-ul');
+      if (playlistUl) {
+        playlistUl.innerHTML = fmPlaylist.map((track, idx) => {
+          const minutes = Math.floor(track.duration / 60);
+          const seconds = track.duration % 60;
+          const durationStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+          const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
+          return `
+            <li class="track-item" style="cursor: default; pointer-events: none;">
+              <span class="track-num">${numStr}</span>
+              <span class="track-name-text">${track.title} - <span class="track-artist" style="opacity: 0.7; font-size: 0.9em;">${track.artist}</span></span>
+              <div class="mini-wave">
+                <span class="mini-bar"></span>
+                <span class="mini-bar"></span>
+                <span class="mini-bar"></span>
+              </div>
+              <span class="track-duration" style="font-size: 0.75rem; opacity: 0.5; display: flex; align-items: center; gap: 4px;">
+                <i class="ph-light ph-radio"></i> ${durationStr}
+              </span>
+            </li>
+          `;
+        }).join('');
+      }
+    }
+
+    async function loadPlaylist() {
+      const weather = await fetchWeather();
+      const sbUrl = (window as any).PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || '';
+      if (sbUrl) {
+        const playlistUrl = `${sbUrl}/storage/v1/object/public/audio/playlist.json`;
+        try {
+          const res = await fetch(playlistUrl);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.tracks && data.playlists) {
+              initPlaylist(data.tracks, data.playlists, weather);
+              isPlaylistLoaded = true;
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to load playlist.json from Supabase Storage, using fallback", err);
+        }
+      }
+      
+      const fallbackTracks = [
+        { id: "dippermouth", title: "Dipper Mouth Blues (1923) 🎷", artist: "King Oliver's Creole Jazz Band", url: "https://upload.wikimedia.org/wikipedia/commons/f/ff/King_Oliver%27s_Creole_Jazz_Band_-_Dippermouth_Blues_%281923%29.ogg", duration: 180 },
+        { id: "gutbucket", title: "Gut Bucket Blues (1925) 🎺", artist: "Louis Armstrong's Hot Five", url: "https://upload.wikimedia.org/wikipedia/commons/3/30/Louis_Armstrong%27s_Hot_Five_-_Gut_Bucket_Blues_%281925%29.ogg", duration: 180 },
+        { id: "margie", title: "Margie (1920) 🎹", artist: "Max Fells' Della Robbia Orchestra", url: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Margie_%281920%29_performed_by_Max_Fells%27_Della_Robbia_Orchestra.oga", duration: 180 },
+        { id: "christmas", title: "Christmas Time is Here ❄️", artist: "The Airmen of Note", url: "https://upload.wikimedia.org/wikipedia/commons/e/e7/01-The_Airmen_of_Note-Christmas_Time_is_Here-Good_King_Wenceslas_and_His_Merry_Band.mp3", duration: 245 },
+        { id: "amazing", title: "Amazing Grace ✨", artist: "The Airmen of Note", url: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Amazing_Grace_%28USAFB_jazz_vocal%29.ogg", duration: 385 }
+      ];
+      initPlaylist(fallbackTracks, fallbackPlaylists, weather);
+    }
+
+    // Load initial playlist
+    loadPlaylist();
 
     // Toggle Playlist Expand/Collapse
     playlistToggleBtn?.addEventListener('click', (e) => {
@@ -1819,7 +2090,7 @@ const getCategoryLabel = (cat: string) => {
       if (playerWrapper?.classList.contains('expanded')) {
         if (typeof (window as any).gtag === 'function') {
           (window as any).gtag('event', 'expand_playlist_dropdown', {
-            playlist_name: isEvenDay ? 'Cozy Living Jazz' : 'Gentle Coffee Mood'
+            playlist_name: 'Doca FM Radio'
           });
         }
       }
@@ -1835,6 +2106,14 @@ const getCategoryLabel = (cat: string) => {
 
     function getSyncedTrack() {
       const nowInSeconds = Math.floor(Date.now() / 1000);
+      if (totalPlaylistDuration === 0 || fmPlaylist.length === 0) {
+        return {
+          track: { title: "Doca FM 📻", artist: "Đang kết nối...", url: "", duration: 180 },
+          globalOffset: 0,
+          trackOffset: 0,
+          index: 0
+        };
+      }
       const playlistOffset = nowInSeconds % totalPlaylistDuration;
       
       for (let i = 0; i < fmPlaylist.length; i++) {
@@ -1858,9 +2137,10 @@ const getCategoryLabel = (cat: string) => {
       };
     }
 
-    function syncPlaylistUI(activeTrackIndex: number, isPlaying: boolean) {
+    function syncPlaylistUI(activeTrackIdx: number, isPlaying: boolean) {
+      const trackItems = document.querySelectorAll('.track-item');
       trackItems.forEach((item, idx) => {
-        if (idx === activeTrackIndex) {
+        if (idx === activeTrackIdx) {
           item.classList.add('active-track-item');
           if (isPlaying) {
             item.classList.add('playing-state');
@@ -1874,7 +2154,7 @@ const getCategoryLabel = (cat: string) => {
       });
     }
 
-    function updatePlayerUI(isPlaying: boolean, trackTitle: string = "Doca FM Trực Tuyến 📻", activeTrackIndex: number = 0) {
+    function updatePlayerUI(isPlaying: boolean, trackTitle: string = "Doca FM Trực Tuyến 📻", activeTrackIdx: number = 0) {
       if (isPlaying) {
         playerContainer?.classList.add('playing');
         playIcon?.classList.add('hidden');
@@ -1886,7 +2166,7 @@ const getCategoryLabel = (cat: string) => {
         miniPlayIcon?.classList.add('hidden');
         miniPauseIcon?.classList.remove('hidden');
         
-        syncPlaylistUI(activeTrackIndex, true);
+        syncPlaylistUI(activeTrackIdx, true);
       } else {
         playerContainer?.classList.remove('playing');
         playIcon?.classList.remove('hidden');
@@ -1908,80 +2188,107 @@ const getCategoryLabel = (cat: string) => {
     let prevActiveTrackIndex = -1;
     let prevPlayingState = false;
 
-    function playSyncedRadio() {
-      if (!audio) return;
-      const { track, globalOffset, index } = getSyncedTrack();
-      
-      audio.src = audioSrc;
-      audio.currentTime = globalOffset;
-      
-      audio.play().then(() => {
-        updatePlayerUI(true, track.title, index);
-        
-        // Track GA4 event
-        if (typeof (window as any).gtag === 'function') {
-          (window as any).gtag('event', 'play_fm_radio', {
-            playlist_name: isEvenDay ? 'Cozy Living Jazz' : 'Gentle Coffee Mood',
-            track_title: track.title
-          });
-        }
-        
-        // Reset state tracker variables
-        prevActiveTrackIndex = -1;
-        prevPlayingState = false;
+    function playTrackDirectly(index: number) {
+      isDirectPlay = true;
+      activeTrackIndex = index;
+      playSyncedRadio();
+    }
 
-        const updateStatus = () => {
-          if (!audio.paused) {
-            const currentGlobalTime = audio.currentTime;
-            const currentOffset = Math.floor(currentGlobalTime) % totalPlaylistDuration;
-            
-            // Recalculate active track info
-            let activeTrack = track;
-            let activeTrackIndex = index;
-            
-            for (let i = 0; i < fmPlaylist.length; i++) {
-              const t = fmPlaylist[i];
-              const end = t.start + t.duration;
-              if (currentOffset >= t.start && currentOffset < end) {
-                activeTrack = t;
-                activeTrackIndex = i;
-                break;
-              }
-            }
-            
-            if (playerTitle) playerTitle.textContent = `📻 FM: ${activeTrack.title}`;
-            
-            // Sync playlist visualizer selectively
-            if (activeTrackIndex !== prevActiveTrackIndex || !audio.paused !== prevPlayingState) {
-              syncPlaylistUI(activeTrackIndex, !audio.paused);
-              prevActiveTrackIndex = activeTrackIndex;
-              prevPlayingState = !audio.paused;
-            }
-            
-            const elapsedInTrack = currentOffset - activeTrack.start;
-            const minutes = Math.floor(elapsedInTrack / 60);
-            const seconds = elapsedInTrack % 60;
-            const timeStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            
-            const totalMins = Math.floor(activeTrack.duration / 60);
-            const totalSecs = activeTrack.duration % 60;
-            const totalStr = `${totalMins}:${totalSecs < 10 ? '0' : ''}${totalSecs}`;
-            
-            if (playerStatus) playerStatus.textContent = `Đang phát (${timeStr} / ${totalStr})`;
-            
-            requestAnimationFrame(updateStatus);
+    function playSyncedRadio() {
+      if (!audio || fmPlaylist.length === 0) return;
+      
+      let track, trackOffset, index;
+      if (isDirectPlay) {
+        track = fmPlaylist[activeTrackIndex];
+        trackOffset = 0;
+        index = activeTrackIndex;
+      } else {
+        const synced = getSyncedTrack();
+        track = synced.track;
+        trackOffset = synced.trackOffset;
+        index = synced.index;
+      }
+      
+      const onMetadataLoaded = () => {
+        audio.currentTime = trackOffset;
+        audio.play().then(() => {
+          updatePlayerUI(true, track.title, index);
+          
+          // Track GA4 event
+          if (typeof (window as any).gtag === 'function') {
+            (window as any).gtag('event', 'play_fm_radio', {
+              playlist_name: 'Doca FM Radio',
+              track_title: track.title,
+              is_direct: isDirectPlay
+            });
           }
-        };
-        requestAnimationFrame(updateStatus);
-      }).catch(err => {
-        console.warn("Audio play failed, user gesture required:", err);
-        updatePlayerUI(false);
-      });
+          
+          // Reset state tracker variables
+          prevActiveTrackIndex = -1;
+          prevPlayingState = false;
+
+          const updateStatus = () => {
+            if (!audio.paused) {
+              const currentPlayTime = audio.currentTime;
+              const minutes = Math.floor(currentPlayTime / 60);
+              const seconds = Math.floor(currentPlayTime) % 60;
+              const timeStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+              
+              const totalMins = Math.floor(track.duration / 60);
+              const totalSecs = track.duration % 60;
+              const totalStr = `${totalMins}:${totalSecs < 10 ? '0' : ''}${totalSecs}`;
+              
+              if (playerStatus) playerStatus.textContent = `Đang phát (${timeStr} / ${totalStr})`;
+              
+              requestAnimationFrame(updateStatus);
+            }
+          };
+          requestAnimationFrame(updateStatus);
+        }).catch(err => {
+          console.warn("Audio play failed after metadata:", err);
+          updatePlayerUI(false);
+        });
+      };
+      
+      // Update audio source if changed
+      const currentSrc = audio.getAttribute('src');
+      if (currentSrc !== track.url) {
+        audio.setAttribute('src', track.url);
+        // Wait for metadata to load before playing
+        audio.addEventListener('loadedmetadata', onMetadataLoaded, { once: true });
+      } else {
+        audio.currentTime = trackOffset;
+        audio.play().then(() => {
+          updatePlayerUI(true, track.title, index);
+          
+          const updateStatus = () => {
+            if (!audio.paused) {
+              const currentPlayTime = audio.currentTime;
+              const minutes = Math.floor(currentPlayTime / 60);
+              const seconds = Math.floor(currentPlayTime) % 60;
+              const timeStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+              
+              const totalMins = Math.floor(track.duration / 60);
+              const totalSecs = track.duration % 60;
+              const totalStr = `${totalMins}:${totalSecs < 10 ? '0' : ''}${totalSecs}`;
+              
+              if (playerStatus) playerStatus.textContent = `Đang phát (${timeStr} / ${totalStr})`;
+              
+              requestAnimationFrame(updateStatus);
+            }
+          };
+          requestAnimationFrame(updateStatus);
+        }).catch(err => {
+          console.warn("Audio play failed:", err);
+          updatePlayerUI(false);
+        });
+      }
     }
 
     playBtn?.addEventListener('click', () => {
       if (!audio) return;
       if (audio.paused) {
+        isDirectPlay = false; // Reset to FM radio sync on main play click
         playSyncedRadio();
       } else {
         audio.pause();
@@ -1996,19 +2303,10 @@ const getCategoryLabel = (cat: string) => {
 
     playerContainer?.addEventListener('click', (e) => {
       if (!audio) return;
-      
-      // If already playing, do nothing
       if (!audio.paused) return;
       
       const target = e.target as HTMLElement;
-      
-      // Exclude playlist dropdown toggle button
-      if (target.closest('.player-playlist-toggle-btn')) {
-        return;
-      }
-      
-      // Exclude play button itself to avoid double play execution
-      if (target.closest('.player-control-btn')) {
+      if (target.closest('.player-playlist-toggle-btn') || target.closest('.player-control-btn')) {
         return;
       }
       
@@ -2016,8 +2314,12 @@ const getCategoryLabel = (cat: string) => {
     });
 
     audio?.addEventListener('ended', () => {
-      // Re-sync and play next
-      playSyncedRadio();
+      if (isDirectPlay) {
+        activeTrackIndex = (activeTrackIndex + 1) % fmPlaylist.length;
+        playSyncedRadio();
+      } else {
+        playSyncedRadio();
+      }
     });
 
     // Spotify fake door link
@@ -2027,7 +2329,7 @@ const getCategoryLabel = (cat: string) => {
       
       // Show cozy message in Boss perspective using unified global toast
       if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast("Đài của tụi con đang chờ cô chú Spotify duyệt ạ... Sen nghe tạm chiếc radio gỗ này nha? 🐾");
+        (window as any).showToast("Đài của tụi con đang chờ bên Spotify duyệt ạ... Cô/chú nghe tạm chiếc radio gỗ này nha? 🐾");
       }
       
       // Track custom event in localStorage for later GA4 sync or debugging

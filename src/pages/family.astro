@@ -345,6 +345,52 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
       setupCardFlip(card as HTMLElement);
     });
 
+    // --- 2.5 MASONRY FLEXBOX LAYOUT (Sắp xếp theo hàng ngang từ trái sang) ---
+    let allPhotoCards: HTMLElement[] = [];
+
+    function layoutMasonry() {
+      const grid = document.getElementById('family-masonry-grid');
+      if (!grid) return;
+
+      const width = window.innerWidth;
+      let colCount = 7;
+      if (width < 640) colCount = 2;       // Mobile 2 cột
+      else if (width < 1024) colCount = 3;  // Tablet 3 cột
+      else if (width < 1280) colCount = 5;  // Desktop vừa 5 cột
+
+      let cards: HTMLElement[] = [];
+      const existingCols = grid.querySelectorAll('.masonry-col');
+      if (existingCols.length > 0) {
+        cards = allPhotoCards;
+      } else {
+        cards = Array.from(grid.querySelectorAll('.polaroid-card')) as HTMLElement[];
+        allPhotoCards = cards;
+      }
+
+      grid.innerHTML = '';
+
+      const colElements: HTMLElement[] = [];
+      for (let i = 0; i < colCount; i++) {
+        const col = document.createElement('div');
+        col.className = 'masonry-col';
+        grid.appendChild(col);
+        colElements.push(col);
+      }
+
+      cards.forEach((card, index) => {
+        const colIndex = index % colCount;
+        colElements[colIndex].appendChild(card);
+      });
+    }
+
+    let resizeTimer: any;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        layoutMasonry();
+      }, 150);
+    });
+
     // --- 3. FETCH AND DISPLAY GUEST CONTRIBUTIONS FROM SUPABASE ---
     async function loadGuestPhotos() {
       const url = (window as any).PUBLIC_SUPABASE_URL;
@@ -407,6 +453,9 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
             
             // Cập nhật lại hidden cards
             updateLoadMoreButtonState();
+            
+            // Chia cột và phân phối layout Masonry từ trái sang phải
+            layoutMasonry();
           }
         }
       } catch (err) {
@@ -984,33 +1033,20 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
     margin: 0;
   }
 
-  /* Lưới so le Pinterest Masonry chuẩn (Gap mỏng lại để hình to ra) */
+  /* Lưới so le Pinterest Masonry dùng Flexbox Columns để xếp ngang trước */
   .family-masonry-grid {
-    column-count: 7; /* Sử dụng 7 cột trên màn hình Desktop rộng */
-    column-gap: 0.65rem;
+    display: flex;
+    gap: 0.65rem;
     width: 100%;
+    align-items: flex-start;
   }
 
-  /* Breakpoints: Desktop vừa 5 cột, Tablet 3 cột, Mobile 2 cột */
-  @media (max-width: 1279px) {
-    .family-masonry-grid {
-      column-count: 5;
-      column-gap: 0.55rem;
-    }
-  }
-
-  @media (max-width: 1023px) {
-    .family-masonry-grid {
-      column-count: 3;
-      column-gap: 0.5rem;
-    }
-  }
-
-  @media (max-width: 639px) {
-    .family-masonry-grid {
-      column-count: 2;
-      column-gap: 0.4rem;
-    }
+  .masonry-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    min-width: 0;
   }
 
   /* Polaroid Card container (Card KHÔNG nghiêng) */

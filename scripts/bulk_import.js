@@ -108,9 +108,58 @@ async function startImport() {
       
       const base64Data = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
 
-      // 2. Upload trực tiếp lên bảng family_contributions với trạng thái 'approved'
+      // 2. Tự động viết note bằng Gemini nếu có key trong file .env
       const title = `Khoảnh khắc ${path.basename(file, path.extname(file))}`;
-      const note = `Hình ảnh bé cưng được đăng tự động từ thư mục lưu niệm. 🐾`;
+      let note = `Hình ảnh bé cưng được đăng tự động từ thư mục lưu niệm. 🐾`;
+      
+      const geminiKey = process.env.PUBLIC_GEMINI_API_KEY;
+      if (geminiKey) {
+        try {
+          const rawBase64 = compressedBuffer.toString('base64');
+          const prompt = `Bạn là trợ lý chữa lành của gia đình mèo nhà mẹ Lin trên website doca.pet. Hãy quan sát bức ảnh thú cưng này để nhận diện bé mèo nào đang xuất hiện và viết một lời viết tay nhật ký ngắn gọn (dưới 120 ký tự để không bị tràn khung ảnh), dễ thương, ấm áp bằng tiếng Việt từ góc nhìn của mẹ Lin hoặc từ chính bé mèo đó.
+
+Thông tin gia đình mèo để bạn đối chiếu nhận diện:
+- Tina: Chị cả, mèo Anh lông dài màu xám kiêu sa.
+- Latte (hay còn gọi là Tê): Anh ba, mèo trắng lông dài có hai màu mắt (một mắt xanh dương và một mắt vàng).
+- Muối: Anh tư, mèo trắng lông dài giống Tê nhưng hai mắt đều màu nhau (không phải mắt 2 màu), đặc điểm nhận dạng cực kỳ quan trọng là MŨI CÓ NỐT RUỒI ĐEN.
+- Pi's: Em út, mèo Anh lông ngắn màu mướp xám tinh nghịch.
+
+Yêu cầu viết nhật ký:
+- Nếu nhận diện được bé nào (ví dụ dựa vào màu lông xám, mắt 2 màu, nốt ruồi đen ở mũi, hoặc lông mướp xám), hãy gọi đúng tên bé (Tina, Tê/Latte, Muối, hoặc Pi's) và nhắc đến đặc điểm dễ thương đó một cách tự nhiên.
+- Nếu bức ảnh có nhiều bé hoặc không rõ bé nào, hãy viết chung chung về các con một cách ấm áp.
+- Văn phong mộc mạc, giản dị, giàu cảm xúc chữa lành (ví dụ: 'Anh ba Tê hôm nay ngơ ngác ngắm nắng, đôi mắt hai màu lấp lánh như ngọc... ☀️🐾').
+- Trả về DUY NHẤT câu nhật ký đó, không thêm bất kỳ định dạng hay văn bản thừa nào.`;
+          
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: prompt },
+                  {
+                    inlineData: {
+                      mimeType: "image/jpeg",
+                      data: rawBase64
+                    }
+                  }
+                ]
+              }]
+            })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (text) {
+              note = text.slice(0, 140) + " 🐾";
+              console.log(`   📝 AI viết: "${note}"`);
+            }
+          }
+        } catch (geminiErr) {
+          console.warn("   ⚠️ Không thể gọi Gemini API viết note, dùng note mặc định:", geminiErr.message);
+        }
+      }
       
       const res = await fetch(`${SUPABASE_URL}/rest/v1/family_contributions`, {
         method: 'POST',

@@ -1056,6 +1056,16 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
     transform: translateY(-20px);
   }
 
+  /* Trên mobile (2 cột): Cột thứ 2 nhô cao nhẹ nhàng hơn (12px) để vừa vặn màn hình hẹp */
+  @media (max-width: 639px) {
+    .masonry-col:nth-child(even) {
+      transform: translateY(-12px);
+    }
+    .family-masonry-grid {
+      padding-top: 1rem;
+    }
+  }
+
   /* Polaroid Card container (Card KHÔNG nghiêng) */
   .polaroid-card {
     display: inline-block;

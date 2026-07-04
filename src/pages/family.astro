@@ -353,10 +353,10 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
       if (!grid) return;
 
       const width = window.innerWidth;
-      let colCount = 7;
+      let colCount = 6;       // Desktop rộng 6 cột
       if (width < 640) colCount = 2;       // Mobile 2 cột
       else if (width < 1024) colCount = 3;  // Tablet 3 cột
-      else if (width < 1280) colCount = 5;  // Desktop vừa 5 cột
+      else if (width < 1280) colCount = 4;  // Desktop vừa 4 cột
 
       let cards: HTMLElement[] = [];
       const existingCols = grid.querySelectorAll('.masonry-col');
@@ -1260,9 +1260,9 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
   }
   .note-monospace {
     font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.82rem;
     font-weight: 400;
-    line-height: 1.55;
+    line-height: 1.6;
     color: var(--cozy-text-obsidian);
     margin: 0;
     text-align: left;

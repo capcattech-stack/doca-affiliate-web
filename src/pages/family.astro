@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import familyData from '../data/family.json';
 
 // Tải danh sách hình ảnh gia đình từ JSON
-const familyPhotos = familyData;
+const familyPhotos = [];
 
 // Đọc thông tin kết nối Supabase và Gemini từ biến môi trường
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
@@ -363,10 +363,12 @@ Trả về một JSON duy nhất, định dạng: {"valid": boolean, "reason": s
           const contributions = await res.json();
           const grid = document.getElementById('family-masonry-grid');
           if (grid) {
-            contributions.forEach((photo: any) => {
+            contributions.forEach((photo: any, index: number) => {
               // Tạo thẻ Polaroid
               const card = document.createElement('div');
-              card.className = 'polaroid-card guest-contribution hidden-card'; // Mặc định ẩn, sẽ show khi bấm loadmore
+              // 14 tấm ảnh đầu tiên sẽ hiển thị ngay lập tức để lấp đầy grid, còn lại ẩn đi
+              const shouldHide = index >= 14;
+              card.className = `polaroid-card guest-contribution ${shouldHide ? 'hidden-card' : ''}`;
               card.setAttribute('data-id', photo.id.toString());
               card.setAttribute('data-type', 'contribution');
 

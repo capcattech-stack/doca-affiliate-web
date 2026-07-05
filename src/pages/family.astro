@@ -799,6 +799,12 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
             taken_location: takenLocation
           })
         });
+        
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("Supabase save failed. Status:", res.status, "Details:", errText);
+        }
+        
         return res.ok;
       } catch (e) {
         console.error("Supabase save error:", e);

@@ -210,17 +210,17 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
           const latDec = convertDMSToDD(lat, latRef);
           const lonDec = convertDMSToDD(lon, lonRef);
           
-          // Thực hiện reverse geocoding qua OpenStreetMap Nominatim API để lấy tên địa danh thân thiện (ví dụ: Thành phố, Tỉnh)
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latDec}&lon=${lonDec}&zoom=10&accept-language=vi`);
-            if (res.ok) {
-              const geoData = await res.json();
-              takenLocation = geoData.address.city || geoData.address.state || geoData.address.town || `${latDec.toFixed(2)}, ${lonDec.toFixed(2)}`;
-            } else {
-              takenLocation = `${latDec.toFixed(2)}, ${lonDec.toFixed(2)}`;
+          // Chỉ tiếp tục nếu toạ độ hợp lệ (khác 0 và không phải NaN)
+          if (latDec !== 0 && lonDec !== 0 && !isNaN(latDec) && !isNaN(lonDec)) {
+            try {
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latDec}&lon=${lonDec}&zoom=10&accept-language=vi`);
+              if (res.ok) {
+                const geoData = await res.json();
+                takenLocation = geoData.address.city || geoData.address.state || geoData.address.town || null;
+              }
+            } catch (e) {
+              console.warn("Reverse geocode failed:", e);
             }
-          } catch (e) {
-            takenLocation = `${latDec.toFixed(2)}, ${lonDec.toFixed(2)}`;
           }
         }
         
@@ -230,7 +230,15 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
   }
 
   function convertDMSToDD(dms: any, ref: string): number {
-    if (!dms || dms.length < 3) return 0;
+    if (!dms) return 0;
+    
+    // Nếu dms không phải là mảng (ví dụ exif-js trả về số thực trực tiếp)
+    if (!Array.isArray(dms)) {
+      const val = Number(dms);
+      return isNaN(val) ? 0 : (ref === "S" || ref === "W" ? -val : val);
+    }
+    
+    if (dms.length < 3) return 0;
     
     // DMS là mảng [độ, phút, giây]
     const getVal = (val: any) => {
@@ -245,6 +253,8 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
     const seconds = getVal(dms[2]);
     
     let dd = degrees + minutes / 60 + seconds / 3600;
+    if (isNaN(dd)) return 0;
+    
     if (ref === "S" || ref === "W") {
       dd = -dd;
     }

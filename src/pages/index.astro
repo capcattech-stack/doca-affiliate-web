@@ -1822,9 +1822,9 @@ const getCategoryLabel = (cat: string) => {
     const fallbackPlaylists = {};
     for (let d = 0; d < 7; d++) {
       (fallbackPlaylists as any)[d.toString()] = {
-        "morning": { title: `Nắng Sớm Bên Hiên (Thứ ${d===0?'Chủ Nhật':d+1}) ☕`, story_title: "Tách Trà Sớm Và Tiếng Đuôi Gõ Nhịp", story: "Mở đầu ngày mới bên tách trà sớm ấm áp và ngọt lành của bé cưng.", intro: "Chào cô/chú nhé! Sớm hôm nay ở Bình Hưng thật [thời tiết] đúng không? Tina đã dọn sẵn đĩa nhạc...", tracks: ["christmas", "amazing"] },
-        "afternoon": { title: `Góc Khuất Bình Yên (Thứ ${d===0?'Chủ Nhật':d+1}) 🍃`, story_title: "Nắng Trưa Đậu Trên Bộ Lông Khô Ráo", story: "Góc nằm lười trưa nắng bên cửa sổ đón ngọn gió mát lành.", intro: "Tina chào cả nhà nhé! Tiết trời trưa nay Bình Hưng đang [thời tiết], cùng nghe nhạc thư giãn nhé...", tracks: ["gutbucket", "margie"] },
-        "evening": { title: `Đèn Vàng Vĩ Tuyến (Thứ ${d===0?'Chủ Nhật':d+1}) 🌙`, story_title: "Đèn Đêm Vàng Và Giấc Mộng Màu Xanh", story: "Ánh đèn đêm ấm áp vang lên bản jazz êm đềm xoa dịu những nhọc nhằn.", intro: "cô/chú ơi, buổi tối Bình Hưng có chút [thời tiết] rồi đấy, gác lại âu lo và nằm xuống thôi...", tracks: ["dippermouth", "amazing"] }
+        "morning": { title: `Nắng Sớm Bên Hiên (Thứ ${d===0?'Chủ Nhật':d+1}) ☕`, story_title: "Tách Trà Sớm Và Tiếng Đuôi Gõ Nhịp", story: "Mở đầu ngày mới bên tách trà sớm ấm áp và ngọt lành của bé cưng.", intro: "Chào cô/chú nhé! Sớm hôm nay ở Bình Hưng thật [thời tiết] đúng không? Tina đã dọn sẵn đĩa nhạc...", tracks: ["tina_morning_01"] },
+        "afternoon": { title: `Góc Khuất Bình Yên (Thứ ${d===0?'Chủ Nhật':d+1}) 🍃`, story_title: "Nắng Trưa Đậu Trên Bộ Lông Khô Ráo", story: "Góc nằm lười trưa nắng bên cửa sổ đón ngọn gió mát lành.", intro: "Tina chào cả nhà nhé! Tiết trời trưa nay Bình Hưng đang [thời tiết], cùng nghe nhạc thư giãn nhé...", tracks: ["tina_afternoon_01"] },
+        "evening": { title: `Đèn Vàng Vĩ Tuyến (Thứ ${d===0?'Chủ Nhật':d+1}) 🌙`, story_title: "Đèn Đêm Vàng Và Giấc Mộng Màu Xanh", story: "Ánh đèn đêm ấm áp vang lên bản jazz êm đềm xoa dịu những nhọc nhằn.", intro: "cô/chú ơi, buổi tối Bình Hưng có chút [thời tiết] rồi đấy, gác lại âu lo và nằm xuống thôi...", tracks: ["tina_evening_01"] }
       };
     }
 
@@ -2069,11 +2069,9 @@ const getCategoryLabel = (cat: string) => {
       }
       
       const fallbackTracks = [
-        { id: "dippermouth", title: "Dipper Mouth Blues (1923) 🎷", artist: "King Oliver's Creole Jazz Band", url: "https://upload.wikimedia.org/wikipedia/commons/f/ff/King_Oliver%27s_Creole_Jazz_Band_-_Dippermouth_Blues_%281923%29.ogg", duration: 180 },
-        { id: "gutbucket", title: "Gut Bucket Blues (1925) 🎺", artist: "Louis Armstrong's Hot Five", url: "https://upload.wikimedia.org/wikipedia/commons/3/30/Louis_Armstrong%27s_Hot_Five_-_Gut_Bucket_Blues_%281925%29.ogg", duration: 180 },
-        { id: "margie", title: "Margie (1920) 🎹", artist: "Max Fells' Della Robbia Orchestra", url: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Margie_%281920%29_performed_by_Max_Fells%27_Della_Robbia_Orchestra.oga", duration: 180 },
-        { id: "christmas", title: "Christmas Time is Here ❄️", artist: "The Airmen of Note", url: "https://upload.wikimedia.org/wikipedia/commons/e/e7/01-The_Airmen_of_Note-Christmas_Time_is_Here-Good_King_Wenceslas_and_His_Merry_Band.mp3", duration: 245 },
-        { id: "amazing", title: "Amazing Grace ✨", artist: "The Airmen of Note", url: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Amazing_Grace_%28USAFB_jazz_vocal%29.ogg", duration: 385 }
+        { id: "tina_morning_01", title: "Airmail Special ✈️", artist: "U.S. Air Force Band", url: "https://upload.wikimedia.org/wikipedia/commons/d/de/Airmail_Special_-_Airmen_of_Note.mp3", duration: 199 },
+        { id: "tina_afternoon_01", title: "Stardust 🌟", artist: "U.S. Army Blues", url: "https://upload.wikimedia.org/wikipedia/commons/2/29/US_Army_Blues_-_05_-_Stardust.ogg", duration: 205 },
+        { id: "tina_evening_01", title: "Amazing Grace ✨ (Vocal)", artist: "U.S. Air Force Band", url: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Amazing_Grace_%28USAFB_jazz_vocal%29.ogg", duration: 385 }
       ];
       initPlaylist(fallbackTracks, fallbackPlaylists, weather);
     }

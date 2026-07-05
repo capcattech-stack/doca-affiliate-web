@@ -1,0 +1,759 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Supabase Credentials (ở phạm vi build-time)
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+
+// Trình sinh đường dẫn tĩnh (SSG) cho tất cả câu hỏi tại thời điểm build
+export async function getStaticPaths() {
+  const sUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+  const sKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+  
+  let list: any[] = [];
+  
+  if (sUrl && sKey) {
+    try {
+      const res = await fetch(`${sUrl}/rest/v1/quizzes?select=*`, {
+        headers: {
+          'apikey': sKey,
+          'Authorization': `Bearer ${sKey}`
+        }
+      });
+      if (res.ok) {
+        list = await res.json();
+      }
+    } catch (err) {
+      console.warn("Failed to fetch quizzes from Supabase at build time, using static JSON fallback", err);
+    }
+  }
+
+  // Fallback về file JSON tĩnh nếu DB chưa có hoặc lỗi
+  if (list.length === 0) {
+    const localQuizzes = (await import('../../data/quizzes.json')).default;
+    list = localQuizzes;
+  }
+
+  return list.map((quiz) => ({
+    params: { slug: quiz.slug },
+    props: { quiz },
+  }));
+}
+
+const { quiz: rawQuiz } = Astro.props;
+
+// Chuẩn hóa cấu trúc để tương thích cả snake_case từ DB và camelCase từ JSON
+const quiz = {
+  slug: rawQuiz.slug,
+  question: rawQuiz.question,
+  options: typeof rawQuiz.options === 'string' ? JSON.parse(rawQuiz.options) : rawQuiz.options,
+  correctAnswer: rawQuiz.correct_answer !== undefined ? rawQuiz.correct_answer : rawQuiz.correctAnswer,
+  explanation: rawQuiz.explanation,
+  ogImage: rawQuiz.og_image !== undefined ? rawQuiz.og_image : rawQuiz.ogImage
+};
+
+// Trích xuất ảnh xem trước (ogImage) của câu đố để đẩy vào header Layout
+const ogImage = quiz.ogImage || '/images/brand/symbol-green.png';
+const pageTitle = `${quiz.question} | Doca Quiz 🐾`;
+const pageDescription = `Thử tài hiểu biết cùng Tina: ${quiz.question} Tham gia trả lời câu hỏi trắc nghiệm thú vị này nhé.`;
+---
+
+<Layout title={pageTitle} description={pageDescription} ogImage={ogImage}>
+  <!-- Inject credentials sang clientside -->
+  <script is:inline define:vars={{ supabaseUrl, supabaseKey }}>
+    window.PUBLIC_SUPABASE_URL = supabaseUrl;
+    window.PUBLIC_SUPABASE_ANON_KEY = supabaseKey;
+  </script>
+
+  <main class="quiz-view">
+    <div class="container quiz-container">
+      <a href="/" class="back-link">
+        <i class="ph-light ph-arrow-left"></i> Trở về trang chủ
+      </a>
+
+      <!-- HỘP CÂU HỎI CHÍNH (Quiz Card) -->
+      <section class="cozy-card quiz-card" id="quiz-main-card">
+        <div class="quiz-card-header">
+          <span class="quiz-badge">
+            <i class="ph-light ph-sparkles"></i> Tina's Quiz Station
+          </span>
+        </div>
+
+        <h1 class="quiz-question-text">{quiz.question}</h1>
+        <p class="quiz-helper">Nhấp chọn phương án cô/chú tin là chính xác nhất nhé:</p>
+
+        <!-- Danh sách các tùy chọn -->
+        <div class="options-group" role="radiogroup" aria-label="Các phương án trả lời">
+          {quiz.options.map((option, idx) => (
+            <label class="option-label" data-index={idx}>
+              <input type="radio" name="quiz-option" value={idx} class="option-radio-input" />
+              <div class="option-card">
+                <span class="option-bullet">
+                  <i class="ph-light ph-circle option-bullet-unselected"></i>
+                  <i class="ph-fill ph-check-circle option-bullet-selected" style="display: none;"></i>
+                </span>
+                <span class="option-text">{option}</span>
+              </div>
+            </label>
+          ))}
+        </div>
+
+        <!-- Nút gửi câu trả lời -->
+        <button id="submit-answer-btn" class="cozy-btn btn-primary" disabled>
+          Gửi câu trả lời <i class="ph-light ph-paper-plane-right"></i>
+        </button>
+      </section>
+
+      <!-- MÀN HÌNH KẾT QUẢ GIẢI MÃ (Result Container) -->
+      <section class="cozy-card result-card" id="quiz-result-card" style="display: none;">
+        <div class="result-header text-center">
+          <div id="result-icon-container" class="result-icon-bubble">
+            <!-- Sẽ được điền bằng JS: Sparkles (đúng) hoặc SmileySad (sai) -->
+          </div>
+          <h2 id="result-title-text" class="headline-large">Kết quả</h2>
+          <div class="user-choice-summary">
+            Lựa chọn của bạn: <strong id="user-selected-answer-text"></strong>
+          </div>
+        </div>
+
+        <!-- Lời bình phẩm của Tina -->
+        <div class="tina-explanation-box">
+          <div class="tina-author-info">
+            <img src="/images/brand/symbol-green.png" alt="Tina avatar" class="tina-avatar" />
+            <div>
+              <div class="tina-name">Host Tina 🌸</div>
+              <div class="tina-role">Người chữa lành tâm hồn Doca</div>
+            </div>
+          </div>
+          <div class="tina-story-content">
+            <i class="ph-fill ph-quotes" style="font-size: 1.5rem; color: var(--cozy-border-light); opacity: 0.5;"></i>
+            <p id="tina-explanation-text">{quiz.explanation}</p>
+          </div>
+        </div>
+
+        <!-- Các nút hành động CTA -->
+        <div class="result-cta-group">
+          <a href="/#cozy-audio-player" class="cozy-btn btn-primary">
+            <i class="ph-light ph-music-notes"></i> Ghé Trạm Nhạc Tina
+          </a>
+          <a href="/product" class="cozy-btn btn-secondary">
+            <i class="ph-light ph-gift"></i> Khám Phá Kệ Quà Cho Boss
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <!-- LỚP CHẶN THU THẬP LEAD EMAIL (Lead Capture Modal Overlay) -->
+    <div id="lead-modal-overlay" class="modal-overlay" style="display: none;">
+      <div class="modal-box cozy-card">
+        <div class="modal-illustration">
+          <i class="ph-light ph-envelope-open" style="font-size: 3rem; color: var(--cozy-green-matcha-forest);"></i>
+        </div>
+        <h3 class="title-large text-center">Giải Mã Từ Tina 🌸</h3>
+        <p class="modal-desc text-center">
+          Để nhận đáp án chính xác cùng lời giảng giải chi tiết của host Tina, cô/chú vui lòng nhập email nhé.
+        </p>
+
+        <form id="lead-capture-form" class="modal-form" onsubmit="return false;">
+          <div class="input-wrapper">
+            <i class="ph-light ph-envelope input-icon"></i>
+            <input 
+              type="email" 
+              id="lead-email-input" 
+              placeholder="Nhập địa chỉ email của cô/chú..." 
+              required 
+            />
+          </div>
+          <p id="email-validation-error" class="error-text" style="display: none;">
+            <i class="ph-light ph-warning-circle"></i> Định dạng email chưa đúng rồi ạ.
+          </p>
+
+          <div class="modal-actions">
+            <button type="button" id="modal-back-btn" class="cozy-btn btn-secondary">
+              Xem lại câu đố
+            </button>
+            <button type="submit" id="modal-submit-btn" class="cozy-btn btn-primary">
+              Xem kết quả <i class="ph-light ph-sparkles"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<!-- CLIENT-SIDE LOGIC -->
+<script define:vars={{ slug: quiz.slug, correctAnswerIndex: quiz.correctAnswer, options: quiz.options }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const supabaseUrl = window.PUBLIC_SUPABASE_URL || '';
+    const supabaseKey = window.PUBLIC_SUPABASE_ANON_KEY || '';
+
+    // State Variables
+    let selectedOptionIdx = null;
+
+    // DOM Elements
+    const optionLabels = document.querySelectorAll('.option-label');
+    const submitAnswerBtn = document.getElementById('submit-answer-btn');
+    
+    const leadModalOverlay = document.getElementById('lead-modal-overlay');
+    const leadEmailInput = document.getElementById('lead-email-input');
+    const emailValidationError = document.getElementById('email-validation-error');
+    const modalBackBtn = document.getElementById('modal-back-btn');
+    const leadCaptureForm = document.getElementById('lead-capture-form');
+    const modalSubmitBtn = document.getElementById('modal-submit-btn');
+
+    const quizMainCard = document.getElementById('quiz-main-card');
+    const quizResultCard = document.getElementById('quiz-result-card');
+    const resultIconContainer = document.getElementById('result-icon-container');
+    const resultTitleText = document.getElementById('result-title-text');
+    const userSelectedAnswerText = document.getElementById('user-selected-answer-text');
+
+    // 1. Handle Option Selection
+    optionLabels.forEach(label => {
+      label.addEventListener('click', (e) => {
+        // Gỡ bỏ class active trên tất cả option khác
+        optionLabels.forEach(l => {
+          l.classList.remove('selected');
+          l.querySelector('.option-bullet-unselected').style.display = 'inline-block';
+          l.querySelector('.option-bullet-selected').style.display = 'none';
+        });
+
+        // Đánh dấu active cho option hiện tại
+        label.classList.add('selected');
+        label.querySelector('.option-bullet-unselected').style.display = 'none';
+        label.querySelector('.option-bullet-selected').style.display = 'inline-block';
+
+        // Lấy chỉ mục đã chọn
+        selectedOptionIdx = parseInt(label.getAttribute('data-index'), 10);
+        
+        // Kích hoạt nút submit
+        submitAnswerBtn.removeAttribute('disabled');
+      });
+    });
+
+    // 2. Click Submit Answer (Open Modal Lock)
+    submitAnswerBtn.addEventListener('click', () => {
+      if (selectedOptionIdx === null) return;
+      leadModalOverlay.style.display = 'flex';
+      leadEmailInput.focus();
+    });
+
+    // 3. Back Button on Modal
+    modalBackBtn.addEventListener('click', () => {
+      leadModalOverlay.style.display = 'none';
+    });
+
+    // 4. Handle Lead Email Submission
+    leadCaptureForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = leadEmailInput.value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      // Validate Email Format
+      if (!emailRegex.test(email)) {
+        emailValidationError.style.display = 'block';
+        return;
+      }
+      emailValidationError.style.display = 'none';
+
+      // Trích xuất các tham số UTM tiếp thị từ URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmSource = urlParams.get('utm_source') || 'organic';
+      const utmMedium = urlParams.get('utm_medium') || 'organic';
+      const utmCampaign = urlParams.get('utm_campaign') || 'organic';
+
+      // Show Loading Spinner on Button
+      modalSubmitBtn.setAttribute('disabled', 'true');
+      modalSubmitBtn.innerHTML = 'Đang xử lý... <i class="ph-light ph-circle-notch spinner-icon"></i>';
+
+      // Lưu trữ kết quả gửi
+      let submitSuccess = false;
+
+      try {
+        if (supabaseUrl && supabaseKey) {
+          // Gửi dữ liệu lead lên Supabase
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
+
+          const res = await fetch(`${supabaseUrl}/rest/v1/quiz_leads`, {
+            method: 'POST',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              email: email,
+              quiz_slug: slug,
+              selected_option: selectedOptionIdx,
+              utm_source: utmSource,
+              utm_medium: utmMedium,
+              utm_campaign: utmCampaign
+            }),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            submitSuccess = true;
+          }
+        }
+      } catch (err) {
+        console.warn("Lỗi lưu trữ dữ liệu Supabase, kích hoạt giải pháp sao lưu cục bộ (Local Backup)", err);
+      }
+
+      // Sao lưu cục bộ LocalStorage phòng khi mất mạng/sập DB (UX-first recovery)
+      try {
+        const localSubmissions = JSON.parse(localStorage.getItem('quiz_submissions') || '[]');
+        localSubmissions.push({
+          email,
+          quiz_slug: slug,
+          selected_option: selectedOptionIdx,
+          utm_source: utmSource,
+          utm_medium: utmMedium,
+          utm_campaign: utmCampaign,
+          timestamp: new Date().toISOString(),
+          synced: submitSuccess
+        });
+        localStorage.setItem('quiz_submissions', JSON.stringify(localSubmissions));
+      } catch (e) {
+        console.error("Không thể lưu localStorage", e);
+      }
+
+      // Bật Toast thông báo dễ thương
+      if (typeof window.showToast === 'function') {
+        window.showToast("Cảm ơn cô/chú! Tina đang mở khóa đáp án...");
+      }
+
+      // Xử lý mở khóa kết quả
+      revealResult();
+    });
+
+    // 5. Reveal Result Screen
+    function revealResult() {
+      // Đóng modal
+      leadModalOverlay.style.display = 'none';
+
+      // Ẩn hộp câu đố chính, hiển thị hộp kết quả
+      quizMainCard.style.display = 'none';
+      quizResultCard.style.display = 'block';
+
+      const isCorrect = (selectedOptionIdx === correctAnswerIndex);
+      
+      // Điền nội dung lựa chọn của người dùng
+      userSelectedAnswerText.innerText = options[selectedOptionIdx] || '';
+
+      if (isCorrect) {
+        // Correct Answer
+        resultIconContainer.innerHTML = '<i class="ph-light ph-sparkles" style="color: #4A8A2E; font-size: 2rem;"></i>';
+        resultIconContainer.style.background = 'var(--cozy-success)';
+        resultTitleText.innerText = 'Chúc mừng! Bạn đã trả lời chính xác 🎉';
+        resultTitleText.style.color = 'var(--cozy-green-matcha-forest)';
+      } else {
+        // Incorrect Answer
+        resultIconContainer.innerHTML = '<i class="ph-light ph-smiley-sad" style="color: #B8860A; font-size: 2rem;"></i>';
+        resultIconContainer.style.background = 'var(--cozy-warning)';
+        resultTitleText.innerText = 'Chưa chính xác mất rồi... 🐾';
+        resultTitleText.style.color = 'var(--cozy-wood-sugi)';
+        
+        // Hiển thị thêm đáp án đúng ở lời bình
+        const correctText = options[correctAnswerIndex];
+        const userChoiceSummary = document.querySelector('.user-choice-summary');
+        userChoiceSummary.innerHTML = `
+          Lựa chọn của bạn: <del style="color: #6E6E73;">${options[selectedOptionIdx]}</del><br/>
+          Đáp án đúng của Tina: <strong style="color: var(--cozy-green-matcha-forest);">${correctText}</strong>
+        `;
+      }
+
+      // Cuộn mượt lên đầu thẻ kết quả
+      quizResultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+</script>
+
+<style>
+  /* --- PHONG CÁCH BỐ CỤC CHUNG COZY --- */
+  .quiz-view {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    background: radial-gradient(circle at 10% 20%, rgba(245,237,213,0.4) 0%, rgba(232,227,214,0.3) 90%);
+  }
+
+  .quiz-container {
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--cozy-wood-sugi);
+    text-decoration: none;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .back-link:hover {
+    transform: translateX(-4px);
+    color: var(--cozy-text-obsidian);
+  }
+
+  /* --- THẺ CÂU HỎI TRẮC NGHIỆM --- */
+  .quiz-card {
+    background: var(--cozy-bg-pure);
+    border: 1.5px solid var(--cozy-border-light);
+    border-radius: var(--radius-card);
+    padding: 2.5rem;
+    box-shadow: var(--cozy-shadow-default);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .quiz-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--cozy-bg-cream-warm);
+    color: var(--cozy-green-matcha-forest);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-tag);
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(74, 138, 46, 0.15);
+  }
+
+  .quiz-question-text {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.75rem;
+  }
+
+  .quiz-helper {
+    font-size: 0.95rem;
+    color: #6E6E73;
+    margin-bottom: 1.75rem;
+  }
+
+  /* --- CÁC THẺ PHƯƠNG ÁN LỰA CHỌN --- */
+  .options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .option-label {
+    cursor: pointer;
+  }
+
+  .option-radio-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .option-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--cozy-bg-beige);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-card);
+    padding: 1.25rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .option-label:hover .option-card {
+    background: var(--cozy-bg-cream-warm);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(21, 23, 15, 0.03);
+  }
+
+  /* Trạng thái được chọn */
+  .option-label.selected .option-card {
+    background: var(--cozy-bg-pure);
+    border-color: var(--cozy-green-matcha);
+    box-shadow: 0 4px 16px rgba(143, 191, 79, 0.12);
+  }
+
+  .option-bullet {
+    font-size: 1.35rem;
+    color: var(--cozy-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .option-label.selected .option-bullet {
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .option-text {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--cozy-text-obsidian);
+    line-height: 1.4;
+  }
+
+  /* --- NÚT BẤM DẠNG COZY --- */
+  .cozy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.95rem 1.8rem;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    width: 100%;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--cozy-green-matcha-forest);
+    color: #FFFFFF;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--cozy-green-matcha-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 138, 46, 0.2);
+  }
+
+  .btn-primary:disabled {
+    background: var(--cozy-border-light);
+    color: rgba(21, 23, 15, 0.35);
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: var(--cozy-bg-beige);
+    color: var(--cozy-text-obsidian);
+    border: 1.5px solid var(--cozy-border-light);
+  }
+
+  .btn-secondary:hover {
+    background: var(--cozy-bg-oatmeal);
+  }
+
+  /* --- THẺ HIỂN THỊ KẾT QUẢ --- */
+  .result-card {
+    background: var(--cozy-bg-pure);
+    border: 1.5px solid var(--cozy-border-light);
+    border-radius: var(--radius-card);
+    padding: 2.5rem;
+    box-shadow: var(--cozy-shadow-hover);
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .result-icon-bubble {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+  }
+
+  .user-choice-summary {
+    background: var(--cozy-bg-beige);
+    border-radius: var(--radius-tag);
+    padding: 0.85rem;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* Hộp bình phẩm của Tina (Phong cách Iyashikei) */
+  .tina-explanation-box {
+    margin: 2rem 0;
+    border-left: 3px solid var(--cozy-green-matcha);
+    padding-left: 1.5rem;
+    background: rgba(245, 237, 213, 0.25);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+    padding: 1.5rem;
+  }
+
+  .tina-author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .tina-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--cozy-green-matcha);
+    background: white;
+  }
+
+  .tina-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--cozy-text-obsidian);
+  }
+
+  .tina-role {
+    font-size: 0.75rem;
+    color: #6E6E73;
+  }
+
+  .tina-story-content {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--cozy-text-obsidian);
+    font-style: italic;
+  }
+
+  .result-cta-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    .result-cta-group {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* --- LỚP CHẶN MODAL THU THẬP LEAD --- */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(21, 23, 15, 0.45);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: fadeIn 0.25s ease-out;
+  }
+
+  .modal-box {
+    background: var(--cozy-bg-pure);
+    border: 1.5px solid var(--cozy-border-light);
+    border-radius: var(--radius-card);
+    padding: 2.25rem;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .modal-illustration {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-desc {
+    font-size: 0.95rem;
+    color: #6E6E73;
+    line-height: 1.5;
+    margin: 0.75rem 0 1.5rem 0;
+  }
+
+  .modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--cozy-wood-sugi);
+    font-size: 1.2rem;
+  }
+
+  .modal-form input[type="email"] {
+    width: 100%;
+    padding: 0.95rem 1rem 0.95rem 2.75rem;
+    border-radius: var(--radius-button);
+    border: 1.5px solid var(--cozy-border-light);
+    background: var(--cozy-bg-beige);
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--cozy-text-obsidian);
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .modal-form input[type="email"]:focus {
+    border-color: var(--cozy-green-matcha);
+    background: var(--cozy-bg-pure);
+    box-shadow: 0 0 0 3px rgba(143, 191, 79, 0.15);
+  }
+
+  .error-text {
+    font-size: 0.85rem;
+    color: #C470A0; /* Sakura Mauve / semantic error */
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+  }
+
+  .modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  /* --- HIỆU ỨNG ĐỘNG (Animations) --- */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleUp {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .spinner-icon {
+    animation: rotate 1s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>

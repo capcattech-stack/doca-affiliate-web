@@ -4,11 +4,13 @@ import '../styles/global.css';
 interface Props {
 	title?: string;
 	description?: string;
+	ogImage?: string;
 }
 
 const { 
 	title = "DOCA - Sống Chậm Cùng Thú Cưng", 
-	description = "Nơi cùng chú thú cưng của bạn sống chậm mỗi ngày, chia sẻ yêu thương và nuôi dưỡng những ký ức chữa lành." 
+	description = "Nơi cùng chú thú cưng của bạn sống chậm mỗi ngày, chia sẻ yêu thương và nuôi dưỡng những ký ức chữa lành.",
+	ogImage = "/images/brand/symbol-green.png"
 } = Astro.props;
 
 const googleAnalyticsId = import.meta.env.PUBLIC_GA_ID || 'G-0RCGZRPEGR';
@@ -30,14 +32,14 @@ const googleAnalyticsId = import.meta.env.PUBLIC_GA_ID || 'G-0RCGZRPEGR';
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content="/images/brand/symbol-green.png" />
+		<meta property="og:image" content={ogImage} />
 		<meta property="og:locale" content="vi_VN" />
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content="/images/brand/symbol-green.png" />
+		<meta property="twitter:image" content={ogImage} />
 
 		<!-- Google Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">

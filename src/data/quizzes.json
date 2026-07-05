@@ -1,0 +1,28 @@
+[
+  {
+    "slug": "meo-hieu-tieng-nguoi-khong",
+    "question": "Mèo của bạn có thực sự hiểu tiếng người không?",
+    "options": [
+      "Không hề, chúng chỉ nghe thấy các tần số âm thanh vô nghĩa.",
+      "Có, chúng hiểu khoảng 20-50 từ và biểu cảm giọng điệu của Sen.",
+      "Chúng hiểu hết tất cả nhưng luôn giả vờ như không nghe thấy.",
+      "Chỉ hiểu khi bạn gọi tên món ăn hoặc pate yêu thích."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Các nghiên cứu khoa học cho thấy mèo có khả năng nhận diện tên riêng và hiểu được một số từ ngữ quen thuộc cùng sắc thái giọng nói của chủ nuôi. Tuy nhiên, do đặc tính độc lập, chúng thường phản hồi rất khẽ (nhúc nhích tai, vẫy nhẹ đuôi) thay vì chạy lại vồ vập như cún. Đừng buồn nếu bé có vẻ lờ bạn đi nhé, bé vẫn đang lắng nghe đấy!",
+    "ogImage": "/images/quizzes/meo-hieu-tieng-nguoi-khong.png"
+  },
+  {
+    "slug": "tai-sao-meo-thich-hop-giay",
+    "question": "Tại sao mèo lại có niềm đam mê mãnh liệt với hộp giấy?",
+    "options": [
+      "Vì hộp giấy giúp chúng giảm căng thẳng và cảm thấy an toàn.",
+      "Vì chúng thích mài móng và cắn xé chất liệu carton.",
+      "Vì nhiệt độ trong hộp giúp giữ ấm cơ thể mèo rất tốt.",
+      "Cả A và C đều đúng."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Nghiên cứu từ Đại học Utrecht cho thấy hộp giấy giúp mèo thích nghi nhanh hơn với môi trường mới và giảm đáng kể nồng độ stress. Ngoài ra, chất liệu carton là chất cách nhiệt tuyệt vời, giúp duy trì nhiệt độ cơ thể lý tưởng của mèo (khoảng 38-39°C). Vì vậy, một chiếc hộp giấy cũ chính là pháo đài bình yên nhất của bé!",
+    "ogImage": "/images/quizzes/tai-sao-meo-thich-hop-giay.png"
+  }
+]

@@ -79,6 +79,12 @@ const pageDescription = `Thử tài hiểu biết cùng Tina: ${quiz.question} T
           </span>
         </div>
 
+        {quiz.ogImage && (
+          <div class="quiz-cover-container">
+            <img src={ogImage} alt={quiz.question} class="quiz-cover-img" />
+          </div>
+        )}
+
         <h1 class="quiz-question-text">{quiz.question}</h1>
         <p class="quiz-helper">Nhấp chọn phương án cô/chú tin là chính xác nhất nhé:</p>
 
@@ -415,6 +421,23 @@ const pageDescription = `Thử tài hiểu biết cùng Tina: ${quiz.question} T
     box-shadow: var(--cozy-shadow-default);
     position: relative;
     overflow: hidden;
+  }
+
+  .quiz-cover-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--cozy-border-light);
+    background-color: var(--cozy-bg-beige);
+  }
+
+  .quiz-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .quiz-badge {

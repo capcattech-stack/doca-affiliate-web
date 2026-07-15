@@ -282,3 +282,195 @@ h3, .title-large {
   border-color: var(--cozy-green-matcha);
   transform: translateY(-2px);
 }
+
+/* --- GOOGLE AUTHENTICATION INTEGRATION V2 --- */
+
+/* Nút kết nối Google trên Navbar Desktop */
+.nav-auth-container {
+  display: flex;
+  align-items: center;
+  margin-left: 1.25rem;
+}
+
+.nav-google-btn-circular {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--cozy-border-light);
+  background-color: var(--cozy-bg-pure);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 1.5px 3px rgba(21, 23, 15, 0.03);
+  padding: 0;
+}
+
+.nav-google-btn-circular:hover {
+  background-color: var(--cozy-bg-beige);
+  border-color: var(--cozy-text-obsidian);
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(21, 23, 15, 0.08);
+}
+
+.nav-google-btn-circular:active {
+  transform: scale(0.96);
+}
+
+/* Avatar trên Navbar Desktop */
+.nav-avatar-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--cozy-border-light);
+  box-shadow: 0 2px 5px rgba(21, 23, 15, 0.04);
+  transition: all 0.25s ease;
+}
+
+.nav-avatar-link:hover {
+  transform: scale(1.05);
+  border-color: var(--cozy-green-matcha);
+  box-shadow: 0 3px 8px rgba(143, 191, 79, 0.15);
+}
+
+.nav-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Navbar Auth trên Mobile */
+.nav-auth-container-mobile {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--cozy-border-light);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-nav-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cozy-bg-pure);
+  background-color: var(--cozy-text-charcoal);
+  border: 1px solid var(--cozy-text-charcoal);
+  padding: 0.75rem;
+  border-radius: var(--radius-button);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-google-btn i {
+  font-size: 1.25rem;
+}
+
+.mobile-nav-google-btn:hover {
+  opacity: 0.9;
+}
+
+.mobile-nav-auth-user {
+  width: 100%;
+}
+
+.mobile-avatar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--cozy-text-obsidian);
+  background-color: var(--cozy-bg-pure);
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--cozy-border-light);
+}
+
+.mobile-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--cozy-border-light);
+}
+
+.mobile-avatar-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* --- GOOGLE QUICK CONNECT FOR EMAIL INPUTS --- */
+
+.cozy-email-input-wrapper {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+
+/* Đảm bảo input email khi bọc bằng wrapper luôn có width 100% và khoảng cách phải */
+.cozy-email-input-wrapper input[type="email"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 44px !important; /* Chừa khoảng trống bên phải để placeholder/text không bị đè lên nút Google */
+}
+
+.google-quick-connect-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--cozy-border-light);
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1.5px 3px rgba(21, 23, 15, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  z-index: 10;
+}
+
+.google-quick-connect-btn:hover {
+  background-color: var(--cozy-bg-beige);
+  border-color: var(--cozy-text-obsidian);
+  box-shadow: 0 3px 6px rgba(21, 23, 15, 0.08);
+  transform: translateY(-50%) scale(1.04);
+}
+
+.google-quick-connect-btn:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.email-verified-badge {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Kiểu dáng cho input email khi đã kết nối */
+input[type="email"].readonly-connected {
+  background-color: #F7F9F6 !important;
+  border-color: rgba(142, 172, 137, 0.6) !important;
+  color: #4A5D4E !important;
+  cursor: not-allowed;
+}
+

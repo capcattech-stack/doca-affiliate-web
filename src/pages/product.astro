@@ -222,6 +222,8 @@ const getCategoryLabel = (cat: string) => {
             <a href="/#blog-section" class="nav-link-text">Blog</a>
           </div>
 
+          <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
+
           <!-- Hamburger toggle -->
           <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
             <span></span>
@@ -237,6 +239,7 @@ const getCategoryLabel = (cat: string) => {
           <a href="/family" class="mobile-menu-link"><i class="ph-light ph-users"></i> Gia đình</a>
           <a href="/about" class="mobile-menu-link"><i class="ph-light ph-info"></i> About Us</a>
           <a href="/#blog-section" class="mobile-menu-link"><i class="ph-light ph-book-open"></i> Blog</a>
+          <div id="nav-auth-container-mobile" class="nav-auth-container-mobile"></div>
         </div>
       </div>
     </nav>
@@ -436,7 +439,7 @@ const getCategoryLabel = (cat: string) => {
   }
 
   .mobile-menu.active {
-    max-height: 250px;
+    max-height: 380px;
     opacity: 1;
   }
 

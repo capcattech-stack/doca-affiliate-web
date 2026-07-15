@@ -97,6 +97,9 @@ const googleAnalyticsId = import.meta.env.PUBLIC_GA_ID || 'G-0RCGZRPEGR';
 		</div>
 
 		<script>
+			import { initNavbarAuth } from '../scripts/navbarAuth';
+			import { setupGoogleQuickConnect } from '../scripts/formAuth';
+
 			declare global {
 				interface Window {
 					showToast: (message: string) => void;
@@ -121,6 +124,10 @@ const googleAnalyticsId = import.meta.env.PUBLIC_GA_ID || 'G-0RCGZRPEGR';
 					}, 4000);
 				}
 			}
+
+			// Khởi động các tính năng xác thực toàn cục
+			initNavbarAuth();
+			setupGoogleQuickConnect();
 		</script>
 	</body>
 </html>

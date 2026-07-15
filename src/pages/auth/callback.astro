@@ -1,0 +1,66 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Đang kết nối tài khoản... | DOCA" description="Vui lòng chờ trong giây lát trong khi chúng tôi kết nối tài khoản Google của bạn.">
+  <main class="auth-callback-view">
+    <div class="container text-center">
+      <div class="loading-spinner-wrapper">
+        <i class="ph-light ph-spinner-gap spin" style="font-size: 3.5rem; color: var(--cozy-green-matcha-forest);"></i>
+      </div>
+      <h2 class="title-large">Đang kết nối tài khoản...</h2>
+      <p class="whisper-mono">"Tụi con đang chuẩn bị bậu cửa ấm áp cho cô/chú bước vào..."</p>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { getSupabase } from '../../scripts/supabase';
+
+  const client = getSupabase();
+
+  if (client) {
+    // Chờ session được thiết lập
+    client.auth.onAuthStateChange((event: string, session: any) => {
+      if (event === 'SIGNED_IN' || session) {
+        const redirectTo = localStorage.getItem('auth_redirect_origin') || '/';
+        localStorage.removeItem('auth_redirect_origin');
+        
+        // Chuyển hướng người dùng quay trở lại trang gốc
+        window.location.href = redirectTo;
+      }
+    });
+  }
+
+  // Phòng trường hợp không kích hoạt event (đã có session hoặc lỗi)
+  setTimeout(() => {
+    const redirectTo = localStorage.getItem('auth_redirect_origin') || '/';
+    localStorage.removeItem('auth_redirect_origin');
+    window.location.href = redirectTo;
+  }, 2500);
+</script>
+
+<style>
+  .auth-callback-view {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cozy-bg-beige);
+  }
+  .loading-spinner-wrapper {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+  }
+  .spin {
+    animation: spin 1.2s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .text-center {
+    text-align: center;
+  }
+</style>

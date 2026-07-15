@@ -1,0 +1,268 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Hồ Sơ Của Bạn | DOCA" description="Hồ sơ cá nhân và thông tin kết nối tài khoản trên ngôi nhà DOCA.">
+  <main class="profile-view">
+    <div class="profile-page-container">
+      <!-- Khu vực nút quay lại đồng bộ với các trang khác -->
+      <div class="profile-nav-header">
+        <a href="/" class="back-link"><i class="ph-light ph-arrow-left"></i> Trở về trang chủ</a>
+      </div>
+
+      <!-- Khu vực Card hồ sơ căn giữa màn hình -->
+      <div class="profile-card-wrapper">
+        <!-- Card Loading -->
+        <div class="profile-card text-center" id="profile-card-loading">
+          <div class="spinner-wrapper">
+            <i class="ph-light ph-spinner-gap spin" style="font-size: 2rem; color: var(--cozy-green-matcha-forest);"></i>
+          </div>
+          <p class="whisper-mono" style="font-size: 0.85rem;">Đang tải thông tin hồ sơ...</p>
+        </div>
+
+        <!-- Card Content -->
+        <div class="profile-card text-center hidden" id="profile-card-content">
+          <div class="profile-card-header">
+            <h1>Hồ Sơ Của Bạn</h1>
+            <p>Thông tin kết nối trên ngôi nhà DOCA</p>
+          </div>
+
+          <div class="avatar-wrapper">
+            <img id="profile-avatar" src="" alt="Avatar" class="profile-avatar-img" />
+          </div>
+
+          <div class="profile-info">
+            <h2 id="profile-name" class="profile-name">Người dùng Google</h2>
+            <p id="profile-email" class="profile-email-text"></p>
+          </div>
+
+          <div class="profile-status-badge">
+            <i class="ph-fill ph-check-circle" style="color: var(--cozy-green-matcha-forest);"></i> Đã kết nối Google
+          </div>
+
+          <div class="profile-actions">
+            <button id="profile-logout-btn" class="logout-btn">
+              Ngắt kết nối tài khoản <i class="ph-light ph-sign-out"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { getSupabase, logout } from '../scripts/supabase';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const loadingCard = document.getElementById('profile-card-loading');
+    const contentCard = document.getElementById('profile-card-content');
+    const avatarImg = document.getElementById('profile-avatar') as HTMLImageElement;
+    const nameEl = document.getElementById('profile-name');
+    const emailEl = document.getElementById('profile-email');
+    const logoutBtn = document.getElementById('profile-logout-btn');
+
+    const client = getSupabase();
+    if (!client) {
+      window.location.href = '/';
+      return;
+    }
+
+    // Kiểm tra session hiện tại
+    client.auth.getSession().then(({ data: { session } }: any) => {
+      const user = session?.user;
+      if (!user) {
+        // Chưa đăng nhập, chuyển hướng về trang chủ
+        window.location.href = '/';
+        return;
+      }
+
+      // Đã đăng nhập, hiển thị thông tin cá nhân
+      if (avatarImg) avatarImg.src = user.user_metadata.avatar_url || '/images/default-avatar.png';
+      if (nameEl) nameEl.textContent = user.user_metadata.full_name || user.user_metadata.name || 'Người dùng Google';
+      if (emailEl) emailEl.textContent = user.email || '';
+
+      if (loadingCard) loadingCard.classList.add('hidden');
+      if (contentCard) contentCard.classList.remove('hidden');
+    }).catch((err: any) => {
+      console.error('Error fetching session on profile page:', err);
+      window.location.href = '/';
+    });
+
+    logoutBtn?.addEventListener('click', async () => {
+      await logout();
+      window.location.href = '/';
+    });
+  });
+</script>
+
+<style>
+  .profile-view {
+    padding: 3rem 1.5rem 6rem;
+    background-color: var(--cozy-bg-beige);
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .profile-page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  .profile-nav-header {
+    width: 100%;
+    margin-bottom: 2.5rem;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--cozy-text-obsidian);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+  }
+  .back-link:hover {
+    opacity: 1;
+    transform: translateX(-4px);
+    color: var(--cozy-green-matcha-forest);
+  }
+  .profile-card-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    padding-bottom: 4rem;
+  }
+  .profile-card {
+    position: relative;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 16px;
+    padding: 2.25rem 1.75rem 1.75rem;
+    box-shadow: 0 4px 16px rgba(21, 23, 15, 0.02);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 380px;
+  }
+  /* Vạt gỗ tuyết tùng ở đỉnh card tạo đặc trưng Muji ấm áp */
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background-color: var(--cozy-wood-sugi);
+  }
+  .profile-card-header h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.2rem;
+  }
+  .profile-card-header p {
+    font-size: 0.78rem;
+    color: var(--cozy-text-charcoal);
+    opacity: 0.7;
+  }
+  .avatar-wrapper {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--cozy-border-light);
+    box-shadow: 0 3px 8px rgba(21, 23, 15, 0.04);
+    background-color: var(--cozy-bg-beige);
+  }
+  .profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .profile-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+  }
+  .profile-email-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--cozy-text-charcoal);
+    opacity: 0.85;
+  }
+  .profile-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: #F1F6F0;
+    color: var(--cozy-green-matcha-forest);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border: 1px solid rgba(143, 191, 79, 0.12);
+  }
+  .profile-actions {
+    width: 100%;
+    border-top: 1px dashed var(--cozy-border-light);
+    padding-top: 1.25rem;
+    margin-top: 0.25rem;
+  }
+  .logout-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 550;
+    color: var(--cozy-text-charcoal);
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .logout-btn:hover {
+    background-color: #FFF2F2;
+    border-color: #FFC1C1;
+    color: #D32F2F;
+  }
+  .hidden {
+    display: none !important;
+  }
+  .spinner-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 0;
+  }
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .text-center {
+    text-align: center;
+  }
+</style>

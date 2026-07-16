@@ -144,54 +144,54 @@ import Layout from '../../layouts/Layout.astro';
             </div>
           </div>
 
-          <!-- Khung thêm link tiếp thị tối màu (Cozy Charcoal) -->
-          <div class="kiosk-dark-container">
+          <!-- Khung thêm link tiếp thị sáng màu (Cozy Cloud) -->
+          <div class="kiosk-light-container">
             <div class="kiosk-add-link-wrapper" style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
               <!-- Left Column: Inputs Form -->
               <div class="kiosk-add-link-form" style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 0.85rem;">
                 <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
-                  <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; margin-bottom: -0.25rem;">Link sản phẩm Shopee</label>
+                  <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; margin-bottom: -0.25rem;">Link sản phẩm Shopee</label>
                   <div style="position: relative; width: 100%;">
-                    <input type="url" id="kiosk-link-url" class="dark-input" placeholder="Dán link Shopee affiliate (ví dụ: https://shopee.vn/...)" style="font-family: inherit; padding-right: 2.25rem;" />
+                    <input type="url" id="kiosk-link-url" class="light-input" placeholder="Dán link Shopee affiliate (ví dụ: https://shopee.vn/...)" style="font-family: inherit; padding-right: 2.25rem;" />
                     <!-- Loading spinner inside URL input -->
-                    <div id="kiosk-url-loading-spinner" class="hidden" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4);">
+                    <div id="kiosk-url-loading-spinner" class="hidden" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--cozy-text-charcoal);">
                       <i class="ph-light ph-spinner-gap spin"></i>
                     </div>
                   </div>
                   
                   <div>
-                    <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Mô tả cảm xúc hoặc đánh giá</label>
-                    <input type="text" id="kiosk-link-desc" class="dark-input" placeholder="Ví dụ: Bé mèo thích mê, nằm chải cả ngày không chán..." />
+                    <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 0.35rem;">Mô tả cảm xúc hoặc đánh giá</label>
+                    <input type="text" id="kiosk-link-desc" class="light-input" placeholder="Ví dụ: Bé mèo thích mê, nằm chải cả ngày không chán..." />
                   </div>
 
                   <!-- Toggle Advanced Settings -->
                   <div style="margin-top: 0.25rem;">
-                    <button type="button" id="kiosk-toggle-advanced-btn" style="background: none; border: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
+                    <button type="button" id="kiosk-toggle-advanced-btn" style="background: none; border: none; color: var(--cozy-text-charcoal); font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
                       <span>Cấu hình nâng cao (Tên & Ảnh)</span>
                       <i id="kiosk-advanced-chevron" class="ph-light ph-caret-down"></i>
                     </button>
                   </div>
 
                   <!-- Advanced Fields Content (Collapsible) -->
-                  <div id="kiosk-advanced-fields" class="hidden" style="display: flex; flex-direction: column; gap: 0.85rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.85rem; margin-top: 0.25rem;">
+                  <div id="kiosk-advanced-fields" class="hidden" style="display: flex; flex-direction: column; gap: 0.85rem; border-top: 1px dashed var(--cozy-border-light); padding-top: 0.85rem; margin-top: 0.25rem;">
                     <div>
-                      <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Tên hiển thị sản phẩm (tự động gợi ý)</label>
-                      <input type="text" id="kiosk-link-name" class="dark-input" placeholder="Tên sản phẩm bày trên Kiosk..." />
+                      <label style="color: var(--cozy-text-charcoal); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Tên hiển thị sản phẩm (tự động gợi ý)</label>
+                      <input type="text" id="kiosk-link-name" class="light-input" placeholder="Tên sản phẩm bày trên Kiosk..." />
                     </div>
 
                     <div>
-                      <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Ảnh sản phẩm hiển thị</label>
+                      <label style="color: var(--cozy-text-charcoal); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Ảnh sản phẩm hiển thị</label>
                       <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                         <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px; min-width: 200px;">
-                          <input type="url" id="kiosk-link-image" class="dark-input" placeholder="Dán link ảnh sản phẩm (hoặc chọn nhanh gợi ý)..." style="font-size: 0.8rem;" />
+                          <input type="url" id="kiosk-link-image" class="light-input" placeholder="Dán link ảnh sản phẩm (hoặc chọn nhanh gợi ý)..." style="font-size: 0.8rem;" />
                           
                           <!-- Preset product illustration images -->
                           <div class="product-img-presets" style="display: flex; gap: 8px; margin-top: 2px; align-items: center; flex-wrap: wrap;">
-                            <span style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-right: 4px;">Chọn nhanh:</span>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/hat-dinh-duong-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Hạt Dinh Dưỡng"><img src="/images/products/hat-dinh-duong-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/luoc-massage-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Lược Massage"><img src="/images/products/luoc-massage-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/sach-meo-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Sách Tâm Lý Mèo"><img src="/images/products/sach-meo-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/den-totoro-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Đèn Totoro"><img src="/images/products/den-totoro-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                            <span style="font-size: 0.72rem; color: var(--cozy-text-charcoal); margin-right: 4px;">Chọn nhanh:</span>
+                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/hat-dinh-duong-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Hạt Dinh Dưỡng"><img src="/images/products/hat-dinh-duong-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/luoc-massage-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Lược Massage"><img src="/images/products/luoc-massage-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/sach-meo-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Sách Tâm Lý Mèo"><img src="/images/products/sach-meo-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/den-totoro-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Đèn Totoro"><img src="/images/products/den-totoro-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
                           </div>
                         </div>
                       </div>
@@ -199,20 +199,20 @@ import Layout from '../../layouts/Layout.astro';
                   </div>
                 </div>
                 <div style="display: flex; justify-content: flex-end; margin-top: 0.25rem; width: 100%;">
-                  <button id="kiosk-link-add-btn" class="dark-add-btn" style="padding: 0.65rem 1.5rem; font-weight: 600;">Add URL</button>
+                  <button id="kiosk-link-add-btn" class="light-add-btn" style="padding: 0.65rem 1.5rem; font-weight: 600;">Add URL</button>
                 </div>
               </div>
 
               <!-- Right Column: Live Preview Card -->
               <div style="width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.5rem; justify-content: flex-start; align-self: stretch;">
-                <span style="color: rgba(255,255,255,0.4); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; text-align: center;">Xem trước hiển thị</span>
-                <div class="product-card-v2" style="pointer-events: none; border-color: rgba(255,255,255,0.1); height: auto; background-color: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
-                  <div class="product-image-container" style="background-color: rgba(255,255,255,0.05);">
+                <span style="color: var(--cozy-text-charcoal); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; text-align: center;">Xem trước hiển thị</span>
+                <div class="product-card-v2" style="pointer-events: none; border-color: var(--cozy-border-light); height: auto; background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light);">
+                  <div class="product-image-container" style="background-color: var(--cozy-bg-beige);">
                     <img id="live-preview-image" src="/images/brand/symbol-green.png" class="product-image" />
                   </div>
                   <div class="product-meta">
-                    <h4 id="live-preview-title" class="product-title" style="margin-bottom: 4px; height: 2.6em; color: #fff;">Tên sản phẩm</h4>
-                    <p id="live-preview-quote" class="product-quote" style="margin-bottom: 4px; color: rgba(255,255,255,0.5);">“ Mô tả cảm xúc ”</p>
+                    <h4 id="live-preview-title" class="product-title" style="margin-bottom: 4px; height: 2.6em; color: var(--cozy-text-obsidian);">Tên sản phẩm</h4>
+                    <p id="live-preview-quote" class="product-quote" style="margin-bottom: 4px; color: var(--cozy-text-charcoal);">“ Mô tả cảm xúc ”</p>
                     <span class="platform-badge" data-platform="shopee">
                       <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" style="display: inline-block; vertical-align: -0.5px; margin-right: 3px;">
                         <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3a1 1 0 1 0-2 0c0 2.76 2.24 5 5 5s5-2.24 5-5a1 1 0 1 0-2 0c0 1.66-1.34 3-3 3z"/>
@@ -225,11 +225,14 @@ import Layout from '../../layouts/Layout.astro';
             </div>
 
             <!-- Danh sách Links sản phẩm -->
-            <div class="kiosk-links-list-container">
-              <div id="kiosk-links-list-loading" class="text-center" style="padding: 2rem; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
-                <i class="ph-light ph-spinner-gap spin" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; margin-left: auto; margin-right: auto;"></i> Đang tải danh sách liên kết...
+            <div class="kiosk-links-list-container" style="border-top: 1px solid var(--cozy-border-light); padding-top: 1.5rem; margin-top: 0.5rem;">
+              <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin-bottom: 1rem; text-align: left; display: flex; align-items: center; gap: 0.35rem;">
+                <i class="ph-light ph-list-bullets" style="font-size: 1.1rem; color: var(--cozy-green-matcha-forest);"></i> Sản phẩm đã bày bán <span id="kiosk-list-title-kios-name" style="font-weight: 550; opacity: 0.85;"></span>
+              </h3>
+              <div id="kiosk-links-list-loading" class="text-center" style="padding: 2rem; color: var(--cozy-text-charcoal); font-size: 0.85rem;">
+                <i class="ph-light ph-spinner-gap spin" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; margin-left: auto; margin-right: auto; color: var(--cozy-green-matcha-forest);"></i> Đang tải danh sách liên kết...
               </div>
-              <div id="kiosk-links-list-empty" class="text-center hidden" style="padding: 2.5rem 1.5rem; color: rgba(255,255,255,0.4); font-style: italic; font-size: 0.85rem;">
+              <div id="kiosk-links-list-empty" class="text-center hidden" style="padding: 2.5rem 1.5rem; color: var(--cozy-text-charcoal); font-style: italic; font-size: 0.85rem;">
                 Cửa hàng của bạn chưa bày sản phẩm nào. Hãy dán link Shopee ở phía trên để thêm nhé! 🐾
               </div>
               <div id="kiosk-links-list" class="kiosk-links-list">
@@ -461,6 +464,9 @@ import Layout from '../../layouts/Layout.astro';
       if (viewLink) {
         viewLink.href = `http://${window.location.hostname}:4323/${kiosk.kios_name}`;
       }
+
+      const listTitleName = document.getElementById('kiosk-list-title-kios-name');
+      if (listTitleName) listTitleName.textContent = `(${kiosk.kios_name.toLowerCase()})`;
 
       copyBtn?.addEventListener('click', () => {
         navigator.clipboard.writeText(`https://${fullUrlPath}`).then(() => {
@@ -790,27 +796,41 @@ import Layout from '../../layouts/Layout.astro';
           if (listEl) {
             listEl.innerHTML = links.map((link: any) => {
               const badgeHtml = link.status === 'rejected'
-                ? `<span class="kiosk-item-reject-badge"><i class="ph-light ph-warning-circle"></i> Bị từ chối: ${link.rejection_reason || 'Vi phạm chính sách'}</span>`
+                ? `<span class="kiosk-item-reject-badge" style="font-size: 0.68rem; padding: 2px 6px; margin-top: 4px; display: inline-flex;"><i class="ph-light ph-warning-circle"></i> Từ chối: ${link.rejection_reason || 'Vi phạm'}</span>`
                 : '';
 
               const displayImage = link.product_image_url 
-                ? `<img src="${link.product_image_url}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);" />`
-                : `<div style="width: 40px; height: 40px; border-radius: 6px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-light ph-shopping-bag" style="font-size: 1.15rem; color: rgba(255,255,255,0.6);"></i></div>`;
+                ? `<img src="${link.product_image_url}" class="product-image" style="width: 100%; height: 100%; object-fit: cover;" />`
+                : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--cozy-bg-beige);"><i class="ph-light ph-shopping-bag" style="font-size: 1.5rem; color: var(--cozy-text-charcoal); opacity: 0.5;"></i></div>`;
 
               const displayName = link.product_name || escapeHtml(link.affiliate_url);
 
               return `
-                <div class="kiosk-link-item" style="align-items: center;">
-                  <input type="checkbox" class="kiosk-item-checkbox" style="margin-top: 0;" />
-                  ${displayImage}
-                  <div style="display: flex; flex-direction: column; gap: 0.15rem; flex-grow: 1; min-width: 0; margin-left: 4px;">
-                    <a href="${link.affiliate_url}" target="_blank" class="kiosk-item-url-link" title="${link.affiliate_url}" style="font-weight: 600; font-family: inherit; font-size: 0.88rem;">${displayName}</a>
-                    ${link.description ? `<span class="kiosk-item-desc" style="font-size: 0.78rem;">“ ${escapeHtml(link.description)} ”</span>` : ''}
+                <div class="kiosk-added-card" style="background: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 12px; padding: 0.65rem; display: flex; flex-direction: column; gap: 0.5rem; position: relative; transition: all 0.2s ease;">
+                  <!-- Checkbox & Delete absolute -->
+                  <div style="position: absolute; top: 8px; left: 8px; z-index: 5;">
+                    <input type="checkbox" class="kiosk-item-checkbox" data-id="${link.id}" style="margin: 0; cursor: pointer; width: 15px; height: 15px; accent-color: var(--cozy-green-matcha-forest);" />
+                  </div>
+                  <div style="position: absolute; top: 8px; right: 8px; z-index: 5;">
+                    <button class="kiosk-item-delete-btn" data-id="${link.id}" title="Xóa liên kết" style="background: rgba(255,255,255,0.9); border: 1px solid var(--cozy-border-light); color: #ff4d4f; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                      <i class="ph-light ph-trash" style="font-size: 0.85rem;"></i>
+                    </button>
+                  </div>
+
+                  <!-- Product image -->
+                  <div class="product-image-container" style="border-radius: 8px; background-color: var(--cozy-bg-beige); aspect-ratio: 1.1; overflow: hidden; width: 100%;">
+                    ${displayImage}
+                  </div>
+
+                  <!-- Product info -->
+                  <div class="product-meta" style="padding: 0 0.15rem; display: flex; flex-direction: column; gap: 0.2rem; flex-grow: 1;">
+                    <h4 class="product-title" style="font-size: 0.82rem; font-weight: 700; height: 2.6em; line-height: 1.35; margin-bottom: 2px; color: var(--cozy-text-obsidian); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(displayName)}</h4>
+                    ${link.description ? `<p class="product-quote" style="font-size: 0.72rem; line-height: 1.3; height: 2.6em; margin-bottom: 4px; color: var(--cozy-text-charcoal); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">“ ${escapeHtml(link.description)} ”</p>` : ''}
+                    <span class="platform-badge" data-platform="shopee" style="font-size: 0.6rem; padding: 0.1rem 0.35rem; margin-top: auto; display: inline-flex; align-self: flex-start;">
+                      Shopee
+                    </span>
                     ${badgeHtml}
                   </div>
-                  <button class="kiosk-item-delete-btn" data-id="${link.id}" title="Xóa liên kết">
-                    <i class="ph-light ph-trash"></i>
-                  </button>
                 </div>
               `;
             }).join('');
@@ -1057,61 +1077,63 @@ import Layout from '../../layouts/Layout.astro';
     color: var(--cozy-green-matcha-forest);
   }
 
-  /* --- DARK CONTAINER (GIỐNG HÌNH MẪU ĐEN) --- */
-  .kiosk-dark-container {
-    background-color: var(--cozy-text-obsidian);
+  /* --- LIGHT CONTAINER (NỀN MÂY SÁNG ĐỒNG BỘ CHỮA LÀNH) --- */
+  .kiosk-light-container {
+    background-color: var(--cozy-bg-pure);
     border-radius: 12px;
     padding: 1.5rem;
-    color: var(--cozy-bg-pure);
+    color: var(--cozy-text-obsidian);
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 1.5rem;
+    border: 1px solid var(--cozy-border-light);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.01);
     text-align: left;
   }
   .kiosk-add-link-form {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--cozy-border-light);
     padding-bottom: 1.25rem;
   }
-  .dark-input {
+  .light-input {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
     border-radius: 8px;
     padding: 0.65rem 0.85rem;
-    color: #fff;
+    color: var(--cozy-text-obsidian);
     font-size: 0.85rem;
     outline: none;
     transition: all 0.2s ease;
   }
-  .dark-input:focus {
-    border-color: var(--cozy-green-matcha);
-    background-color: rgba(255, 255, 255, 0.08);
+  .light-input:focus {
+    border-color: var(--cozy-green-matcha-forest);
+    box-shadow: 0 0 0 3px rgba(74, 138, 46, 0.08);
   }
-  .dark-add-btn {
-    background-color: #0d8050; /* Emerald green */
+  .light-add-btn {
+    background-color: var(--cozy-green-matcha-forest);
     color: #fff;
     border: none;
     border-radius: 8px;
-    padding: 0.5rem 1.25rem;
-    font-weight: 550;
-    font-size: 0.82rem;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
   }
-  .dark-add-btn:hover {
-    background-color: #0b6b43;
+  .light-add-btn:hover {
+    background-color: var(--cozy-green-matcha-dark);
   }
 
-  /* --- DANH SÁCH SẢN PHẨM --- */
+  /* --- DANH SÁCH SẢN PHẨM (DẠNG CARD LƯỚI) --- */
   .kiosk-links-list-container {
-    max-height: 420px;
+    max-height: 480px;
     overflow-y: auto;
+    padding-right: 0.25rem;
   }
   .kiosk-links-list-container::-webkit-scrollbar {
     width: 6px;
@@ -1120,41 +1142,54 @@ import Layout from '../../layouts/Layout.astro';
     background: transparent;
   }
   .kiosk-links-list-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--cozy-border-light);
     border-radius: 3px;
   }
   .kiosk-links-list-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--cozy-text-charcoal);
   }
 
   .kiosk-links-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 0.25rem 0;
   }
-  .kiosk-link-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.9rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    position: relative;
-    transition: background-color 0.2s ease;
+  .kiosk-added-card {
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   }
-  .kiosk-link-item:hover {
-    background-color: rgba(255, 255, 255, 0.02);
-  }
-  .kiosk-link-item:last-child {
-    border-bottom: none;
+  .kiosk-added-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+    border-color: var(--cozy-green-matcha) !important;
   }
   .kiosk-item-checkbox {
-    width: 14px;
-    height: 14px;
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 3px;
-    accent-color: var(--cozy-green-matcha);
-    margin-top: 6px;
+    width: 15px;
+    height: 15px;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 4px;
+    accent-color: var(--cozy-green-matcha-forest);
     cursor: pointer;
   }
+  .kiosk-item-delete-btn:hover {
+    background-color: #ffeff0 !important;
+    border-color: #ffa39e !important;
+    transform: scale(1.05);
+  }
+  .kiosk-item-reject-badge {
+    background-color: rgba(211, 47, 47, 0.06);
+    color: #ff4d4f;
+    border: 1px solid rgba(211, 47, 47, 0.15);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 550;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
   .kiosk-item-url-link {
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;

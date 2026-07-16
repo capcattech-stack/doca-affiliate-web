@@ -40,6 +40,35 @@ import Layout from '../layouts/Layout.astro';
             <i class="ph-fill ph-check-circle" style="color: var(--cozy-green-matcha-forest);"></i> Đã kết nối Google
           </div>
 
+          <!-- PHẦN THÔNG TIN KIOSK (DỰA VÀO TRẠNG THÁI DATABASE) -->
+          <div class="kiosk-cta-box">
+            <div id="kiosk-cta-loading" class="text-center" style="padding: 0.5rem 0;">
+              <i class="ph-light ph-spinner-gap spin" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
+              <span class="whisper-mono" style="font-size: 0.78rem; margin-left: 0.35rem;">Đang kiểm tra Kiosk...</span>
+            </div>
+
+            <!-- Trạng thái: Chưa đăng ký Kiosk -->
+            <div id="kiosk-cta-unregistered" class="kiosk-cta-state hidden">
+              <h3>Kiosk Của Riêng Bạn</h3>
+              <p>Xây dựng tủ cửa hàng tiếp thị liên kết xinh xắn để chia sẻ các đề xuất mua sắm yêu thích.</p>
+              <a href="/profile/kiosk" class="cozy-btn cta-btn" style="margin-top: 0.75rem;">
+                Tạo Kiosk Của Tôi <i class="ph-light ph-storefront"></i>
+              </a>
+            </div>
+
+            <!-- Trạng thái: Đã đăng ký (Pending / Approved / Rejected) -->
+            <div id="kiosk-cta-registered" class="kiosk-cta-state hidden">
+              <h3>Cửa Hàng Kiosk Cá Nhân</h3>
+              <div class="kiosk-status-badge-row">
+                <span class="kiosk-domain whisper-mono" id="kiosk-badge-domain">kios.capcat.vn/...</span>
+                <span class="status-badge" id="kiosk-badge-status">Chờ duyệt</span>
+              </div>
+              <a href="/profile/kiosk" class="cozy-btn cta-btn" style="margin-top: 0.75rem;">
+                Quản lý Kiosk Của Tôi <i class="ph-light ph-gear"></i>
+              </a>
+            </div>
+          </div>
+
           <div class="profile-actions">
             <button id="profile-logout-btn" class="logout-btn">
               Ngắt kết nối tài khoản <i class="ph-light ph-sign-out"></i>
@@ -62,6 +91,13 @@ import Layout from '../layouts/Layout.astro';
     const emailEl = document.getElementById('profile-email');
     const logoutBtn = document.getElementById('profile-logout-btn');
 
+    // Kiosk elements
+    const kioskCtaLoading = document.getElementById('kiosk-cta-loading');
+    const kioskCtaUnregistered = document.getElementById('kiosk-cta-unregistered');
+    const kioskCtaRegistered = document.getElementById('kiosk-cta-registered');
+    const kioskBadgeDomain = document.getElementById('kiosk-badge-domain');
+    const kioskBadgeStatus = document.getElementById('kiosk-badge-status');
+
     const client = getSupabase();
     if (!client) {
       window.location.href = '/';
@@ -72,18 +108,20 @@ import Layout from '../layouts/Layout.astro';
     client.auth.getSession().then(({ data: { session } }: any) => {
       const user = session?.user;
       if (!user) {
-        // Chưa đăng nhập, chuyển hướng về trang chủ
         window.location.href = '/';
         return;
       }
 
-      // Đã đăng nhập, hiển thị thông tin cá nhân
+      // Hiển thị thông tin cá nhân
       if (avatarImg) avatarImg.src = user.user_metadata.avatar_url || '/images/default-avatar.png';
       if (nameEl) nameEl.textContent = user.user_metadata.full_name || user.user_metadata.name || 'Người dùng Google';
       if (emailEl) emailEl.textContent = user.email || '';
 
       if (loadingCard) loadingCard.classList.add('hidden');
       if (contentCard) contentCard.classList.remove('hidden');
+
+      // Tải và hiển thị thông tin Kiosk rút gọn
+      loadKioskInfo(user.id);
     }).catch((err: any) => {
       console.error('Error fetching session on profile page:', err);
       window.location.href = '/';
@@ -93,6 +131,38 @@ import Layout from '../layouts/Layout.astro';
       await logout();
       window.location.href = '/';
     });
+
+    // --- HÀM TẢI THÔNG TIN KIOSK TẠI PROFILE ---
+    function loadKioskInfo(userId: string) {
+      client.from('creator_kiosks').select('*').eq('user_id', userId).maybeSingle().then(({ data: kiosk, error }: any) => {
+        if (kioskCtaLoading) kioskCtaLoading.classList.add('hidden');
+        if (error) {
+          console.error('Error loading kiosk info:', error.message);
+          return;
+        }
+
+        if (!kiosk) {
+          if (kioskCtaUnregistered) kioskCtaUnregistered.classList.remove('hidden');
+        } else {
+          if (kioskCtaRegistered) kioskCtaRegistered.classList.remove('hidden');
+          if (kioskBadgeDomain) kioskBadgeDomain.textContent = `kios.capcat.vn/${kiosk.kios_name}`;
+          
+          if (kioskBadgeStatus) {
+            kioskBadgeStatus.className = 'status-badge'; // reset
+            if (kiosk.status === 'pending') {
+              kioskBadgeStatus.textContent = 'Chờ duyệt 🐾';
+              kioskBadgeStatus.classList.add('badge-pending');
+            } else if (kiosk.status === 'rejected') {
+              kioskBadgeStatus.textContent = 'Cần sửa đổi ⚠️';
+              kioskBadgeStatus.classList.add('badge-rejected');
+            } else if (kiosk.status === 'approved') {
+              kioskBadgeStatus.textContent = 'Hoạt động 🎉';
+              kioskBadgeStatus.classList.add('badge-approved');
+            }
+          }
+        }
+      });
+    }
   });
 </script>
 
@@ -156,7 +226,6 @@ import Layout from '../layouts/Layout.astro';
     width: 100%;
     max-width: 380px;
   }
-  /* Vạt gỗ tuyết tùng ở đỉnh card tạo đặc trưng Muji ấm áp */
   .profile-card::before {
     content: '';
     position: absolute;
@@ -219,6 +288,68 @@ import Layout from '../layouts/Layout.astro';
     font-weight: 600;
     border: 1px solid rgba(143, 191, 79, 0.12);
   }
+
+  /* --- KIOSK CTA CONTAINER --- */
+  .kiosk-cta-box {
+    width: 100%;
+    border-top: 1px dashed var(--cozy-border-light);
+    padding-top: 1.25rem;
+    margin-top: 0.25rem;
+    text-align: left;
+  }
+  .kiosk-cta-state h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.35rem;
+  }
+  .kiosk-cta-state p {
+    font-size: 0.78rem;
+    color: var(--cozy-text-charcoal);
+    line-height: 1.45;
+    opacity: 0.85;
+    margin-bottom: 0.6rem;
+  }
+  .kiosk-status-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .kiosk-domain {
+    font-size: 0.72rem;
+    color: var(--cozy-text-charcoal);
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .status-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+  }
+  .badge-pending {
+    background-color: #FFF2E6;
+    color: #E67E22;
+    border: 1px solid rgba(230, 126, 34, 0.15);
+  }
+  .badge-approved {
+    background-color: #F0F9EB;
+    color: var(--cozy-green-matcha-forest);
+    border: 1px solid rgba(60, 94, 22, 0.15);
+  }
+  .badge-rejected {
+    background-color: #FFF2F2;
+    color: #D32F2F;
+    border: 1px solid rgba(211, 47, 47, 0.15);
+  }
+  .cta-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
   .profile-actions {
     width: 100%;
     border-top: 1px dashed var(--cozy-border-light);
@@ -246,6 +377,26 @@ import Layout from '../layouts/Layout.astro';
     background-color: #FFF2F2;
     border-color: #FFC1C1;
     color: #D32F2F;
+  }
+  .cozy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--cozy-green-matcha-forest);
+    border: none;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .cozy-btn:hover {
+    background-color: var(--cozy-green-matcha-dark);
   }
   .hidden {
     display: none !important;

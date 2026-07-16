@@ -1,0 +1,912 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Quản Lý Kiosk Của Bạn | DOCA" description="Cấu hình cửa hàng Kiosk tiếp thị liên kết cá nhân của bạn.">
+  <main class="kiosk-page-view">
+    <div class="kiosk-page-container">
+      <!-- Nút quay lại Hồ sơ cá nhân -->
+      <div class="kiosk-nav-header">
+        <a href="/profile" class="back-link"><i class="ph-light ph-arrow-left"></i> Trở về Hồ sơ</a>
+      </div>
+
+      <!-- Khung Card Kiosk Căn giữa -->
+      <div class="kiosk-card-wrapper">
+        <!-- Kiosk Loading Card -->
+        <div class="kiosk-card text-center" id="kiosk-loading-card">
+          <div class="spinner-wrapper">
+            <i class="ph-light ph-spinner-gap spin" style="font-size: 2rem; color: var(--cozy-green-matcha-forest);"></i>
+          </div>
+          <p class="whisper-mono" style="font-size: 0.85rem;">Đang tải cấu hình Kiosk...</p>
+        </div>
+
+        <!-- Kiosk Register Form Card -->
+        <div class="kiosk-card hidden" id="kiosk-register-card">
+          <div class="kiosk-card-header">
+            <h2>Đăng Ký Cửa Hàng Kiosk</h2>
+            <p>Xây dựng trang tiếp thị liên kết cá nhân trên miền <strong>kios.capcat.vn</strong> để chia sẻ đề xuất mua sắm của bạn.</p>
+          </div>
+          <form id="kiosk-register-form" class="kiosk-form" onsubmit="return false;">
+            <div class="form-group">
+              <label for="kiosk-name-input">Tên Kiosk của bạn (Slug viết liền không dấu)</label>
+              <div class="input-prefix-wrapper">
+                <span class="url-prefix">kios.capcat.vn/</span>
+                <input type="text" id="kiosk-name-input" class="cozy-input" placeholder="tên-kiosk-của-bạn" required />
+              </div>
+              <small class="form-help">Chỉ sử dụng chữ cái viết thường (a-z), chữ số (0-9) và dấu gạch ngang (-). Ví dụ: tiem-nho-tina, meo-map-curator</small>
+            </div>
+            <div class="form-group">
+              <label for="kiosk-channel-input">Kênh truyền thông chính (TikTok, YouTube, Facebook...)</label>
+              <input type="url" id="kiosk-channel-input" class="cozy-input" placeholder="https://tiktok.com/@kenh-cua-ban" required />
+            </div>
+            <div id="kiosk-register-error" class="error-message hidden"></div>
+            <button type="submit" id="kiosk-register-submit-btn" class="cozy-btn">
+              Gửi yêu cầu đăng ký Kiosk <i class="ph-light ph-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- Kiosk Pending Card -->
+        <div class="kiosk-card text-center hidden" id="kiosk-pending-card">
+          <div style="font-size: 3.5rem; color: var(--cozy-green-matcha);"><i class="ph-light ph-clock-counter-clockwise"></i></div>
+          <h2>Kiosk Đang Chờ Phê Duyệt</h2>
+          <p class="whisper-mono" id="kiosk-pending-info"></p>
+          <div class="kiosk-notice-box">
+            Cửa hàng Kiosk của bạn đang được Ban Quản Trị DOCA xem xét các thông tin kênh liên kết. Chúng tôi sẽ phê duyệt đơn đăng ký trong vòng 24h làm việc. Xin cảm ơn sự kiên nhẫn của bạn! 🐾
+          </div>
+        </div>
+
+        <!-- Kiosk Rejected Card -->
+        <div class="kiosk-card hidden" id="kiosk-rejected-card">
+          <div class="text-center" style="font-size: 3.5rem; color: #D32F2F;"><i class="ph-light ph-warning-circle"></i></div>
+          <h2 class="text-center" style="color: #D32F2F;">Đơn Đăng Ký Bị Từ Chối</h2>
+          
+          <div class="kiosk-notice-box error-box">
+            <strong>Lý do từ chối:</strong> <span id="kiosk-rejected-reason"></span>
+          </div>
+
+          <div class="kiosk-card-header" style="margin-top: 1.5rem; border-top: 1px dashed var(--cozy-border-light); padding-top: 1.5rem;">
+            <h3>Cập Nhật & Gửi Duyệt Lại</h3>
+            <p>Vui lòng điều chỉnh lại thông tin đăng ký Kiosk bên dưới và gửi lại cho chúng tôi xem xét.</p>
+          </div>
+          <form id="kiosk-resubmit-form" class="kiosk-form" onsubmit="return false;">
+            <div class="form-group">
+              <label for="kiosk-resubmit-name">Tên Kiosk của bạn (Slug viết liền không dấu)</label>
+              <div class="input-prefix-wrapper">
+                <span class="url-prefix">kios.capcat.vn/</span>
+                <input type="text" id="kiosk-resubmit-name" class="cozy-input" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="kiosk-resubmit-channel">Kênh truyền thông chính</label>
+              <input type="url" id="kiosk-resubmit-channel" class="cozy-input" required />
+            </div>
+            <div id="kiosk-resubmit-error" class="error-message hidden"></div>
+            <button type="submit" id="kiosk-resubmit-submit-btn" class="cozy-btn">
+              Gửi duyệt lại <i class="ph-light ph-arrow-counter-clockwise"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- Kiosk Dashboard Card (Đã được duyệt) -->
+        <div class="kiosk-card hidden" id="kiosk-dashboard-card">
+          <div class="kiosk-card-header" style="border-bottom: 1px solid var(--cozy-border-light); padding-bottom: 1.25rem;">
+            <h2>Cấu Hình Cửa Hàng Kiosk</h2>
+            <div class="kiosk-url-share-row">
+              <div class="kiosk-url-badge">
+                <i class="ph-light ph-link"></i> Link Kiosk: <span id="kiosk-url-text" class="whisper-mono" style="font-weight: 600; color: var(--cozy-text-obsidian);"></span>
+              </div>
+              <div class="kiosk-share-actions">
+                <button id="copy-kiosk-url-btn" class="kiosk-action-btn" title="Sao chép liên kết Kiosk"><i class="ph-light ph-copy"></i> Sao chép</button>
+                <a id="view-kiosk-url-link" href="#" target="_blank" class="kiosk-action-btn"><i class="ph-light ph-arrow-square-out"></i> Xem Kiosk</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Khung thêm link tiếp thị tối màu (Cozy Charcoal) -->
+          <div class="kiosk-dark-container">
+            <div class="kiosk-add-link-form">
+              <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+                <input type="url" id="kiosk-link-url" class="dark-input" placeholder="Nhập link Shopee affiliate (ví dụ: https://shope.ee/...)" />
+                <input type="text" id="kiosk-link-desc" class="dark-input" placeholder="Nhập mô tả sản phẩm (ví dụ: Cát đậu nành hút ẩm khử mùi siêu tốt...)" />
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; width: 100%;">
+                <button id="kiosk-link-add-btn" class="dark-add-btn">Add URL</button>
+              </div>
+            </div>
+
+            <!-- Danh sách Links sản phẩm -->
+            <div class="kiosk-links-list-container">
+              <div id="kiosk-links-list-loading" class="text-center" style="padding: 2rem; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
+                <i class="ph-light ph-spinner-gap spin" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; margin-left: auto; margin-right: auto;"></i> Đang tải danh sách liên kết...
+              </div>
+              <div id="kiosk-links-list-empty" class="text-center hidden" style="padding: 2.5rem 1.5rem; color: rgba(255,255,255,0.4); font-style: italic; font-size: 0.85rem;">
+                Cửa hàng của bạn chưa bày sản phẩm nào. Hãy dán link Shopee ở phía trên để thêm nhé! 🐾
+              </div>
+              <div id="kiosk-links-list" class="kiosk-links-list">
+                <!-- Links item render ở đây -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { getSupabase } from '../../scripts/supabase';
+
+  // Lọc từ khóa thô tục offline giống trang Gia đình
+  const BAD_WORDS = ['cút', 'đm', 'đéo', 'vcl', 'clm', 'chửi', 'ngu', 'chó', 'fuck', 'shit', 'asshole', 'bitch', 'dâm', 'khùng', 'điên', 'đần', 'cac', 'cc', 'cl'];
+
+  function checkTextSafety(text: string): boolean {
+    const lower = text.toLowerCase();
+    return !BAD_WORDS.some(word => lower.includes(word));
+  }
+
+  function escapeHtml(str: string): string {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const kioskLoading = document.getElementById('kiosk-loading-card');
+    const kioskRegister = document.getElementById('kiosk-register-card');
+    const kioskPending = document.getElementById('kiosk-pending-card');
+    const kioskRejected = document.getElementById('kiosk-rejected-card');
+    const kioskDashboard = document.getElementById('kiosk-dashboard-card');
+
+    const client = getSupabase();
+    if (!client) {
+      window.location.href = '/';
+      return;
+    }
+
+    // Kiểm tra session hiện tại
+    client.auth.getSession().then(({ data: { session } }: any) => {
+      const user = session?.user;
+      if (!user) {
+        window.location.href = '/';
+        return;
+      }
+
+      // Tải thông tin chi tiết Kiosk
+      loadKioskDetails(user);
+    }).catch((err: any) => {
+      console.error('Error fetching session:', err);
+      window.location.href = '/profile';
+    });
+
+    // --- HÀM TẢI CHI TIẾT KIOSK ---
+    function loadKioskDetails(user: any) {
+      if (kioskLoading) kioskLoading.classList.remove('hidden');
+      if (kioskRegister) kioskRegister.classList.add('hidden');
+      if (kioskPending) kioskPending.classList.add('hidden');
+      if (kioskRejected) kioskRejected.classList.add('hidden');
+      if (kioskDashboard) kioskDashboard.classList.add('hidden');
+
+      client.from('creator_kiosks').select('*').eq('user_id', user.id).maybeSingle().then(({ data: kiosk, error }: any) => {
+        if (kioskLoading) kioskLoading.classList.add('hidden');
+        if (error) {
+          console.error('Lỗi khi tải Kiosk:', error.message);
+          return;
+        }
+
+        if (!kiosk) {
+          if (kioskRegister) kioskRegister.classList.remove('hidden');
+          setupRegistrationForm(user);
+        } else if (kiosk.status === 'pending') {
+          if (kioskPending) kioskPending.classList.remove('hidden');
+          const pendingInfo = document.getElementById('kiosk-pending-info');
+          if (pendingInfo) pendingInfo.textContent = `Tên đăng ký: kios.capcat.vn/${kiosk.kios_name} | Kênh: ${kiosk.channel}`;
+        } else if (kiosk.status === 'rejected') {
+          if (kioskRejected) kioskRejected.classList.remove('hidden');
+          const rejectedReason = document.getElementById('kiosk-rejected-reason');
+          if (rejectedReason) rejectedReason.textContent = kiosk.rejection_reason || 'Không rõ lý do từ chối.';
+          setupResubmitForm(user, kiosk);
+        } else if (kiosk.status === 'approved') {
+          if (kioskDashboard) kioskDashboard.classList.remove('hidden');
+          setupDashboard(kiosk);
+        }
+      });
+    }
+
+    // --- CẤU HÌNH FORM ĐĂNG KÝ ---
+    function setupRegistrationForm(user: any) {
+      const form = document.getElementById('kiosk-register-form');
+      const nameInput = document.getElementById('kiosk-name-input') as HTMLInputElement;
+      const channelInput = document.getElementById('kiosk-channel-input') as HTMLInputElement;
+      const submitBtn = document.getElementById('kiosk-register-submit-btn') as HTMLButtonElement;
+      const errorEl = document.getElementById('kiosk-register-error');
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (errorEl) errorEl.classList.add('hidden');
+
+        const nameVal = nameInput.value.trim().toLowerCase();
+        const channelVal = channelInput.value.trim();
+
+        // Validate slug format
+        const slugRegex = /^[a-z0-9-]+$/;
+        if (!slugRegex.test(nameVal)) {
+          if (errorEl) {
+            errorEl.textContent = 'Tên Kiosk chỉ được dùng chữ thường không dấu, số và dấu gạch ngang (-).';
+            errorEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang gửi đăng ký...';
+
+        // Kiểm tra kios_name duy nhất
+        const { data: existing } = await client.from('creator_kiosks').select('id').eq('kios_name', nameVal).maybeSingle();
+        if (existing) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Gửi yêu cầu đăng ký Kiosk <i class="ph-light ph-paper-plane"></i>';
+          if (errorEl) {
+            errorEl.textContent = 'Tên Kiosk này đã có người đăng ký. Vui lòng chọn tên khác!';
+            errorEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        // Thực hiện ghi danh sách
+        const { error } = await client.from('creator_kiosks').insert({
+          user_id: user.id,
+          email: user.email,
+          kios_name: nameVal,
+          channel: channelVal,
+          status: 'pending'
+        });
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Gửi yêu cầu đăng ký Kiosk <i class="ph-light ph-paper-plane"></i>';
+
+        if (error) {
+          if (errorEl) {
+            errorEl.textContent = 'Lỗi gửi đăng ký: ' + error.message;
+            errorEl.classList.remove('hidden');
+          }
+        } else {
+          if ((window as any).showToast) (window as any).showToast('Đã gửi yêu cầu đăng ký lên Admin! 🐾');
+          loadKioskDetails(user);
+        }
+      });
+    }
+
+    // --- CẤU HÌNH GỬI DUYỆT LẠI ---
+    function setupResubmitForm(user: any, kiosk: any) {
+      const form = document.getElementById('kiosk-resubmit-form');
+      const nameInput = document.getElementById('kiosk-resubmit-name') as HTMLInputElement;
+      const channelInput = document.getElementById('kiosk-resubmit-channel') as HTMLInputElement;
+      const submitBtn = document.getElementById('kiosk-resubmit-submit-btn') as HTMLButtonElement;
+      const errorEl = document.getElementById('kiosk-resubmit-error');
+
+      // Fill values cũ
+      nameInput.value = kiosk.kios_name;
+      channelInput.value = kiosk.channel;
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (errorEl) errorEl.classList.add('hidden');
+
+        const nameVal = nameInput.value.trim().toLowerCase();
+        const channelVal = channelInput.value.trim();
+
+        const slugRegex = /^[a-z0-9-]+$/;
+        if (!slugRegex.test(nameVal)) {
+          if (errorEl) {
+            errorEl.textContent = 'Tên Kiosk chỉ được dùng chữ thường không dấu, số và dấu gạch ngang (-).';
+            errorEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang gửi duyệt lại...';
+
+        // Check trùng name ngoại trừ chính Kiosk này
+        const { data: existing } = await client.from('creator_kiosks').select('id').eq('kios_name', nameVal).neq('id', kiosk.id).maybeSingle();
+        if (existing) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Gửi duyệt lại <i class="ph-light ph-arrow-counter-clockwise"></i>';
+          if (errorEl) {
+            errorEl.textContent = 'Tên Kiosk này đã có người đăng ký. Vui lòng chọn tên khác!';
+            errorEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        // Cập nhật lại và reset status = pending
+        const { error } = await client.from('creator_kiosks').update({
+          kios_name: nameVal,
+          channel: channelVal,
+          status: 'pending',
+          rejection_reason: null,
+          updated_at: new Date().toISOString()
+        }).eq('id', kiosk.id);
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Gửi duyệt lại <i class="ph-light ph-arrow-counter-clockwise"></i>';
+
+        if (error) {
+          if (errorEl) {
+            errorEl.textContent = 'Lỗi cập nhật dữ liệu: ' + error.message;
+            errorEl.classList.remove('hidden');
+          }
+        } else {
+          if ((window as any).showToast) (window as any).showToast('Đã gửi thông tin cập nhật lên Admin thành công! 🐾');
+          loadKioskDetails(user);
+        }
+      });
+    }
+
+    // --- CẤU HÌNH DASHBOARD ĐÃ PHÊ DUYỆT ---
+    function setupDashboard(kiosk: any) {
+      const urlText = document.getElementById('kiosk-url-text');
+      const copyBtn = document.getElementById('copy-kiosk-url-btn');
+      const viewLink = document.getElementById('view-kiosk-url-link') as HTMLAnchorElement;
+
+      const fullUrlPath = `kios.capcat.vn/${kiosk.kios_name}`;
+      if (urlText) urlText.textContent = fullUrlPath;
+      if (viewLink) {
+        // dynamic link port test local, khi deploy production sẽ chạy domain thực tế
+        viewLink.href = `http://${window.location.hostname}:4325/${kiosk.kios_name}`;
+      }
+
+      copyBtn?.addEventListener('click', () => {
+        navigator.clipboard.writeText(`https://${fullUrlPath}`).then(() => {
+          if ((window as any).showToast) (window as any).showToast('Đã sao chép đường dẫn Kiosk! 📋');
+        }).catch(() => {
+          if ((window as any).showToast) (window as any).showToast('Lỗi sao chép tự động.');
+        });
+      });
+
+      // Tải các link ban đầu
+      loadKioskLinks(kiosk.id);
+
+      // Xử lý thêm link Shopee mới
+      const addBtn = document.getElementById('kiosk-link-add-btn') as HTMLButtonElement;
+      const urlInput = document.getElementById('kiosk-link-url') as HTMLInputElement;
+      const descInput = document.getElementById('kiosk-link-desc') as HTMLInputElement;
+
+      addBtn?.addEventListener('click', async () => {
+        const urlVal = urlInput.value.trim();
+        const descVal = descInput.value.trim();
+
+        if (!urlVal) {
+          if ((window as any).showToast) (window as any).showToast('Vui lòng nhập đường dẫn tiếp thị sản phẩm 🐾');
+          return;
+        }
+
+        if (!urlVal.startsWith('http://') && !urlVal.startsWith('https://')) {
+          if ((window as any).showToast) (window as any).showToast('Vui lòng nhập link đầy đủ bao gồm http:// hoặc https:// 🐾');
+          return;
+        }
+
+        // Bộ lọc tự động kiểm duyệt
+        let linkStatus = 'approved';
+        let linkRejectReason = null;
+
+        // A. Check link Shopee
+        const isShopee = urlVal.toLowerCase().includes('shopee.vn') || urlVal.toLowerCase().includes('shp.ee') || urlVal.toLowerCase().includes('shope.ee');
+        if (!isShopee) {
+          linkStatus = 'rejected';
+          linkRejectReason = 'Đường dẫn không phải link Shopee Affiliate hợp lệ.';
+        }
+        // B. Check text safety offline
+        else if (descVal && !checkTextSafety(descVal)) {
+          linkStatus = 'rejected';
+          linkRejectReason = 'Mô tả chứa từ ngữ chưa lành mạnh.';
+        }
+
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Adding...';
+
+        const { error } = await client.from('kiosk_links').insert({
+          kiosk_id: kiosk.id,
+          affiliate_url: urlVal,
+          description: descVal || null,
+          status: linkStatus,
+          rejection_reason: linkRejectReason
+        });
+
+        addBtn.disabled = false;
+        addBtn.innerHTML = 'Add URL';
+
+        if (error) {
+          if ((window as any).showToast) (window as any).showToast('Lỗi khi ghi DB: ' + error.message);
+        } else {
+          if ((window as any).showToast) {
+            if (linkStatus === 'approved') {
+              (window as any).showToast('Đã thêm sản phẩm lên Kiosk của bạn thành công! 🎉');
+            } else {
+              (window as any).showToast(`Sản phẩm bị từ chối duyệt: ${linkRejectReason} ⚠️`);
+            }
+          }
+          urlInput.value = '';
+          descInput.value = '';
+          loadKioskLinks(kiosk.id);
+        }
+      });
+    }
+
+    // --- TẢI DANH SÁCH LINK KIOSK ---
+    function loadKioskLinks(kioskId: string) {
+      const listEl = document.getElementById('kiosk-links-list');
+      const loadingEl = document.getElementById('kiosk-links-list-loading');
+      const emptyEl = document.getElementById('kiosk-links-list-empty');
+
+      if (loadingEl) loadingEl.classList.remove('hidden');
+      if (emptyEl) emptyEl.classList.add('hidden');
+      if (listEl) listEl.innerHTML = '';
+
+      client.from('kiosk_links')
+        .select('*')
+        .eq('kiosk_id', kioskId)
+        .order('created_at', { ascending: false })
+        .then(({ data: links, error }: any) => {
+          if (loadingEl) loadingEl.classList.add('hidden');
+          if (error) {
+            console.error('Lỗi tải liên kết Kiosk:', error.message);
+            return;
+          }
+
+          if (!links || links.length === 0) {
+            if (emptyEl) emptyEl.classList.remove('hidden');
+            return;
+          }
+
+          if (emptyEl) emptyEl.classList.add('hidden');
+          if (listEl) {
+            listEl.innerHTML = links.map((link: any) => {
+              const badgeHtml = link.status === 'rejected'
+                ? `<span class="kiosk-item-reject-badge"><i class="ph-light ph-warning-circle"></i> Bị từ chối: ${link.rejection_reason || 'Vi phạm chính sách'}</span>`
+                : '';
+
+              return `
+                <div class="kiosk-link-item">
+                  <input type="checkbox" class="kiosk-item-checkbox" />
+                  <i class="ph-light ph-globe" style="font-size: 1.15rem; color: rgba(255,255,255,0.6); margin-top: 4px;"></i>
+                  <div style="display: flex; flex-direction: column; gap: 0.25rem; flex-grow: 1; min-width: 0;">
+                    <a href="${link.affiliate_url}" target="_blank" class="kiosk-item-url-link" title="${link.affiliate_url}">${escapeHtml(link.affiliate_url)}</a>
+                    ${link.description ? `<span class="kiosk-item-desc">${escapeHtml(link.description)}</span>` : ''}
+                    ${badgeHtml}
+                  </div>
+                  <button class="kiosk-item-delete-btn" data-id="${link.id}" title="Xóa liên kết">
+                    <i class="ph-light ph-trash"></i>
+                  </button>
+                </div>
+              `;
+            }).join('');
+
+            // Delete link handler
+            listEl.querySelectorAll('.kiosk-item-delete-btn').forEach((btn: any) => {
+              btn.addEventListener('click', () => {
+                const linkId = btn.getAttribute('data-id');
+                if (confirm('Cô/chú có thực sự muốn xóa sản phẩm này khỏi cửa hàng Kiosk của mình không?')) {
+                  client.from('kiosk_links').delete().eq('id', linkId).then(({ error: delErr }: any) => {
+                    if (delErr) {
+                      if ((window as any).showToast) (window as any).showToast('Lỗi khi xóa: ' + delErr.message);
+                    } else {
+                      if ((window as any).showToast) (window as any).showToast('Đã gỡ sản phẩm khỏi Kiosk thành công! 🐾');
+                      loadKioskLinks(kioskId);
+                    }
+                  });
+                }
+              });
+            });
+          }
+        });
+    }
+  });
+</script>
+
+<style>
+  .kiosk-page-view {
+    padding: 3rem 1.5rem 6rem;
+    background-color: var(--cozy-bg-beige);
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .kiosk-page-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .kiosk-nav-header {
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--cozy-text-obsidian);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+  }
+  .back-link:hover {
+    opacity: 1;
+    transform: translateX(-4px);
+    color: var(--cozy-green-matcha-forest);
+  }
+  
+  .kiosk-card-wrapper {
+    width: 100%;
+  }
+
+  .kiosk-card {
+    position: relative;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 16px;
+    padding: 2.5rem 2.25rem;
+    box-shadow: 0 4px 16px rgba(21, 23, 15, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+  }
+  .kiosk-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background-color: var(--cozy-green-matcha);
+  }
+
+  .kiosk-card-header h2 {
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.35rem;
+  }
+  .kiosk-card-header h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.2rem;
+  }
+  .kiosk-card-header p {
+    font-size: 0.85rem;
+    color: var(--cozy-text-charcoal);
+    opacity: 0.8;
+  }
+
+  /* --- COZY INPUTS & PREFIX --- */
+  .kiosk-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    text-align: left;
+  }
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+  }
+  .cozy-input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 8px;
+    background-color: var(--cozy-bg-pure);
+    color: var(--cozy-text-obsidian);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  .cozy-input:focus {
+    border-color: var(--cozy-green-matcha);
+    box-shadow: 0 0 0 3px rgba(143, 191, 79, 0.15);
+  }
+  .input-prefix-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 8px;
+    background-color: var(--cozy-bg-pure);
+    overflow: hidden;
+  }
+  .input-prefix-wrapper:focus-within {
+    border-color: var(--cozy-green-matcha);
+    box-shadow: 0 0 0 3px rgba(143, 191, 79, 0.15);
+  }
+  .input-prefix-wrapper .url-prefix {
+    background-color: var(--cozy-bg-beige);
+    color: var(--cozy-text-charcoal);
+    padding: 0.65rem 0.85rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-right: 1px solid var(--cozy-border-light);
+    user-select: none;
+  }
+  .input-prefix-wrapper .cozy-input {
+    border: none;
+    border-radius: 0;
+    flex-grow: 1;
+    box-shadow: none !important;
+  }
+  .form-help {
+    font-size: 0.75rem;
+    color: var(--cozy-text-charcoal);
+    opacity: 0.75;
+  }
+  .error-message {
+    background-color: #FFF2F2;
+    border: 1px solid #FFC1C1;
+    color: #D32F2F;
+    padding: 0.65rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 550;
+    text-align: left;
+  }
+
+  /* --- NOTICE BOXES --- */
+  .kiosk-notice-box {
+    background-color: var(--cozy-bg-cream-warm);
+    border: 1px solid rgba(143, 191, 79, 0.12);
+    padding: 1.15rem 1.35rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--cozy-green-matcha-forest);
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+  .kiosk-notice-box.error-box {
+    background-color: #FFF2F2;
+    border-color: rgba(211, 47, 47, 0.12);
+    color: #D32F2F;
+  }
+
+  /* --- DASHBOARD APPROVED --- */
+  .kiosk-url-share-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+    width: 100%;
+  }
+  .kiosk-url-badge {
+    background-color: var(--cozy-bg-beige);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 20px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--cozy-text-charcoal);
+  }
+  .kiosk-share-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .kiosk-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    color: var(--cozy-text-obsidian);
+    padding: 0.4rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 550;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .kiosk-action-btn:hover {
+    background-color: var(--cozy-bg-beige);
+    border-color: var(--cozy-green-matcha);
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  /* --- DARK CONTAINER (GIỐNG HÌNH MẪU ĐEN) --- */
+  .kiosk-dark-container {
+    background-color: var(--cozy-text-obsidian);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: var(--cozy-bg-pure);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: left;
+  }
+  .kiosk-add-link-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1.25rem;
+  }
+  .dark-input {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    color: #fff;
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  .dark-input:focus {
+    border-color: var(--cozy-green-matcha);
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  .dark-add-btn {
+    background-color: #0d8050; /* Emerald green */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 550;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+  }
+  .dark-add-btn:hover {
+    background-color: #0b6b43;
+  }
+
+  /* --- DANH SÁCH SẢN PHẨM --- */
+  .kiosk-links-list-container {
+    max-height: 420px;
+    overflow-y: auto;
+  }
+  .kiosk-links-list-container::-webkit-scrollbar {
+    width: 6px;
+  }
+  .kiosk-links-list-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .kiosk-links-list-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  .kiosk-links-list-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .kiosk-links-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .kiosk-link-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    position: relative;
+    transition: background-color 0.2s ease;
+  }
+  .kiosk-link-item:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+  .kiosk-link-item:last-child {
+    border-bottom: none;
+  }
+  .kiosk-item-checkbox {
+    width: 14px;
+    height: 14px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 3px;
+    accent-color: var(--cozy-green-matcha);
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  .kiosk-item-url-link {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-size: 0.85rem;
+    word-break: break-all;
+    font-family: 'Space Mono', monospace;
+    transition: color 0.2s ease;
+  }
+  .kiosk-item-url-link:hover {
+    text-decoration: underline;
+    color: var(--cozy-green-matcha);
+  }
+  .kiosk-item-desc {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+  .kiosk-item-reject-badge {
+    background-color: rgba(211, 47, 47, 0.15);
+    color: #ff4d4f;
+    border: 1px solid rgba(211, 47, 47, 0.25);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    align-self: flex-start;
+    margin-top: 0.15rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  .kiosk-item-delete-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    margin-top: 2px;
+  }
+  .kiosk-item-delete-btn:hover {
+    color: #ff4d4f;
+    background-color: rgba(211, 47, 47, 0.12);
+  }
+
+  /* --- BTNS --- */
+  .cozy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--cozy-green-matcha-forest);
+    border: none;
+    padding: 0.65rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .cozy-btn:hover {
+    background-color: var(--cozy-green-matcha-dark);
+  }
+  .cozy-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .hidden {
+    display: none !important;
+  }
+  .spinner-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 0;
+  }
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .text-center {
+    text-align: center;
+  }
+</style>

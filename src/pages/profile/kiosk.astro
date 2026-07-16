@@ -462,7 +462,11 @@ import Layout from '../../layouts/Layout.astro';
       const fullUrlPath = `kiosk.capcat.vn/${kiosk.kios_name}`;
       if (urlText) urlText.textContent = fullUrlPath;
       if (viewLink) {
-        viewLink.href = `http://${window.location.hostname}:4323/${kiosk.kios_name}`;
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          viewLink.href = `http://${window.location.hostname}:4323/${kiosk.kios_name}`;
+        } else {
+          viewLink.href = `https://kiosk.capcat.vn/${kiosk.kios_name}`;
+        }
       }
 
       const listTitleName = document.getElementById('kiosk-list-title-kios-name');

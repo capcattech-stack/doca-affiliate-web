@@ -40,18 +40,27 @@ export default async function handler(request, response) {
       html = await res.text();
     }
 
-    // Parse og:title / og:image
-    const titleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i) || 
-                       html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']/i) ||
-                       html.match(/<title>([^<]+)<\/title>/i);
+    // Hàm bóc tách nội dung thẻ meta bất kể thứ tự thuộc tính
+    function getMetaContent(htmlContent, propertyName) {
+      const regex = new RegExp(`<meta[^>]+(?:property|name)=["']${propertyName}["'][^>]*>`, 'i');
+      const match = htmlContent.match(regex);
+      if (match) {
+        const contentMatch = match[0].match(/content=["']([^"']+)["']/i);
+        return contentMatch ? contentMatch[1] : null;
+      }
+      return null;
+    }
 
-    const imageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i) ||
-                       html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i);
+    let title = getMetaContent(html, 'og:title');
+    let image = getMetaContent(html, 'og:image');
 
-    let title = titleMatch ? titleMatch[1] : null;
-    let image = imageMatch ? imageMatch[1] : null;
+    // Fallback sang thẻ <title> nếu không có og:title
+    if (!title) {
+      const titleTagMatch = html.match(/<title>([^<]+)<\/title>/i);
+      title = titleTagMatch ? titleTagMatch[1] : null;
+    }
 
-    // Decode HTML entities in title
+    // Giải mã ký tự HTML trong tiêu đề
     if (title) {
       title = title.replace(/&amp;/g, '&')
                    .replace(/&lt;/g, '<')

@@ -60,7 +60,7 @@ import Layout from '../layouts/Layout.astro';
             <div id="kiosk-cta-registered" class="kiosk-cta-state hidden">
               <h3>Cửa Hàng Kiosk Cá Nhân</h3>
               <div class="kiosk-status-badge-row">
-                <span class="kiosk-domain whisper-mono" id="kiosk-badge-domain">kios.capcat.vn/...</span>
+                <span class="kiosk-domain whisper-mono" id="kiosk-badge-domain">kiosk.capcat.vn/...</span>
                 <span class="status-badge" id="kiosk-badge-status">Chờ duyệt</span>
               </div>
               <a href="/profile/kiosk" class="cozy-btn cta-btn" style="margin-top: 0.75rem;">
@@ -145,7 +145,7 @@ import Layout from '../layouts/Layout.astro';
           if (kioskCtaUnregistered) kioskCtaUnregistered.classList.remove('hidden');
         } else {
           if (kioskCtaRegistered) kioskCtaRegistered.classList.remove('hidden');
-          if (kioskBadgeDomain) kioskBadgeDomain.textContent = `kios.capcat.vn/${kiosk.kios_name}`;
+          if (kioskBadgeDomain) kioskBadgeDomain.textContent = `kiosk.capcat.vn/${kiosk.kios_name}`;
           
           if (kioskBadgeStatus) {
             kioskBadgeStatus.className = 'status-badge'; // reset

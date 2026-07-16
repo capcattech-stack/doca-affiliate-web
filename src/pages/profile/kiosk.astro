@@ -24,13 +24,13 @@ import Layout from '../../layouts/Layout.astro';
         <div class="kiosk-card hidden" id="kiosk-register-card">
           <div class="kiosk-card-header">
             <h2>Đăng Ký Cửa Hàng Kiosk</h2>
-            <p>Xây dựng trang tiếp thị liên kết cá nhân trên miền <strong>kios.capcat.vn</strong> để chia sẻ đề xuất mua sắm của bạn.</p>
+            <p>Xây dựng trang tiếp thị liên kết cá nhân trên miền <strong>kiosk.capcat.vn</strong> để chia sẻ đề xuất mua sắm của bạn.</p>
           </div>
           <form id="kiosk-register-form" class="kiosk-form" onsubmit="return false;">
             <div class="form-group">
               <label for="kiosk-name-input">Tên Kiosk của bạn (Slug viết liền không dấu)</label>
               <div class="input-prefix-wrapper">
-                <span class="url-prefix">kios.capcat.vn/</span>
+                <span class="url-prefix">kiosk.capcat.vn/</span>
                 <input type="text" id="kiosk-name-input" class="cozy-input" placeholder="tên-kiosk-của-bạn" required />
               </div>
               <small class="form-help">Chỉ sử dụng chữ cái viết thường (a-z), chữ số (0-9) và dấu gạch ngang (-). Ví dụ: tiem-nho-tina, meo-map-curator</small>
@@ -73,7 +73,7 @@ import Layout from '../../layouts/Layout.astro';
             <div class="form-group">
               <label for="kiosk-resubmit-name">Tên Kiosk của bạn (Slug viết liền không dấu)</label>
               <div class="input-prefix-wrapper">
-                <span class="url-prefix">kios.capcat.vn/</span>
+                <span class="url-prefix">kiosk.capcat.vn/</span>
                 <input type="text" id="kiosk-resubmit-name" class="cozy-input" required />
               </div>
             </div>
@@ -198,7 +198,7 @@ import Layout from '../../layouts/Layout.astro';
         } else if (kiosk.status === 'pending') {
           if (kioskPending) kioskPending.classList.remove('hidden');
           const pendingInfo = document.getElementById('kiosk-pending-info');
-          if (pendingInfo) pendingInfo.textContent = `Tên đăng ký: kios.capcat.vn/${kiosk.kios_name} | Kênh: ${kiosk.channel}`;
+          if (pendingInfo) pendingInfo.textContent = `Tên đăng ký: kiosk.capcat.vn/${kiosk.kios_name} | Kênh: ${kiosk.channel}`;
         } else if (kiosk.status === 'rejected') {
           if (kioskRejected) kioskRejected.classList.remove('hidden');
           const rejectedReason = document.getElementById('kiosk-rejected-reason');
@@ -348,11 +348,11 @@ import Layout from '../../layouts/Layout.astro';
       const copyBtn = document.getElementById('copy-kiosk-url-btn');
       const viewLink = document.getElementById('view-kiosk-url-link') as HTMLAnchorElement;
 
-      const fullUrlPath = `kios.capcat.vn/${kiosk.kios_name}`;
+      const fullUrlPath = `kiosk.capcat.vn/${kiosk.kios_name}`;
       if (urlText) urlText.textContent = fullUrlPath;
       if (viewLink) {
         // dynamic link port test local, khi deploy production sẽ chạy domain thực tế
-        viewLink.href = `http://${window.location.hostname}:4325/${kiosk.kios_name}`;
+        viewLink.href = `http://${window.location.hostname}:4323/${kiosk.kios_name}`;
       }
 
       copyBtn?.addEventListener('click', () => {

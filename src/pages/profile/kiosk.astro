@@ -90,7 +90,7 @@ import Layout from '../../layouts/Layout.astro';
 
         <!-- Kiosk Dashboard Card (Đã được duyệt) -->
         <div class="kiosk-card hidden" id="kiosk-dashboard-card">
-          <div class="kiosk-card-header" style="border-bottom: 1px solid var(--cozy-border-light); padding-bottom: 1.25rem;">
+          <div class="kiosk-card-header" style="border-bottom: 1px solid var(--cozy-border-light); padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
             <h2>Cấu Hình Cửa Hàng Kiosk</h2>
             <div class="kiosk-url-share-row">
               <div class="kiosk-url-badge">
@@ -103,14 +103,82 @@ import Layout from '../../layouts/Layout.astro';
             </div>
           </div>
 
+          <!-- Cấu hình thông tin Kiosk (Avatar) -->
+          <div class="kiosk-settings-section" style="background-color: var(--cozy-bg-beige); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--cozy-border-light);">
+            <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0;">
+              <i class="ph-light ph-user-circle" style="font-size: 1.15rem; color: var(--cozy-green-matcha-forest);"></i> Ảnh đại diện Kiosk
+            </h3>
+            <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
+              <!-- Preview Avatar -->
+              <div class="avatar-preview-box" style="position: relative; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background-color: var(--cozy-bg-pure); border: 2px solid var(--cozy-green-matcha-forest); flex-shrink: 0;">
+                <img id="kiosk-avatar-preview" src="/images/default-avatar.png" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+              <div style="flex-grow: 1; min-width: 250px; display: flex; flex-direction: column; gap: 0.5rem;">
+                <input type="url" id="kiosk-avatar-url" class="cozy-input" placeholder="Dán link ảnh đại diện (hoặc chọn nhanh bên dưới)..." style="width: 100%; padding: 0.5rem 0.75rem;" />
+                
+                <!-- Avatar Presets -->
+                <div class="avatar-presets" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 500;">
+                    🐱 Tina
+                  </button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 500;">
+                    🐶 Corgi
+                  </button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 500;">
+                    🕶️ Boss Xám
+                  </button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 500;">
+                    🐯 Munchkin
+                  </button>
+                </div>
+              </div>
+              <button id="kiosk-save-settings-btn" class="cozy-btn" style="padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; background-color: var(--cozy-green-matcha-forest); color: #fff; border-radius: 8px;">
+                Lưu cấu hình <i class="ph-light ph-check"></i>
+              </button>
+            </div>
+          </div>
+
           <!-- Khung thêm link tiếp thị tối màu (Cozy Charcoal) -->
           <div class="kiosk-dark-container">
-            <div class="kiosk-add-link-form">
+            <div class="kiosk-add-link-form" style="display: flex; flex-direction: column; gap: 0.85rem;">
               <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
-                <input type="url" id="kiosk-link-url" class="dark-input" placeholder="Nhập link Shopee affiliate (ví dụ: https://shope.ee/...)" />
-                <input type="text" id="kiosk-link-desc" class="dark-input" placeholder="Nhập mô tả sản phẩm (ví dụ: Cát đậu nành hút ẩm khử mùi siêu tốt...)" />
+                <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; margin-bottom: -0.25rem;">Link sản phẩm Shopee</label>
+                <input type="url" id="kiosk-link-url" class="dark-input" placeholder="Nhập link Shopee affiliate (ví dụ: https://shopee.vn/...)" style="font-family: inherit;" />
+                
+                <!-- Expanded fields (hiển thị khi nhập link hợp lệ) -->
+                <div id="kiosk-expanded-fields" class="hidden" style="display: flex; flex-direction: column; gap: 0.85rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.85rem; margin-top: 0.15rem;">
+                  <div>
+                    <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Tên hiển thị sản phẩm (tự động gợi ý)</label>
+                    <input type="text" id="kiosk-link-name" class="dark-input" placeholder="Tên sản phẩm bày trên Kiosk..." />
+                  </div>
+                  
+                  <div>
+                    <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Mô tả cảm xúc hoặc đánh giá</label>
+                    <input type="text" id="kiosk-link-desc" class="dark-input" placeholder="Nhập mô tả cảm nghĩ (ví dụ: Bé mèo thích mê, nằm chải cả ngày không chán...)" />
+                  </div>
+
+                  <div>
+                    <label style="color: rgba(255,255,255,0.7); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Ảnh sản phẩm hiển thị</label>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                      <div class="product-preview-img-box" style="width: 48px; height: 48px; border-radius: 8px; overflow: hidden; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <img id="kiosk-link-image-preview" src="/images/brand/symbol-green.png" style="width: 100%; height: 100%; object-fit: cover;" />
+                      </div>
+                      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px; min-width: 200px;">
+                        <input type="url" id="kiosk-link-image" class="dark-input" placeholder="Dán link ảnh sản phẩm (hoặc chọn nhanh bên dưới)..." style="font-size: 0.8rem;" />
+                        
+                        <!-- Preset product illustration images -->
+                        <div class="product-img-presets" style="display: flex; gap: 8px; margin-top: 2px;">
+                          <button type="button" class="preset-prod-img-btn" data-url="/images/products/hat-dinh-duong-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Hạt Dinh Dưỡng"><img src="/images/products/hat-dinh-duong-polaroid.webp" style="width: 20px; height: 20px; border-radius: 4px;" /></button>
+                          <button type="button" class="preset-prod-img-btn" data-url="/images/products/luoc-massage-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Lược Massage"><img src="/images/products/luoc-massage-polaroid.webp" style="width: 20px; height: 20px; border-radius: 4px;" /></button>
+                          <button type="button" class="preset-prod-img-btn" data-url="/images/products/sach-meo-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Sách Tâm Lý Mèo"><img src="/images/products/sach-meo-polaroid.webp" style="width: 20px; height: 20px; border-radius: 4px;" /></button>
+                          <button type="button" class="preset-prod-img-btn" data-url="/images/products/den-totoro-polaroid.webp" style="padding: 2px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center;" title="Đèn Totoro"><img src="/images/products/den-totoro-polaroid.webp" style="width: 20px; height: 20px; border-radius: 4px;" /></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; width: 100%;">
+              <div style="display: flex; justify-content: flex-end; margin-top: 0.25rem; width: 100%;">
                 <button id="kiosk-link-add-btn" class="dark-add-btn">Add URL</button>
               </div>
             </div>
@@ -341,7 +409,6 @@ import Layout from '../../layouts/Layout.astro';
         }
       });
     }
-
     // --- CẤU HÌNH DASHBOARD ĐÃ PHÊ DUYỆT ---
     function setupDashboard(kiosk: any) {
       const urlText = document.getElementById('kiosk-url-text');
@@ -351,7 +418,6 @@ import Layout from '../../layouts/Layout.astro';
       const fullUrlPath = `kiosk.capcat.vn/${kiosk.kios_name}`;
       if (urlText) urlText.textContent = fullUrlPath;
       if (viewLink) {
-        // dynamic link port test local, khi deploy production sẽ chạy domain thực tế
         viewLink.href = `http://${window.location.hostname}:4323/${kiosk.kios_name}`;
       }
 
@@ -363,20 +429,126 @@ import Layout from '../../layouts/Layout.astro';
         });
       });
 
-      // Tải các link ban đầu
-      loadKioskLinks(kiosk.id);
+      // --- Cấu hình Avatar Kiosk ---
+      const avatarUrlInput = document.getElementById('kiosk-avatar-url') as HTMLInputElement;
+      const avatarPreview = document.getElementById('kiosk-avatar-preview') as HTMLImageElement;
+      const saveSettingsBtn = document.getElementById('kiosk-save-settings-btn');
+      const presetAvatarBtns = document.querySelectorAll('.preset-avatar-btn');
 
-      // Xử lý thêm link Shopee mới
+      // Khởi tạo thông tin Avatar hiện tại
+      if (kiosk.avatar_url) {
+        if (avatarUrlInput) avatarUrlInput.value = kiosk.avatar_url;
+        if (avatarPreview) avatarPreview.src = kiosk.avatar_url;
+      }
+
+      // Xử lý thay đổi url avatar thủ công
+      avatarUrlInput?.addEventListener('input', () => {
+        const val = avatarUrlInput.value.trim();
+        if (avatarPreview) {
+          avatarPreview.src = val || '/images/default-avatar.png';
+        }
+      });
+
+      // Chọn avatar pet mẫu
+      presetAvatarBtns.forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          const url = btn.getAttribute('data-url');
+          if (url) {
+            if (avatarUrlInput) avatarUrlInput.value = url;
+            if (avatarPreview) avatarPreview.src = url;
+          }
+        });
+      });
+
+      // Lưu thông tin Avatar Kiosk
+      saveSettingsBtn?.addEventListener('click', async () => {
+        const avatarVal = avatarUrlInput.value.trim();
+        saveSettingsBtn.setAttribute('disabled', 'true');
+        saveSettingsBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang lưu...';
+
+        const { error } = await client.from('creator_kiosks').update({
+          avatar_url: avatarVal || null,
+          updated_at: new Date().toISOString()
+        }).eq('id', kiosk.id);
+
+        saveSettingsBtn.removeAttribute('disabled');
+        saveSettingsBtn.innerHTML = 'Lưu cấu hình <i class="ph-light ph-check"></i>';
+
+        if (error) {
+          if ((window as any).showToast) (window as any).showToast('Lỗi lưu cấu hình: ' + error.message);
+        } else {
+          if ((window as any).showToast) (window as any).showToast('Đã lưu cấu hình Kiosk thành công! 🎉');
+        }
+      });
+
+      // --- Xử lý thêm Link Shopee mới ---
       const addBtn = document.getElementById('kiosk-link-add-btn') as HTMLButtonElement;
       const urlInput = document.getElementById('kiosk-link-url') as HTMLInputElement;
+      const expandedFields = document.getElementById('kiosk-expanded-fields');
+      const nameInput = document.getElementById('kiosk-link-name') as HTMLInputElement;
       const descInput = document.getElementById('kiosk-link-desc') as HTMLInputElement;
+      const imageInput = document.getElementById('kiosk-link-image') as HTMLInputElement;
+      const imagePreview = document.getElementById('kiosk-link-image-preview') as HTMLImageElement;
+      const presetProdBtns = document.querySelectorAll('.preset-prod-img-btn');
 
+      // Tự động phát hiện link Shopee và prefill tên sản phẩm từ slug
+      urlInput?.addEventListener('input', () => {
+        const urlVal = urlInput.value.trim();
+        const isShopee = urlVal.toLowerCase().includes('shopee.vn') || urlVal.toLowerCase().includes('shp.ee') || urlVal.toLowerCase().includes('shope.ee');
+        
+        if (isShopee) {
+          expandedFields?.classList.remove('hidden');
+          
+          // Trích xuất tên từ slug shopee nếu là full link
+          const match = urlVal.match(/shopee\.vn\/([^\/]+)-i\.\d+\.\d+/i);
+          if (match && match[1]) {
+            const slug = match[1];
+            const decoded = decodeURIComponent(slug.replace(/-/g, ' '));
+            const prefilledName = decoded.charAt(0).toUpperCase() + decoded.slice(1);
+            if (nameInput && !nameInput.value) {
+              nameInput.value = prefilledName;
+            }
+          }
+          
+          // Prefill default image nếu chưa có
+          if (imageInput && !imageInput.value) {
+            const defaultImg = '/images/products/hat-dinh-duong-polaroid.webp';
+            imageInput.value = defaultImg;
+            if (imagePreview) imagePreview.src = defaultImg;
+          }
+        } else if (!urlVal) {
+          expandedFields?.classList.add('hidden');
+        }
+      });
+
+      // Xem trước ảnh sản phẩm khi nhập URL thủ công
+      imageInput?.addEventListener('input', () => {
+        const val = imageInput.value.trim();
+        if (imagePreview) {
+          imagePreview.src = val || '/images/brand/symbol-green.png';
+        }
+      });
+
+      // Chọn ảnh sản phẩm mẫu nhanh
+      presetProdBtns.forEach((btn: any) => {
+        btn.addEventListener('click', () => {
+          const url = btn.getAttribute('data-url');
+          if (url) {
+            if (imageInput) imageInput.value = url;
+            if (imagePreview) imagePreview.src = url;
+          }
+        });
+      });
+
+      // Submit thêm sản phẩm mới
       addBtn?.addEventListener('click', async () => {
         const urlVal = urlInput.value.trim();
+        const nameVal = nameInput ? nameInput.value.trim() : '';
         const descVal = descInput.value.trim();
+        const imageVal = imageInput ? imageInput.value.trim() : '';
 
         if (!urlVal) {
-          if ((window as any).showToast) (window as any).showToast('Vui lòng nhập đường dẫn tiếp thị sản phẩm 🐾');
+          if ((window as any).showToast) (window as any).showToast('Vui lòng nhập link sản phẩm Shopee 🐾');
           return;
         }
 
@@ -385,20 +557,23 @@ import Layout from '../../layouts/Layout.astro';
           return;
         }
 
-        // Bộ lọc tự động kiểm duyệt
         let linkStatus = 'approved';
         let linkRejectReason = null;
 
-        // A. Check link Shopee
+        // Kiểm tra hợp lệ link Shopee
         const isShopee = urlVal.toLowerCase().includes('shopee.vn') || urlVal.toLowerCase().includes('shp.ee') || urlVal.toLowerCase().includes('shope.ee');
         if (!isShopee) {
           linkStatus = 'rejected';
           linkRejectReason = 'Đường dẫn không phải link Shopee Affiliate hợp lệ.';
         }
-        // B. Check text safety offline
+        // Kiểm duyệt từ ngữ bậy bạ
         else if (descVal && !checkTextSafety(descVal)) {
           linkStatus = 'rejected';
           linkRejectReason = 'Mô tả chứa từ ngữ chưa lành mạnh.';
+        }
+        else if (nameVal && !checkTextSafety(nameVal)) {
+          linkStatus = 'rejected';
+          linkRejectReason = 'Tên sản phẩm chứa từ ngữ chưa lành mạnh.';
         }
 
         addBtn.disabled = true;
@@ -407,6 +582,8 @@ import Layout from '../../layouts/Layout.astro';
         const { error } = await client.from('kiosk_links').insert({
           kiosk_id: kiosk.id,
           affiliate_url: urlVal,
+          product_name: nameVal || null,
+          product_image_url: imageVal || null,
           description: descVal || null,
           status: linkStatus,
           rejection_reason: linkRejectReason
@@ -416,7 +593,7 @@ import Layout from '../../layouts/Layout.astro';
         addBtn.innerHTML = 'Add URL';
 
         if (error) {
-          if ((window as any).showToast) (window as any).showToast('Lỗi khi ghi DB: ' + error.message);
+          if ((window as any).showToast) (window as any).showToast('Lỗi ghi DB: ' + error.message);
         } else {
           if ((window as any).showToast) {
             if (linkStatus === 'approved') {
@@ -425,14 +602,22 @@ import Layout from '../../layouts/Layout.astro';
               (window as any).showToast(`Sản phẩm bị từ chối duyệt: ${linkRejectReason} ⚠️`);
             }
           }
+          
+          // Reset form và ẩn các trường mở rộng
           urlInput.value = '';
+          if (nameInput) nameInput.value = '';
           descInput.value = '';
+          if (imageInput) imageInput.value = '';
+          if (imagePreview) imagePreview.src = '/images/brand/symbol-green.png';
+          expandedFields?.classList.add('hidden');
+          
           loadKioskLinks(kiosk.id);
         }
       });
-    }
 
-    // --- TẢI DANH SÁCH LINK KIOSK ---
+      // Tải các link ban đầu
+      loadKioskLinks(kiosk.id);
+    }    // --- TẢI DANH SÁCH LINK KIOSK ---
     function loadKioskLinks(kioskId: string) {
       const listEl = document.getElementById('kiosk-links-list');
       const loadingEl = document.getElementById('kiosk-links-list-loading');
@@ -465,13 +650,19 @@ import Layout from '../../layouts/Layout.astro';
                 ? `<span class="kiosk-item-reject-badge"><i class="ph-light ph-warning-circle"></i> Bị từ chối: ${link.rejection_reason || 'Vi phạm chính sách'}</span>`
                 : '';
 
+              const displayImage = link.product_image_url 
+                ? `<img src="${link.product_image_url}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);" />`
+                : `<div style="width: 40px; height: 40px; border-radius: 6px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-light ph-shopping-bag" style="font-size: 1.15rem; color: rgba(255,255,255,0.6);"></i></div>`;
+
+              const displayName = link.product_name || escapeHtml(link.affiliate_url);
+
               return `
-                <div class="kiosk-link-item">
-                  <input type="checkbox" class="kiosk-item-checkbox" />
-                  <i class="ph-light ph-globe" style="font-size: 1.15rem; color: rgba(255,255,255,0.6); margin-top: 4px;"></i>
-                  <div style="display: flex; flex-direction: column; gap: 0.25rem; flex-grow: 1; min-width: 0;">
-                    <a href="${link.affiliate_url}" target="_blank" class="kiosk-item-url-link" title="${link.affiliate_url}">${escapeHtml(link.affiliate_url)}</a>
-                    ${link.description ? `<span class="kiosk-item-desc">${escapeHtml(link.description)}</span>` : ''}
+                <div class="kiosk-link-item" style="align-items: center;">
+                  <input type="checkbox" class="kiosk-item-checkbox" style="margin-top: 0;" />
+                  ${displayImage}
+                  <div style="display: flex; flex-direction: column; gap: 0.15rem; flex-grow: 1; min-width: 0; margin-left: 4px;">
+                    <a href="${link.affiliate_url}" target="_blank" class="kiosk-item-url-link" title="${link.affiliate_url}" style="font-weight: 600; font-family: inherit; font-size: 0.88rem;">${displayName}</a>
+                    ${link.description ? `<span class="kiosk-item-desc" style="font-size: 0.78rem;">“ ${escapeHtml(link.description)} ”</span>` : ''}
                     ${badgeHtml}
                   </div>
                   <button class="kiosk-item-delete-btn" data-id="${link.id}" title="Xóa liên kết">

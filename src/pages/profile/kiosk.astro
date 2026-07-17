@@ -260,8 +260,14 @@ import Layout from '../../layouts/Layout.astro';
                         <div>
                           <label style="color: var(--cozy-text-charcoal); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Ảnh sản phẩm hiển thị</label>
                           <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px; min-width: 200px;">
-                              <input type="url" id="kiosk-link-image" class="light-input" placeholder="Dán link ảnh sản phẩm (hoặc chọn nhanh gợi ý)..." style="font-size: 0.8rem;" />
+                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px; min-width: 200px; width: 100%;">
+                              <div style="display: flex; gap: 8px; width: 100%;">
+                                <input type="text" id="kiosk-link-image" class="light-input" placeholder="Dán link ảnh (hoặc tải lên từ thiết bị)..." style="font-size: 0.8rem; flex: 1;" />
+                                <button type="button" id="kiosk-product-upload-btn" class="cozy-btn" style="padding: 0.65rem 1.15rem; font-size: 0.82rem; font-weight: 600; border-radius: 8px; background-color: var(--cozy-bg-beige); border: 1px solid var(--cozy-border-light); color: var(--cozy-text-obsidian); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; transition: all 0.2s ease;">
+                                  <i class="ph-light ph-upload-simple"></i> Tải ảnh
+                                </button>
+                                <input type="file" id="kiosk-product-file-input" accept="image/*" class="hidden" style="display: none;" />
+                              </div>
                               
                               <!-- Preset product illustration images -->
                               <div class="product-img-presets" style="display: flex; gap: 8px; margin-top: 2px; align-items: center; flex-wrap: wrap;">
@@ -709,6 +715,8 @@ import Layout from '../../layouts/Layout.astro';
       const nameInput = document.getElementById('kiosk-link-name') as HTMLInputElement;
       const descInput = document.getElementById('kiosk-link-desc') as HTMLInputElement;
       const imageInput = document.getElementById('kiosk-link-image') as HTMLInputElement;
+      const productUploadBtn = document.getElementById('kiosk-product-upload-btn');
+      const productFileInput = document.getElementById('kiosk-product-file-input') as HTMLInputElement;
       const presetProdBtns = document.querySelectorAll('.preset-prod-img-btn');
 
       // Các thành phần Live Preview Card
@@ -728,6 +736,40 @@ import Layout from '../../layouts/Layout.astro';
             advancedChevron.className = isHidden ? 'ph-light ph-caret-down' : 'ph-light ph-caret-up';
           }
         }
+      });
+
+      // Tải ảnh sản phẩm từ thiết bị
+      productUploadBtn?.addEventListener('click', () => productFileInput?.click());
+
+      productFileInput?.addEventListener('change', () => {
+        const files = productFileInput.files;
+        if (!files || files.length === 0) return;
+        const file = files[0];
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target?.result as string;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              const size = Math.min(img.width, img.height);
+              const sx = (img.width - size) / 2;
+              const sy = (img.height - size) / 2;
+              ctx.drawImage(img, sx, sy, size, size, 0, 0, 300, 300);
+
+              const base64Data = canvas.toDataURL('image/jpeg', 0.85);
+              if (imageInput) imageInput.value = base64Data;
+              
+              if ((window as any).showToast) (window as any).showToast('Đã tải lên ảnh sản phẩm thành công! 📸');
+              updateLivePreview();
+            }
+          };
+        };
+        reader.readAsDataURL(file);
       });
 
       // Hàm cập nhật Live Preview
@@ -954,6 +996,7 @@ import Layout from '../../layouts/Layout.astro';
           if (nameInput) nameInput.value = '';
           descInput.value = '';
           if (imageInput) imageInput.value = '';
+          if (productFileInput) productFileInput.value = '';
           
           // Đóng accordion nâng cao nếu đang mở
           if (advancedFields && !advancedFields.classList.contains('hidden')) {

@@ -50,24 +50,44 @@ export default async function handler(request, response) {
         const shopeeApiUrl = `https://shopee.vn/api/v4/item/get?itemid=${itemId}&shopid=${shopId}`;
         let apiData = null;
 
-        // Lớp 1: Gọi trực tiếp API Shopee từ Serverless
-        try {
-          const res = await fetch(shopeeApiUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-              'Accept': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest',
-              'Referer': 'https://shopee.vn/'
+        const shoperProxyUrl = process.env.SHOPER_PROXY_URL;
+
+        // Lớp 0: Gọi qua Google Apps Script Proxy (Nếu được cấu hình trong .env)
+        if (shoperProxyUrl) {
+          try {
+            const requestUrl = `${shoperProxyUrl}${shoperProxyUrl.includes('?') ? '&' : '?'}url=${encodeURIComponent(shopeeApiUrl)}`;
+            const res = await fetch(requestUrl);
+            if (res.status === 200) {
+              const json = await res.json();
+              if (json && json.data) {
+                apiData = json.data;
+              }
             }
-          });
-          if (res.status === 200) {
-            const json = await res.json();
-            if (json && json.data) {
-              apiData = json.data;
-            }
+          } catch (e) {
+            console.error('Shopee API Lớp 0 (GAS Proxy) fetch error:', e.message);
           }
-        } catch (e) {
-          console.error('Shopee API direct fetch error:', e.message);
+        }
+
+        // Lớp 1: Gọi trực tiếp API Shopee từ Serverless
+        if (!apiData) {
+          try {
+            const res = await fetch(shopeeApiUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Referer': 'https://shopee.vn/'
+              }
+            });
+            if (res.status === 200) {
+              const json = await res.json();
+              if (json && json.data) {
+                apiData = json.data;
+              }
+            }
+          } catch (e) {
+            console.error('Shopee API direct fetch error:', e.message);
+          }
         }
 
         // Lớp 2: Gọi API qua Free CORS Proxy nếu trực tiếp bị chặn

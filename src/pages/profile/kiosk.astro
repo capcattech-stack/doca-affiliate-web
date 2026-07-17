@@ -197,6 +197,7 @@ import Layout from '../../layouts/Layout.astro';
               <div id="kiosk-links-list" class="kiosk-links-list">
                 <!-- Links item render ở đây -->
               </div>
+              <div id="kiosk-links-pagination" class="kiosk-pagination" style="display: none;"></div>
             </div>
           </div>
 
@@ -968,22 +969,19 @@ import Layout from '../../layouts/Layout.astro';
 
               return `
                 <div class="kiosk-added-card" style="background: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 12px; padding: 0.65rem; display: flex; flex-direction: column; gap: 0.5rem; position: relative; transition: all 0.2s ease;">
-                  <!-- Checkbox & Delete absolute -->
                   <div style="position: absolute; top: 8px; left: 8px; z-index: 5;">
                     <input type="checkbox" class="kiosk-item-checkbox" data-id="${link.id}" style="margin: 0; cursor: pointer; width: 15px; height: 15px; accent-color: var(--cozy-green-matcha-forest);" />
                   </div>
                   <div style="position: absolute; top: 8px; right: 8px; z-index: 5;">
-                    <button class="kiosk-item-delete-btn" data-id="${link.id}" title="Xóa liên kết" style="background: rgba(255,255,255,0.9); border: 1px solid var(--cozy-border-light); color: #ff4d4f; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                    <button type="button" class="kiosk-item-delete-btn" data-id="${link.id}" title="Xóa liên kết" style="background: rgba(255,255,255,0.9); border: 1px solid var(--cozy-border-light); color: #ff4d4f; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
                       <i class="ph-light ph-trash" style="font-size: 0.85rem;"></i>
                     </button>
                   </div>
 
-                  <!-- Product image -->
                   <div class="product-image-container" style="border-radius: 8px; background-color: var(--cozy-bg-beige); aspect-ratio: 1.1; overflow: hidden; width: 100%;">
                     ${displayImage}
                   </div>
 
-                  <!-- Product info -->
                   <div class="product-meta" style="padding: 0 0.15rem; display: flex; flex-direction: column; gap: 0.2rem; flex-grow: 1;">
                     <h4 class="product-title" style="font-size: 0.82rem; font-weight: 700; height: 2.6em; line-height: 1.35; margin-bottom: 2px; color: var(--cozy-text-obsidian); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(displayName)}</h4>
                     ${link.description ? `<p class="product-quote" style="font-size: 0.72rem; line-height: 1.3; height: 2.6em; margin-bottom: 4px; color: var(--cozy-text-charcoal); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">“ ${escapeHtml(link.description)} ”</p>` : ''}
@@ -995,6 +993,76 @@ import Layout from '../../layouts/Layout.astro';
                 </div>
               `;
             }).join('');
+
+            // Cài đặt phân trang client-side
+            const cards = listEl.children;
+            const paginationContainer = document.getElementById('kiosk-links-pagination');
+            let currentPage = 1;
+            const itemsPerPage = 10;
+
+            function updatePagination() {
+              if (!cards.length) return;
+              const totalItems = cards.length;
+              const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+              if (currentPage < 1) currentPage = 1;
+              if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+              const startIndex = (currentPage - 1) * itemsPerPage;
+              const endIndex = startIndex + itemsPerPage;
+
+              Array.from(cards).forEach((card: any) => {
+                card.style.display = 'none';
+              });
+
+              Array.from(cards).forEach((card: any, index) => {
+                if (index >= startIndex && index < endIndex) {
+                  card.style.display = 'flex';
+                }
+              });
+
+              renderPaginationButtons(totalPages);
+            }
+
+            function renderPaginationButtons(totalPages: number) {
+              if (!paginationContainer) return;
+              if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                paginationContainer.style.display = 'none';
+                return;
+              }
+
+              paginationContainer.style.display = 'flex';
+              let html = '';
+              // Prev button
+              html += `<button type="button" class="page-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}"><i class="ph-light ph-caret-left"></i></button>`;
+              
+              for (let i = 1; i <= totalPages; i++) {
+                html += `<button type="button" class="page-btn num-btn ${currentPage === i ? 'active' : ''}" data-page="${i}">${i}</button>`;
+              }
+              
+              // Next button
+              html += `<button type="button" class="page-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}"><i class="ph-light ph-caret-right"></i></button>`;
+              
+              paginationContainer.innerHTML = html;
+
+              paginationContainer.querySelectorAll('.page-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                  const target = e.currentTarget as HTMLButtonElement;
+                  if (target.disabled) return;
+                  const pageNum = parseInt(target.getAttribute('data-page') || '1');
+                  currentPage = pageNum;
+                  updatePagination();
+                  
+                  // Cuộn mượt lên đầu danh sách sản phẩm
+                  const listContainer = document.querySelector('.kiosk-links-list-container');
+                  listContainer?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+              });
+            }
+
+            // Khởi chạy phân trang lần đầu
+            updatePagination();
 
             // Delete link handler
             listEl.querySelectorAll('.kiosk-item-delete-btn').forEach((btn: any) => {
@@ -1511,9 +1579,58 @@ import Layout from '../../layouts/Layout.astro';
 
   .kiosk-links-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     padding: 0.25rem 0;
+  }
+  @media (min-width: 576px) {
+    .kiosk-links-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 992px) {
+    .kiosk-links-list {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  /* Cozy Pagination */
+  .kiosk-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 2rem 0 1rem 0;
+  }
+  .kiosk-pagination .page-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--cozy-border-light);
+    background-color: var(--cozy-bg-pure);
+    color: var(--cozy-text-charcoal);
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  .kiosk-pagination .page-btn:hover:not(:disabled) {
+    background-color: var(--cozy-bg-beige);
+    border-color: var(--cozy-green-matcha);
+    color: var(--cozy-green-matcha-forest);
+  }
+  .kiosk-pagination .page-btn.active {
+    background-color: var(--cozy-green-matcha-forest);
+    border-color: var(--cozy-green-matcha-forest);
+    color: #fff;
+  }
+  .kiosk-pagination .page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
   .kiosk-added-card {
     transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);

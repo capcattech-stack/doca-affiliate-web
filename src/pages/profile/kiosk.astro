@@ -178,102 +178,123 @@ import Layout from '../../layouts/Layout.astro';
             </div>
           </div>
 
-          <!-- Khung thêm link tiếp thị sáng màu (Cozy Cloud) -->
-          <div class="kiosk-light-container">
-            <div class="kiosk-add-link-wrapper" style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-              <!-- Left Column: Inputs Form -->
-              <div class="kiosk-add-link-form" style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 0.85rem;">
-                <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
-                  <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; margin-bottom: -0.25rem;">Link sản phẩm Shopee</label>
-                  <div style="position: relative; width: 100%;">
-                    <input type="url" id="kiosk-link-url" class="light-input" placeholder="Dán link Shopee affiliate (ví dụ: https://shopee.vn/...)" style="font-family: inherit; padding-right: 2.25rem;" />
-                    <!-- Loading spinner inside URL input -->
-                    <div id="kiosk-url-loading-spinner" class="hidden" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--cozy-text-charcoal);">
-                      <i class="ph-light ph-spinner-gap spin"></i>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 0.35rem;">Mô tả cảm xúc hoặc đánh giá</label>
-                    <input type="text" id="kiosk-link-desc" class="light-input" placeholder="Ví dụ: Bé mèo thích mê, nằm chải cả ngày không chán..." />
-                  </div>
-
-                  <!-- Toggle Advanced Settings -->
-                  <div style="margin-top: 0.25rem;">
-                    <button type="button" id="kiosk-toggle-advanced-btn" style="background: none; border: none; color: var(--cozy-text-charcoal); font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
-                      <span>Cấu hình nâng cao (Tên & Ảnh)</span>
-                      <i id="kiosk-advanced-chevron" class="ph-light ph-caret-down"></i>
-                    </button>
-                  </div>
-
-                  <!-- Advanced Fields Content (Collapsible) -->
-                  <div id="kiosk-advanced-fields" class="hidden" style="display: flex; flex-direction: column; gap: 0.85rem; border-top: 1px dashed var(--cozy-border-light); padding-top: 0.85rem; margin-top: 0.25rem;">
-                    <div>
-                      <label style="color: var(--cozy-text-charcoal); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Tên hiển thị sản phẩm (tự động gợi ý)</label>
-                      <input type="text" id="kiosk-link-name" class="light-input" placeholder="Tên sản phẩm bày trên Kiosk..." />
-                    </div>
-
-                    <div>
-                      <label style="color: var(--cozy-text-charcoal); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Ảnh sản phẩm hiển thị</label>
-                      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px; min-width: 200px;">
-                          <input type="url" id="kiosk-link-image" class="light-input" placeholder="Dán link ảnh sản phẩm (hoặc chọn nhanh gợi ý)..." style="font-size: 0.8rem;" />
-                          
-                          <!-- Preset product illustration images -->
-                          <div class="product-img-presets" style="display: flex; gap: 8px; margin-top: 2px; align-items: center; flex-wrap: wrap;">
-                            <span style="font-size: 0.72rem; color: var(--cozy-text-charcoal); margin-right: 4px;">Chọn nhanh:</span>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/hat-dinh-duong-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Hạt Dinh Dưỡng"><img src="/images/products/hat-dinh-duong-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/luoc-massage-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Lược Massage"><img src="/images/products/luoc-massage-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/sach-meo-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Sách Tâm Lý Mèo"><img src="/images/products/sach-meo-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
-                            <button type="button" class="preset-prod-img-btn" data-url="/images/products/den-totoro-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Đèn Totoro"><img src="/images/products/den-totoro-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div style="display: flex; justify-content: flex-end; margin-top: 0.25rem; width: 100%;">
-                  <button id="kiosk-link-add-btn" class="light-add-btn" style="padding: 0.65rem 1.5rem; font-weight: 600;">Add URL</button>
-                </div>
-              </div>
-
-              <!-- Right Column: Live Preview Card -->
-              <div style="width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.5rem; justify-content: flex-start; align-self: stretch;">
-                <span style="color: var(--cozy-text-charcoal); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; text-align: center;">Xem trước hiển thị</span>
-                <div class="product-card-v2" style="pointer-events: none; border-color: var(--cozy-border-light); height: auto; background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light);">
-                  <div class="product-image-container" style="background-color: var(--cozy-bg-beige);">
-                    <img id="live-preview-image" src="/images/brand/symbol-green.png" class="product-image" />
-                  </div>
-                  <div class="product-meta">
-                    <h4 id="live-preview-title" class="product-title" style="margin-bottom: 4px; height: 2.6em; color: var(--cozy-text-obsidian);">Tên sản phẩm</h4>
-                    <p id="live-preview-quote" class="product-quote" style="margin-bottom: 4px; color: var(--cozy-text-charcoal);">“ Mô tả cảm xúc ”</p>
-                    <span class="platform-badge" data-platform="shopee">
-                      <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" style="display: inline-block; vertical-align: -0.5px; margin-right: 3px;">
-                        <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3a1 1 0 1 0-2 0c0 2.76 2.24 5 5 5s5-2.24 5-5a1 1 0 1 0-2 0c0 1.66-1.34 3-3 3z"/>
-                      </svg>
-                      Shopee
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Danh sách Links sản phẩm -->
             <div class="kiosk-links-list-container" style="border-top: 1px solid var(--cozy-border-light); padding-top: 1.5rem; margin-top: 0.5rem;">
-              <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin-bottom: 1rem; text-align: left; display: flex; align-items: center; gap: 0.35rem;">
-                <i class="ph-light ph-list-bullets" style="font-size: 1.1rem; color: var(--cozy-green-matcha-forest);"></i> Sản phẩm đã bày bán <span id="kiosk-list-title-kios-name" style="font-weight: 550; opacity: 0.85;"></span>
-              </h3>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
+                <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                  <i class="ph-light ph-list-bullets" style="font-size: 1.1rem; color: var(--cozy-green-matcha-forest);"></i> Sản phẩm đã bày bán <span id="kiosk-list-title-kios-name" style="font-weight: 550; opacity: 0.85;"></span>
+                </h3>
+                <button type="button" id="kiosk-add-product-trigger" class="cozy-btn" style="padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; background-color: var(--cozy-green-matcha-forest); color: #fff; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer; transition: all 0.2s ease;">
+                  Thêm sản phẩm <i class="ph-light ph-plus"></i>
+                </button>
+              </div>
               <div id="kiosk-links-list-loading" class="text-center" style="padding: 2rem; color: var(--cozy-text-charcoal); font-size: 0.85rem;">
                 <i class="ph-light ph-spinner-gap spin" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; margin-left: auto; margin-right: auto; color: var(--cozy-green-matcha-forest);"></i> Đang tải danh sách liên kết...
               </div>
               <div id="kiosk-links-list-empty" class="text-center hidden" style="padding: 2.5rem 1.5rem; color: var(--cozy-text-charcoal); font-style: italic; font-size: 0.85rem;">
-                Cửa hàng của bạn chưa bày sản phẩm nào. Hãy dán link Shopee ở phía trên để thêm nhé! 🐾
+                Cửa hàng của bạn chưa bày sản phẩm nào. Nhấp nút "Thêm sản phẩm" phía trên để mở gian hàng nhé! 🐾
               </div>
               <div id="kiosk-links-list" class="kiosk-links-list">
                 <!-- Links item render ở đây -->
               </div>
             </div>
           </div>
+
+          <!-- Bottom Sheet Thêm Sản Phẩm -->
+          <div id="kiosk-add-product-sheet" class="cozy-bottom-sheet">
+            <div class="cozy-sheet-backdrop" id="kiosk-sheet-backdrop"></div>
+            <div class="cozy-sheet-content">
+              <div class="cozy-sheet-drag-handle"></div>
+              <div class="cozy-sheet-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem 0.5rem; border-bottom: 1px dashed var(--cozy-border-light);">
+                <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                  <i class="ph-light ph-shopping-bag" style="color: var(--cozy-green-matcha-forest); font-size: 1.2rem;"></i> Thêm sản phẩm mới
+                </h3>
+                <button type="button" id="kiosk-sheet-close-btn" style="background: none; border: none; font-size: 1.35rem; color: var(--cozy-text-charcoal); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                  <i class="ph-light ph-x"></i>
+                </button>
+              </div>
+              
+              <div class="cozy-sheet-body" style="padding: 1.25rem; overflow-y: auto; max-height: 70vh;">
+                <div class="kiosk-add-link-wrapper" style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                  <!-- Left Column: Inputs Form -->
+                  <div class="kiosk-add-link-form" style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 0.85rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+                      <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; margin-bottom: -0.25rem;">Link sản phẩm Shopee</label>
+                      <div style="position: relative; width: 100%;">
+                        <input type="url" id="kiosk-link-url" class="light-input" placeholder="Dán link Shopee affiliate (ví dụ: https://shopee.vn/...)" style="font-family: inherit; padding-right: 2.25rem;" />
+                        <div id="kiosk-url-loading-spinner" class="hidden" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--cozy-text-charcoal);">
+                          <i class="ph-light ph-spinner-gap spin"></i>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 0.35rem;">Mô tả cảm xúc hoặc đánh giá</label>
+                        <input type="text" id="kiosk-link-desc" class="light-input" placeholder="Ví dụ: Bé mèo thích mê, nằm chải cả ngày không chán..." />
+                      </div>
+
+                      <!-- Toggle Advanced Settings -->
+                      <div style="margin-top: 0.25rem;">
+                        <button type="button" id="kiosk-toggle-advanced-btn" style="background: none; border: none; color: var(--cozy-text-charcoal); font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0;">
+                          <span>Cấu hình nâng cao (Tên & Ảnh)</span>
+                          <i id="kiosk-advanced-chevron" class="ph-light ph-caret-down"></i>
+                        </button>
+                      </div>
+
+                      <!-- Advanced Fields Content (Collapsible) -->
+                      <div id="kiosk-advanced-fields" class="hidden" style="display: flex; flex-direction: column; gap: 0.85rem; border-top: 1px dashed var(--cozy-border-light); padding-top: 0.85rem; margin-top: 0.25rem;">
+                        <div>
+                          <label style="color: var(--cozy-text-charcoal); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Tên hiển thị sản phẩm (tự động gợi ý)</label>
+                          <input type="text" id="kiosk-link-name" class="light-input" placeholder="Tên sản phẩm bày trên Kiosk..." />
+                        </div>
+
+                        <div>
+                          <label style="color: var(--cozy-text-charcoal); font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 0.35rem;">Ảnh sản phẩm hiển thị</label>
+                          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px; min-width: 200px;">
+                              <input type="url" id="kiosk-link-image" class="light-input" placeholder="Dán link ảnh sản phẩm (hoặc chọn nhanh gợi ý)..." style="font-size: 0.8rem;" />
+                              
+                              <!-- Preset product illustration images -->
+                              <div class="product-img-presets" style="display: flex; gap: 8px; margin-top: 2px; align-items: center; flex-wrap: wrap;">
+                                <span style="font-size: 0.72rem; color: var(--cozy-text-charcoal); margin-right: 4px;">Chọn nhanh:</span>
+                                <button type="button" class="preset-prod-img-btn" data-url="/images/products/hat-dinh-duong-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Hạt Dinh Dưỡng"><img src="/images/products/hat-dinh-duong-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                                <button type="button" class="preset-prod-img-btn" data-url="/images/products/luoc-massage-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Lược Massage"><img src="/images/products/luoc-massage-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                                <button type="button" class="preset-prod-img-btn" data-url="/images/products/sach-meo-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Sách Tâm Lý Mèo"><img src="/images/products/sach-meo-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                                <button type="button" class="preset-prod-img-btn" data-url="/images/products/den-totoro-polaroid.webp" style="padding: 2px; border: 1px solid var(--cozy-border-light); border-radius: 6px; background: var(--cozy-bg-beige); cursor: pointer; display: flex; align-items: center;" title="Đèn Totoro"><img src="/images/products/den-totoro-polaroid.webp" style="width: 22px; height: 22px; border-radius: 4px;" /></button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem; width: 100%;">
+                      <button id="kiosk-link-add-btn" class="light-add-btn" style="padding: 0.65rem 1.5rem; font-weight: 600; background-color: var(--cozy-green-matcha-forest); border: none; color: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                        Bày bán ngay <i class="ph-light ph-plus-circle"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Right Column: Live Preview Card -->
+                  <div style="width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.5rem; justify-content: flex-start; align-self: stretch; margin-top: 0.5rem;">
+                    <span style="color: var(--cozy-text-charcoal); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; text-align: center;">Xem trước hiển thị</span>
+                    <div class="product-card-v2" style="pointer-events: none; border-color: var(--cozy-border-light); height: auto; background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light);">
+                      <div class="product-image-container" style="background-color: var(--cozy-bg-beige);">
+                        <img id="live-preview-image" src="/images/brand/symbol-green.png" class="product-image" />
+                      </div>
+                      <div class="product-meta">
+                        <h4 id="live-preview-title" class="product-title" style="margin-bottom: 4px; height: 2.6em; color: var(--cozy-text-obsidian);">Tên sản phẩm</h4>
+                        <p id="live-preview-quote" class="product-quote" style="margin-bottom: 4px; color: var(--cozy-text-charcoal);">“ Mô tả cảm xúc ”</p>
+                        <span class="platform-badge" data-platform="shopee">
+                          <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" style="display: inline-block; vertical-align: -0.5px; margin-right: 3px;">
+                            <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3a1 1 0 1 0-2 0c0 2.76 2.24 5 5 5s5-2.24 5-5a1 1 0 1 0-2 0c0 1.66-1.34 3-3 3z"/>
+                          </svg>
+                          Shopee
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -648,6 +669,30 @@ import Layout from '../../layouts/Layout.astro';
         }
       });
 
+      // --- Xử lý Đóng/Mở Bottom Sheet Thêm Sản Phẩm ---
+      const addProductTrigger = document.getElementById('kiosk-add-product-trigger');
+      const addProductSheet = document.getElementById('kiosk-add-product-sheet');
+      const sheetCloseBtn = document.getElementById('kiosk-sheet-close-btn');
+      const sheetBackdrop = document.getElementById('kiosk-sheet-backdrop');
+
+      function openAddProductSheet() {
+        if (addProductSheet) {
+          addProductSheet.classList.add('open');
+          document.body.style.overflow = 'hidden'; // Khóa scroll màn hình chính
+        }
+      }
+
+      function closeAddProductSheet() {
+        if (addProductSheet) {
+          addProductSheet.classList.remove('open');
+          document.body.style.overflow = ''; // Mở lại scroll màn hình chính
+        }
+      }
+
+      addProductTrigger?.addEventListener('click', openAddProductSheet);
+      sheetCloseBtn?.addEventListener('click', closeAddProductSheet);
+      sheetBackdrop?.addEventListener('click', closeAddProductSheet);
+
       // --- Xử lý thêm Link Shopee mới & Live Preview ---
       const addBtn = document.getElementById('kiosk-link-add-btn') as HTMLButtonElement;
       const urlInput = document.getElementById('kiosk-link-url') as HTMLInputElement;
@@ -836,7 +881,7 @@ import Layout from '../../layouts/Layout.astro';
         }
 
         addBtn.disabled = true;
-        addBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Adding...';
+        addBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang bày bán...';
 
         const { error } = await client.from('kiosk_links').insert({
           kiosk_id: kiosk.id,
@@ -849,7 +894,7 @@ import Layout from '../../layouts/Layout.astro';
         });
 
         addBtn.disabled = false;
-        addBtn.innerHTML = 'Add URL';
+        addBtn.innerHTML = 'Bày bán ngay <i class="ph-light ph-plus-circle"></i>';
 
         if (error) {
           if ((window as any).showToast) (window as any).showToast('Lỗi ghi DB: ' + error.message);
@@ -875,6 +920,7 @@ import Layout from '../../layouts/Layout.astro';
           }
 
           updateLivePreview();
+          closeAddProductSheet(); // Đóng Bottom Sheet sau khi thêm sản phẩm thành công
           loadKioskLinks(kiosk.id);
         }
       });
@@ -1085,6 +1131,90 @@ import Layout from '../../layouts/Layout.astro';
   @media (min-width: 576px) {
     .kiosk-social-grid {
       grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Bottom Sheet Add Product - Mobile First */
+  .cozy-bottom-sheet {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    display: none;
+    align-items: flex-end;
+  }
+  .cozy-bottom-sheet.open {
+    display: flex;
+  }
+
+  .cozy-sheet-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 0.28s ease;
+  }
+  .cozy-bottom-sheet.open .cozy-sheet-backdrop {
+    opacity: 1;
+  }
+
+  .cozy-sheet-content {
+    position: relative;
+    width: 100%;
+    max-height: 90vh;
+    background-color: var(--cozy-bg-pure);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    z-index: 2001;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cozy-bottom-sheet.open .cozy-sheet-content {
+    transform: translateY(0);
+  }
+
+  .cozy-sheet-drag-handle {
+    width: 36px;
+    height: 4px;
+    background-color: var(--cozy-border-light);
+    border-radius: 2px;
+    margin: 8px auto 4px;
+    flex-shrink: 0;
+  }
+
+  .cozy-sheet-close-btn:hover {
+    color: var(--cozy-text-obsidian) !important;
+    transform: scale(1.1);
+  }
+
+  /* Desktop Upgrades: Modal Style (576px+) */
+  @media (min-width: 576px) {
+    .cozy-bottom-sheet {
+      align-items: center;
+      justify-content: center;
+    }
+    .cozy-sheet-content {
+      width: 90%;
+      max-width: 680px;
+      border-radius: 16px;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+    }
+    .cozy-bottom-sheet.open .cozy-sheet-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .cozy-sheet-drag-handle {
+      display: none;
     }
   }
 

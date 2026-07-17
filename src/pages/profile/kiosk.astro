@@ -877,14 +877,17 @@ import Layout from '../../layouts/Layout.astro';
               success = true;
               if ((window as any).showToast) (window as any).showToast('Lấy thông tin sản phẩm thành công! 🎉');
             } else {
+              console.warn('Shopee scraping details:', data.error);
               // Client-side Fallback
               const fallbackTitle = getFallbackTitle(urlVal);
               nameInput.value = fallbackTitle;
               imageInput.value = getFallbackImage(fallbackTitle, urlVal);
-              if ((window as any).showToast) (window as any).showToast('Đã lấy thông tin gợi ý từ link sản phẩm 🐾');
+              if ((window as any).showToast) {
+                (window as any).showToast('Lỗi cào dữ liệu, đã dùng thông tin gợi ý. Xem F12 để biết chi tiết 🐾');
+              }
             }
           } else {
-            throw new Error('API error fallback');
+            throw new Error(`HTTP Status ${res.status}`);
           }
         } catch (err) {
           const fallbackTitle = getFallbackTitle(urlVal);

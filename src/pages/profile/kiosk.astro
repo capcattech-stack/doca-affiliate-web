@@ -116,15 +116,27 @@ import Layout from '../../layouts/Layout.astro';
 
             <!-- Avatar -->
             <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
-              <div class="avatar-preview-box" style="position: relative; width: 72px; height: 72px; border-radius: 50%; overflow: hidden; background-color: var(--cozy-bg-beige); border: 2.5px solid var(--cozy-green-matcha-forest); flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
+              <div id="kiosk-avatar-preview-container" class="avatar-preview-box" style="position: relative; width: 72px; height: 72px; border-radius: 50%; overflow: hidden; background-color: var(--cozy-bg-beige); border: 2.5px solid var(--cozy-green-matcha-forest); flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;">
                 <img id="kiosk-avatar-preview" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150';" />
+                <div class="avatar-hover-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #fff; opacity: 0; transition: opacity 0.2s ease; font-size: 1.1rem;">
+                  <i class="ph-fill ph-camera"></i>
+                </div>
               </div>
               
               <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 250px;">
-                <label for="kiosk-avatar-url" style="font-size: 0.82rem; font-weight: 600; color: var(--cozy-text-obsidian);">Link ảnh đại diện Kiosk</label>
-                <input type="url" id="kiosk-avatar-url" class="cozy-input" placeholder="Dán link ảnh đại diện (hoặc chọn nhanh gợi ý bên dưới)..." style="width: 100%; padding: 0.65rem 0.85rem;" />
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--cozy-text-obsidian);">Ảnh đại diện Kiosk</label>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 0.25rem;">
+                  <button type="button" id="kiosk-avatar-upload-btn" class="cozy-btn" style="padding: 0.55rem 1rem; font-size: 0.8rem; font-weight: 600; background-color: var(--cozy-bg-beige); border: 1px solid var(--cozy-border-light); color: var(--cozy-text-obsidian); border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: none;">
+                    <i class="ph-light ph-upload-simple"></i> Chọn ảnh từ thiết bị
+                  </button>
+                  <button type="button" id="kiosk-avatar-clear-btn" class="cozy-btn" style="padding: 0.55rem 1rem; font-size: 0.8rem; font-weight: 600; background-color: transparent; border: 1px solid rgba(255,0,0,0.15); color: #FF3B30; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; border: 1px solid rgba(255,0,0,0.15);">
+                    <i class="ph-light ph-trash"></i> Xóa
+                  </button>
+                  <input type="file" id="kiosk-avatar-file" accept="image/*" style="display: none;" />
+                  <input type="url" id="kiosk-avatar-url" style="display: none;" />
+                </div>
                 
-                <div class="avatar-presets" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 0.25rem;">
+                <div class="avatar-presets" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                   <span style="font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 500; margin-right: 4px;">Gợi ý nhanh:</span>
                   <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐱 Tina</button>
                   <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐶 Corgi</button>
@@ -514,6 +526,12 @@ import Layout from '../../layouts/Layout.astro';
       const socialFacebook = document.getElementById('kiosk-social-facebook') as HTMLInputElement;
       const socialInstagram = document.getElementById('kiosk-social-instagram') as HTMLInputElement;
 
+      // Thành phần upload avatar từ thiết bị
+      const avatarFile = document.getElementById('kiosk-avatar-file') as HTMLInputElement;
+      const avatarUploadBtn = document.getElementById('kiosk-avatar-upload-btn');
+      const avatarClearBtn = document.getElementById('kiosk-avatar-clear-btn');
+      const avatarPreviewContainer = document.getElementById('kiosk-avatar-preview-container');
+
       // Ảnh mặc định lấy từ tài khoản Google hoặc ảnh Unsplash
       const defaultFallbackAvatar = user?.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150';
 
@@ -535,21 +553,65 @@ import Layout from '../../layouts/Layout.astro';
       if (socialFacebook) socialFacebook.value = socialLinksObj.facebook || '';
       if (socialInstagram) socialInstagram.value = socialLinksObj.instagram || '';
 
-      // Xử lý thay đổi url avatar thủ công
-      avatarUrlInput?.addEventListener('input', () => {
-        const val = avatarUrlInput.value.trim();
-        if (avatarPreview) {
-          avatarPreview.src = val || defaultFallbackAvatar;
-        }
+      // Hiệu ứng hover lớp phủ avatar preview
+      const hoverOverlay = avatarPreviewContainer?.querySelector('.avatar-hover-overlay') as HTMLElement;
+      if (avatarPreviewContainer && hoverOverlay) {
+        avatarPreviewContainer.addEventListener('mouseenter', () => hoverOverlay.style.opacity = '1');
+        avatarPreviewContainer.addEventListener('mouseleave', () => hoverOverlay.style.opacity = '0');
+        avatarPreviewContainer.addEventListener('click', () => avatarFile?.click());
+      }
+
+      avatarUploadBtn?.addEventListener('click', () => avatarFile?.click());
+
+      // Nút Xóa Avatar
+      avatarClearBtn?.addEventListener('click', () => {
+        if (avatarUrlInput) avatarUrlInput.value = '';
+        if (avatarPreview) avatarPreview.src = defaultFallbackAvatar;
+        if (avatarFile) avatarFile.value = '';
+        if ((window as any).showToast) (window as any).showToast('Đã xóa avatar tùy chọn, quay về mặc định. 🐾');
       });
 
-      // Chọn avatar pet mẫu
+      // Xử lý upload file và resize canvas
+      avatarFile?.addEventListener('change', () => {
+        const files = avatarFile.files;
+        if (!files || files.length === 0) return;
+        const file = files[0];
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target?.result as string;
+          img.onload = () => {
+            // Resize ảnh bằng canvas thành hình vuông 150x150
+            const canvas = document.createElement('canvas');
+            canvas.width = 150;
+            canvas.height = 150;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              // Cắt ảnh theo tỉ lệ hình vuông ở giữa
+              const size = Math.min(img.width, img.height);
+              const sx = (img.width - size) / 2;
+              const sy = (img.height - size) / 2;
+              ctx.drawImage(img, sx, sy, size, size, 0, 0, 150, 150);
+
+              const base64Data = canvas.toDataURL('image/jpeg', 0.85);
+              if (avatarUrlInput) avatarUrlInput.value = base64Data;
+              if (avatarPreview) avatarPreview.src = base64Data;
+              if ((window as any).showToast) (window as any).showToast('Đã tải lên ảnh đại diện thành công! 📸');
+            }
+          };
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Chọn avatar pet mẫu (Presets)
       presetAvatarBtns.forEach((btn: any) => {
         btn.addEventListener('click', () => {
           const url = btn.getAttribute('data-url');
           if (url) {
             if (avatarUrlInput) avatarUrlInput.value = url;
             if (avatarPreview) avatarPreview.src = url;
+            if (avatarFile) avatarFile.value = ''; // Reset file input nếu dùng preset
           }
         });
       });

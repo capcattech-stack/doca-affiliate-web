@@ -91,7 +91,7 @@ import Layout from '../../layouts/Layout.astro';
         <!-- Kiosk Dashboard Card (Đã được duyệt) -->
         <div class="kiosk-card hidden" id="kiosk-dashboard-card">
           <div class="kiosk-card-header" style="border-bottom: 1px solid var(--cozy-border-light); padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
-            <h2>Cấu Hình Cửa Hàng Kiosk</h2>
+            <h2 class="kiosk-main-title">Kệ Kiosk xinh xắn của bạn 🐾</h2>
             <div class="kiosk-url-share-row">
               <div class="kiosk-url-badge">
                 <i class="ph-light ph-link"></i> Link Kiosk: <span id="kiosk-url-text" class="whisper-mono" style="font-weight: 600; color: var(--cozy-text-obsidian);"></span>
@@ -107,16 +107,13 @@ import Layout from '../../layouts/Layout.astro';
           <div class="kiosk-settings-section">
             <div class="kiosk-settings-header">
               <h3>
-                <i class="ph-light ph-gear" style="color: var(--cozy-green-matcha-forest);"></i> Thiết lập thông tin Kiosk
+                <i class="ph-light ph-gear" style="color: var(--cozy-green-matcha-forest);"></i> Trang trí Kiosk ấm cúng
               </h3>
-              <button id="kiosk-save-settings-btn" class="kiosk-save-btn">
-                Lưu cấu hình <i class="ph-light ph-check"></i>
-              </button>
             </div>
 
             <!-- Avatar -->
             <div class="kiosk-avatar-row">
-              <div id="kiosk-avatar-preview-container" class="avatar-preview-box" style="position: relative; width: 72px; height: 72px; border-radius: 50%; overflow: hidden; background-color: var(--cozy-bg-beige); border: 2.5px solid var(--cozy-green-matcha-forest); flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;">
+              <div id="kiosk-avatar-preview-container" class="avatar-preview-box" style="position: relative; width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background-color: var(--cozy-bg-beige); border: 2.5px solid var(--cozy-green-matcha-forest); flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;">
                 <img id="kiosk-avatar-preview" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150';" />
                 <div class="avatar-hover-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #fff; opacity: 0; transition: opacity 0.2s ease; font-size: 1.1rem;">
                   <i class="ph-fill ph-camera"></i>
@@ -124,24 +121,24 @@ import Layout from '../../layouts/Layout.astro';
               </div>
               
               <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 250px; width: 100%;">
-                <label style="font-size: 0.82rem; font-weight: 600; color: var(--cozy-text-obsidian);">Ảnh đại diện Kiosk</label>
+                <label style="font-size: 0.85rem; font-weight: 700; color: var(--cozy-text-obsidian);">Ảnh đại diện Kiosk của Boss</label>
                 <div class="avatar-upload-actions">
                   <button type="button" id="kiosk-avatar-upload-btn" class="cozy-btn">
-                    <i class="ph-light ph-upload-simple"></i> Chọn ảnh từ thiết bị
+                    <i class="ph-light ph-image"></i> Tải ảnh lên
                   </button>
-                  <button type="button" id="kiosk-avatar-clear-btn" class="cozy-btn" style="border: 1px solid rgba(255,0,0,0.15);">
-                    <i class="ph-light ph-trash"></i> Xóa
+                  <button type="button" id="kiosk-avatar-clear-btn" class="cozy-btn" style="border: 1px solid rgba(255,0,0,0.15); color: #FF3B30;">
+                    <i class="ph-light ph-trash"></i> Dùng ảnh gốc
                   </button>
                   <input type="file" id="kiosk-avatar-file" accept="image/*" style="display: none;" />
                   <input type="url" id="kiosk-avatar-url" style="display: none;" />
                 </div>
                 
-                <div class="avatar-presets" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                  <span style="font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 500; margin-right: 4px;">Gợi ý nhanh:</span>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐱 Tina</button>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐶 Corgi</button>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🕶️ Boss Xám</button>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐯 Munchkin</button>
+                <div class="avatar-presets">
+                  <span class="preset-label">Gợi ý nhanh từ Boss:</span>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150">🐱 Tina</button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150">🐶 Corgi</button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=150">🕶️ Boss Xám</button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=150">🐯 Munchkin</button>
                 </div>
               </div>
             </div>
@@ -149,31 +146,38 @@ import Layout from '../../layouts/Layout.astro';
             <div style="display: grid; grid-template-columns: 1fr; gap: 1.25rem; border-top: 1px dashed var(--cozy-border-light); padding-top: 1.25rem;">
               <!-- Bio / Lời chào -->
               <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <label for="kiosk-bio" style="font-size: 0.85rem; font-weight: 600; color: var(--cozy-text-obsidian);">Lời chào Kiosk (Bio)</label>
-                <textarea id="kiosk-bio" class="cozy-input" rows="2" maxlength="150" placeholder="Lời chào dễ thương của bạn gửi tới khách ghé Kiosk (tối đa 150 ký tự)..." style="width: 100%; padding: 0.65rem 0.85rem; font-family: inherit; resize: vertical;"></textarea>
+                <label for="kiosk-bio" style="font-size: 0.85rem; font-weight: 600; color: var(--cozy-text-obsidian);">Lời nhắn gửi dễ thương (Bio)</label>
+                <textarea id="kiosk-bio" class="cozy-input" rows="2" maxlength="150" placeholder="Lời chào góc nhỏ gửi tới sen ghé thăm (tối đa 150 ký tự)..." style="width: 100%; padding: 0.65rem 0.85rem; font-family: inherit; resize: vertical;"></textarea>
               </div>
 
               <!-- Links social -->
               <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <label style="font-size: 0.85rem; font-weight: 600; color: var(--cozy-text-obsidian);">Liên kết mạng xã hội khác</label>
+                <label style="font-size: 0.85rem; font-weight: 600; color: var(--cozy-text-obsidian);">Góc chia sẻ của Boss (Social Links)</label>
                 <div class="kiosk-social-grid">
                   <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
                     <i class="ph-light ph-youtube-logo" style="font-size: 1.2rem; color: #FF0000; flex-shrink: 0;"></i>
-                    <input type="url" id="kiosk-social-youtube" class="cozy-input" placeholder="Link kênh YouTube..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                    <input type="url" id="kiosk-social-youtube" class="cozy-input" placeholder="Đường dẫn kênh YouTube của Boss..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
                   </div>
                   <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
                     <i class="ph-light ph-tiktok-logo" style="font-size: 1.2rem; color: var(--cozy-text-obsidian); flex-shrink: 0;"></i>
-                    <input type="url" id="kiosk-social-tiktok" class="cozy-input" placeholder="Link kênh TikTok..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                    <input type="url" id="kiosk-social-tiktok" class="cozy-input" placeholder="Đường dẫn kênh TikTok của Boss..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
                   </div>
                   <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
                     <i class="ph-light ph-facebook-logo" style="font-size: 1.2rem; color: #1877F2; flex-shrink: 0;"></i>
-                    <input type="url" id="kiosk-social-facebook" class="cozy-input" placeholder="Link Facebook cá nhân/page..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                    <input type="url" id="kiosk-social-facebook" class="cozy-input" placeholder="Đường dẫn Facebook của Boss..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
                   </div>
                   <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
                     <i class="ph-light ph-instagram-logo" style="font-size: 1.2rem; color: #E1306C; flex-shrink: 0;"></i>
-                    <input type="url" id="kiosk-social-instagram" class="cozy-input" placeholder="Link Instagram..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                    <input type="url" id="kiosk-social-instagram" class="cozy-input" placeholder="Đường dẫn Instagram của Boss..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
                   </div>
                 </div>
+              </div>
+
+              <!-- Nút Lưu cấu hình ở cuối form -->
+              <div style="border-top: 1px dashed var(--cozy-border-light); padding-top: 1.25rem; margin-top: 0.5rem; display: flex; justify-content: flex-end; width: 100%;">
+                <button id="kiosk-save-settings-btn" class="kiosk-save-btn">
+                  Ghi nhớ trang trí này nha <i class="ph-light ph-check"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -1191,6 +1195,57 @@ import Layout from '../../layouts/Layout.astro';
     }
   }
 
+  /* Presets avatar styling */
+  .avatar-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+  @media (min-width: 576px) {
+    .avatar-presets {
+      justify-content: flex-start;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .preset-label {
+    font-size: 0.72rem;
+    color: var(--cozy-text-charcoal);
+    font-weight: 500;
+    margin-right: 4px;
+    width: 100%;
+    text-align: center;
+  }
+  @media (min-width: 576px) {
+    .preset-label {
+      width: auto;
+      text-align: left;
+    }
+  }
+
+  .preset-avatar-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 20px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.72rem;
+    color: var(--cozy-text-charcoal);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  .preset-avatar-btn:hover {
+    border-color: var(--cozy-green-matcha);
+    background-color: var(--cozy-bg-beige);
+    color: var(--cozy-green-matcha-forest);
+    transform: translateY(-1px);
+  }
+
   .kiosk-social-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -1460,45 +1515,91 @@ import Layout from '../../layouts/Layout.astro';
   }
 
   /* --- DASHBOARD APPROVED --- */
+  .kiosk-main-title {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--cozy-text-obsidian);
+    margin: 0;
+    text-align: center;
+  }
+  @media (min-width: 768px) {
+    .kiosk-main-title {
+      font-size: 1.55rem;
+      text-align: left;
+    }
+  }
+
   .kiosk-url-share-row {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    flex-wrap: wrap;
     gap: 0.75rem;
     margin-top: 0.85rem;
     width: 100%;
   }
+  @media (min-width: 768px) {
+    .kiosk-url-share-row {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
   .kiosk-url-badge {
     background-color: var(--cozy-bg-beige);
     border: 1px solid var(--cozy-border-light);
     border-radius: 20px;
-    padding: 0.35rem 0.9rem;
-    font-size: 0.8rem;
+    padding: 0.45rem 1.1rem;
+    font-size: 0.82rem;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.4rem;
     color: var(--cozy-text-charcoal);
+    width: 100%;
+    box-sizing: border-box;
   }
+  @media (min-width: 768px) {
+    .kiosk-url-badge {
+      width: auto;
+    }
+  }
+
   .kiosk-share-actions {
     display: flex;
     gap: 0.5rem;
+    width: 100%;
   }
+  @media (min-width: 768px) {
+    .kiosk-share-actions {
+      width: auto;
+    }
+  }
+
   .kiosk-action-btn {
+    flex: 1;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.35rem;
     background-color: var(--cozy-bg-pure);
     border: 1px solid var(--cozy-border-light);
     color: var(--cozy-text-obsidian);
-    padding: 0.4rem 0.85rem;
+    padding: 0.55rem 0.85rem;
     border-radius: 8px;
     font-size: 0.8rem;
-    font-weight: 550;
+    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s ease;
   }
+  @media (min-width: 768px) {
+    .kiosk-action-btn {
+      flex: initial;
+      width: auto;
+    }
+  }
+
   .kiosk-action-btn:hover {
     background-color: var(--cozy-bg-beige);
     border-color: var(--cozy-green-matcha);

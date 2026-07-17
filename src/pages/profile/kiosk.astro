@@ -891,7 +891,7 @@ import Layout from '../../layouts/Layout.astro';
               }
               if ((window as any).showToast) (window as any).showToast('Lấy thông tin sản phẩm thành công! 🎉');
             } else {
-              console.warn('Shopee scraping details:', data.error);
+              console.warn('Shopee scraping response data:', data);
               if (statusMsg) {
                 statusMsg.style.color = '#b71c1c'; // Red
                 statusMsg.innerHTML = `⚠️ Không cào được Shopee. Đã dùng thông tin gợi ý.<br/><span style="font-size: 0.68rem; opacity: 0.85;">Lỗi: ${data.error || 'Empty response'}</span>`;

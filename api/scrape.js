@@ -49,6 +49,7 @@ export default async function handler(request, response) {
         const { shopId, itemId } = shopeeParams;
         const shopeeApiUrl = `https://shopee.vn/api/v4/item/get?itemid=${itemId}&shopid=${shopId}`;
         let apiData = null;
+        const errorLogs = [];
 
         const shoperProxyUrl = process.env.SHOPER_PROXY_URL;
 
@@ -61,11 +62,19 @@ export default async function handler(request, response) {
               const json = await res.json();
               if (json && json.data) {
                 apiData = json.data;
+              } else if (json && json.error) {
+                errorLogs.push('GAS Script error: ' + json.error);
+              } else {
+                errorLogs.push('GAS JSON empty data');
               }
+            } else {
+              errorLogs.push(`GAS HTTP Status: ${res.status}`);
             }
           } catch (e) {
-            console.error('Shopee API Lớp 0 (GAS Proxy) fetch error:', e.message);
+            errorLogs.push('GAS exception: ' + e.message);
           }
+        } else {
+          errorLogs.push('Chưa cấu hình SHOPER_PROXY_URL trong .env');
         }
 
         // Lớp 1: Gọi trực tiếp API Shopee từ Serverless
@@ -83,10 +92,14 @@ export default async function handler(request, response) {
               const json = await res.json();
               if (json && json.data) {
                 apiData = json.data;
+              } else {
+                errorLogs.push('Lớp 1 JSON empty data');
               }
+            } else {
+              errorLogs.push(`Lớp 1 HTTP Status: ${res.status}`);
             }
           } catch (e) {
-            console.error('Shopee API direct fetch error:', e.message);
+            errorLogs.push('Lớp 1 exception: ' + e.message);
           }
         }
 
@@ -103,19 +116,27 @@ export default async function handler(request, response) {
               const json = await res.json();
               if (json && json.data) {
                 apiData = json.data;
+              } else {
+                errorLogs.push('Lớp 2 JSON empty data');
               }
+            } else {
+              errorLogs.push(`Lớp 2 HTTP Status: ${res.status}`);
             }
           } catch (e) {
-            console.error('Shopee API proxy fetch error:', e.message);
+            errorLogs.push('Lớp 2 exception: ' + e.message);
           }
         }
 
-        if (apiData) {
+        if (apiData && apiData.name) {
           const title = apiData.name || '';
           const imageId = apiData.image || (apiData.images && apiData.images[0]) || '';
           const image = imageId ? `https://down-vn.img.susercontent.com/file/${imageId}` : '';
           return response.status(200).json({ title, image });
+        } else {
+          return response.status(200).json({ error: errorLogs.join(' | '), fallback: true });
         }
+      } else {
+        return response.status(200).json({ error: 'Không thể phân tách mã shopId và itemId từ link Shopee này.', fallback: true });
       }
     }
 

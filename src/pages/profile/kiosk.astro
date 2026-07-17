@@ -103,42 +103,64 @@ import Layout from '../../layouts/Layout.astro';
             </div>
           </div>
 
-          <!-- Cấu hình thông tin Kiosk (Avatar) -->
+          <!-- Cấu hình thông tin Kiosk (Settings) -->
           <div class="kiosk-settings-section" style="background-color: var(--cozy-bg-pure); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--cozy-border-light); box-shadow: 0 2px 8px rgba(0,0,0,0.01);">
-            <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0;">
-              <i class="ph-light ph-user-circle" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i> Ảnh đại diện Kiosk
-            </h3>
-            <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: nowrap;">
-              <!-- Preview Avatar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--cozy-border-light); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+              <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="ph-light ph-gear" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i> Thiết lập thông tin Kiosk
+              </h3>
+              <button id="kiosk-save-settings-btn" class="cozy-btn" style="padding: 0.5rem 1.15rem; font-size: 0.82rem; font-weight: 600; background-color: var(--cozy-green-matcha-forest); color: #fff; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer; transition: all 0.2s ease;">
+                Lưu cấu hình <i class="ph-light ph-check"></i>
+              </button>
+            </div>
+
+            <!-- Avatar -->
+            <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
               <div class="avatar-preview-box" style="position: relative; width: 72px; height: 72px; border-radius: 50%; overflow: hidden; background-color: var(--cozy-bg-beige); border: 2.5px solid var(--cozy-green-matcha-forest); flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center;">
                 <img id="kiosk-avatar-preview" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150';" />
               </div>
               
-              <!-- Input and presets -->
-              <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.75rem; min-width: 0;">
-                <!-- Input and Save button in one line -->
-                <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
-                  <input type="url" id="kiosk-avatar-url" class="cozy-input" placeholder="Dán link ảnh đại diện (hoặc chọn nhanh gợi ý bên dưới)..." style="flex-grow: 1; padding: 0.65rem 0.85rem;" />
-                  <button id="kiosk-save-settings-btn" class="cozy-btn" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; background-color: var(--cozy-green-matcha-forest); color: #fff; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
-                    Lưu cấu hình <i class="ph-light ph-check"></i>
-                  </button>
-                </div>
+              <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 250px;">
+                <label for="kiosk-avatar-url" style="font-size: 0.82rem; font-weight: 600; color: var(--cozy-text-obsidian);">Link ảnh đại diện Kiosk</label>
+                <input type="url" id="kiosk-avatar-url" class="cozy-input" placeholder="Dán link ảnh đại diện (hoặc chọn nhanh gợi ý bên dưới)..." style="width: 100%; padding: 0.65rem 0.85rem;" />
                 
-                <!-- Avatar Presets styled as chips -->
-                <div class="avatar-presets" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                  <span style="font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 500; margin-right: 4px;">Gợi ý:</span>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="padding: 5px 10px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    🐱 Tina
-                  </button>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150" style="padding: 5px 10px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    🐶 Corgi
-                  </button>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=150" style="padding: 5px 10px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    🕶️ Boss Xám
-                  </button>
-                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=150" style="padding: 5px 10px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    🐯 Munchkin
-                  </button>
+                <div class="avatar-presets" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 0.25rem;">
+                  <span style="font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 500; margin-right: 4px;">Gợi ý nhanh:</span>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐱 Tina</button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐶 Corgi</button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🕶️ Boss Xám</button>
+                  <button type="button" class="preset-avatar-btn" data-url="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=150" style="padding: 4px 8px; border: 1px solid var(--cozy-border-light); border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.72rem; color: var(--cozy-text-charcoal); font-weight: 600; transition: all 0.2s ease;">🐯 Munchkin</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.25rem; border-top: 1px dashed var(--cozy-border-light); padding-top: 1.25rem;">
+              <!-- Bio / Lời chào -->
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <label for="kiosk-bio" style="font-size: 0.85rem; font-weight: 600; color: var(--cozy-text-obsidian);">Lời chào Kiosk (Bio)</label>
+                <textarea id="kiosk-bio" class="cozy-input" rows="2" maxlength="150" placeholder="Lời chào dễ thương của bạn gửi tới khách ghé Kiosk (tối đa 150 ký tự)..." style="width: 100%; padding: 0.65rem 0.85rem; font-family: inherit; resize: vertical;"></textarea>
+              </div>
+
+              <!-- Links social -->
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <label style="font-size: 0.85rem; font-weight: 600; color: var(--cozy-text-obsidian);">Liên kết mạng xã hội khác</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+                  <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
+                    <i class="ph-light ph-youtube-logo" style="font-size: 1.2rem; color: #FF0000; flex-shrink: 0;"></i>
+                    <input type="url" id="kiosk-social-youtube" class="cozy-input" placeholder="Link kênh YouTube..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
+                    <i class="ph-light ph-tiktok-logo" style="font-size: 1.2rem; color: var(--cozy-text-obsidian); flex-shrink: 0;"></i>
+                    <input type="url" id="kiosk-social-tiktok" class="cozy-input" placeholder="Link kênh TikTok..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
+                    <i class="ph-light ph-facebook-logo" style="font-size: 1.2rem; color: #1877F2; flex-shrink: 0;"></i>
+                    <input type="url" id="kiosk-social-facebook" class="cozy-input" placeholder="Link Facebook cá nhân/page..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
+                    <i class="ph-light ph-instagram-logo" style="font-size: 1.2rem; color: #E1306C; flex-shrink: 0;"></i>
+                    <input type="url" id="kiosk-social-instagram" class="cozy-input" placeholder="Link Instagram..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -480,11 +502,17 @@ import Layout from '../../layouts/Layout.astro';
         });
       });
 
-      // --- Cấu hình Avatar Kiosk ---
+      // --- Cấu hình Avatar Kiosk, Bio và Social Links ---
       const avatarUrlInput = document.getElementById('kiosk-avatar-url') as HTMLInputElement;
       const avatarPreview = document.getElementById('kiosk-avatar-preview') as HTMLImageElement;
-      const saveSettingsBtn = document.getElementById('kiosk-save-settings-btn');
       const presetAvatarBtns = document.querySelectorAll('.preset-avatar-btn');
+      const saveSettingsBtn = document.getElementById('kiosk-save-settings-btn');
+
+      const bioInput = document.getElementById('kiosk-bio') as HTMLTextAreaElement;
+      const socialYoutube = document.getElementById('kiosk-social-youtube') as HTMLInputElement;
+      const socialTiktok = document.getElementById('kiosk-social-tiktok') as HTMLInputElement;
+      const socialFacebook = document.getElementById('kiosk-social-facebook') as HTMLInputElement;
+      const socialInstagram = document.getElementById('kiosk-social-instagram') as HTMLInputElement;
 
       // Ảnh mặc định lấy từ tài khoản Google hoặc ảnh Unsplash
       const defaultFallbackAvatar = user?.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150';
@@ -496,6 +524,16 @@ import Layout from '../../layouts/Layout.astro';
       } else {
         if (avatarPreview) avatarPreview.src = defaultFallbackAvatar;
       }
+
+      // Khởi tạo thông tin Bio hiện tại
+      if (bioInput) bioInput.value = kiosk.bio || '';
+
+      // Khởi tạo thông tin Social Links hiện tại
+      const socialLinksObj = kiosk.social_links || {};
+      if (socialYoutube) socialYoutube.value = socialLinksObj.youtube || '';
+      if (socialTiktok) socialTiktok.value = socialLinksObj.tiktok || '';
+      if (socialFacebook) socialFacebook.value = socialLinksObj.facebook || '';
+      if (socialInstagram) socialInstagram.value = socialLinksObj.instagram || '';
 
       // Xử lý thay đổi url avatar thủ công
       avatarUrlInput?.addEventListener('input', () => {
@@ -516,14 +554,25 @@ import Layout from '../../layouts/Layout.astro';
         });
       });
 
-      // Lưu thông tin Avatar Kiosk
+      // Lưu toàn bộ thông tin cấu hình Kiosk Settings
       saveSettingsBtn?.addEventListener('click', async () => {
-        const avatarVal = avatarUrlInput.value.trim();
+        const avatarVal = avatarUrlInput ? avatarUrlInput.value.trim() : '';
+        const bioVal = bioInput ? bioInput.value.trim() : '';
+        
+        const socialLinksPayload = {
+          youtube: socialYoutube ? socialYoutube.value.trim() : '',
+          tiktok: socialTiktok ? socialTiktok.value.trim() : '',
+          facebook: socialFacebook ? socialFacebook.value.trim() : '',
+          instagram: socialInstagram ? socialInstagram.value.trim() : ''
+        };
+
         saveSettingsBtn.setAttribute('disabled', 'true');
         saveSettingsBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang lưu...';
 
         const { error } = await client.from('creator_kiosks').update({
           avatar_url: avatarVal || null,
+          bio: bioVal || null,
+          social_links: socialLinksPayload,
           updated_at: new Date().toISOString()
         }).eq('id', kiosk.id);
 

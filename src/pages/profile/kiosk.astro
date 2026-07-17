@@ -791,8 +791,11 @@ import Layout from '../../layouts/Layout.astro';
         return 'Sản phẩm tiếp thị';
       }
 
-      // Tự động cào dữ liệu trực tiếp bằng client-side regex & keyword mapping (Zero latency)
+      // Tự động cào dữ liệu qua Vercel API / Fallback Client-side
+      let urlTimeout: any = null;
       urlInput?.addEventListener('input', () => {
+        if (urlTimeout) clearTimeout(urlTimeout);
+        
         const urlVal = urlInput.value.trim();
         if (!urlVal) {
           updateLivePreview();
@@ -802,12 +805,36 @@ import Layout from '../../layouts/Layout.astro';
         const isShopee = urlVal.toLowerCase().includes('shopee.vn') || urlVal.toLowerCase().includes('shp.ee') || urlVal.toLowerCase().includes('shope.ee');
         if (!isShopee) return;
 
-        // Điền trực tiếp tức thì
-        const fallbackTitle = getFallbackTitle(urlVal);
-        nameInput.value = fallbackTitle;
-        imageInput.value = getFallbackImage(fallbackTitle, urlVal);
-        
-        updateLivePreview();
+        const spinner = document.getElementById('kiosk-url-loading-spinner');
+        if (spinner) spinner.classList.remove('hidden');
+
+        urlTimeout = setTimeout(async () => {
+          try {
+            const res = await fetch(`/api/scrape?url=${encodeURIComponent(urlVal)}`);
+            if (res.status === 200) {
+              const data = await res.json();
+              if (spinner) spinner.classList.add('hidden');
+
+              if (data.title && !data.error) {
+                nameInput.value = data.title;
+                imageInput.value = data.image || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300';
+              } else {
+                // Client-side Fallback
+                const fallbackTitle = getFallbackTitle(urlVal);
+                nameInput.value = fallbackTitle;
+                imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+              }
+            } else {
+              throw new Error('API error fallback');
+            }
+          } catch (err) {
+            if (spinner) spinner.classList.add('hidden');
+            const fallbackTitle = getFallbackTitle(urlVal);
+            nameInput.value = fallbackTitle;
+            imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+          }
+          updateLivePreview();
+        }, 800);
       });
 
       // Chọn nhanh hình ảnh từ danh sách Preset

@@ -61,28 +61,76 @@ export default async function handler(request, response) {
 
       const shoperProxyUrl = process.env.SHOPER_PROXY_URL;
 
-      // Lớp 0: Gửi yêu cầu qua GAS Proxy
+      const scrapeDoToken = process.env.SCRAPE_DO_TOKEN;
+      const scraperApiKey = process.env.SCRAPER_API_KEY;
+
+      // Lớp 0: Gửi yêu cầu qua Proxy (Tự động phát hiện GAS JSON hoặc Cloudflare Worker HTML)
       if (shoperProxyUrl) {
         try {
           const requestUrl = `${shoperProxyUrl}${shoperProxyUrl.includes('?') ? '&' : '?'}url=${encodeURIComponent(cleanShopeeUrl)}`;
           const res = await fetch(requestUrl);
           if (res.status === 200) {
-            htmlContent = await res.text();
-            if (!htmlContent || htmlContent.trim() === '') {
-              errorLogs.push('GAS HTML empty response');
-              htmlContent = '';
+            const contentType = res.headers.get('Content-Type') || '';
+            if (contentType.includes('application/json')) {
+              const json = await res.json();
+              if (json && json.data) {
+                const name = json.data.name || '';
+                const imageId = json.data.image || (json.data.images && json.data.images[0]) || '';
+                const image = imageId ? `https://down-vn.img.susercontent.com/file/${imageId}` : '';
+                if (name && image) {
+                  return response.status(200).json({ title: name, image });
+                }
+              } else if (json && json.error) {
+                errorLogs.push('Proxy JSON error: ' + json.error);
+              }
+            } else {
+              htmlContent = await res.text();
+              if (!htmlContent || htmlContent.trim() === '') {
+                errorLogs.push('Proxy HTML empty response');
+                htmlContent = '';
+              }
             }
           } else {
-            errorLogs.push(`GAS HTTP Status: ${res.status}`);
+            errorLogs.push(`Proxy HTTP Status: ${res.status}`);
           }
         } catch (e) {
-          errorLogs.push('GAS exception: ' + e.message);
+          errorLogs.push('Proxy exception: ' + e.message);
         }
       } else {
         errorLogs.push('Chưa cấu hình SHOPER_PROXY_URL trong .env');
       }
 
-      // Lớp 1: Gọi trực tiếp từ serverless giả lập User-Agent của Facebook Bot
+      // Lớp 1: Gọi qua Scrape.do (Nếu được cấu hình)
+      if (!htmlContent && scrapeDoToken) {
+        try {
+          const scrapeUrl = `https://api.scrape.do?token=${scrapeDoToken}&url=${encodeURIComponent(cleanShopeeUrl)}`;
+          const res = await fetch(scrapeUrl);
+          if (res.status === 200) {
+            htmlContent = await res.text();
+          } else {
+            errorLogs.push(`Scrape.do HTTP Status: ${res.status}`);
+          }
+        } catch (e) {
+          errorLogs.push('Scrape.do exception: ' + e.message);
+        }
+      }
+
+      // Lớp 2: Gọi qua ScraperAPI (Nếu được cấu hình)
+      if (!htmlContent && scraperApiKey) {
+        try {
+          const scrapeUrl = `https://api.scraperapi.com?api_key=${scraperApiKey}&url=${encodeURIComponent(cleanShopeeUrl)}`;
+          const res = await fetch(scrapeUrl);
+          if (res.status === 200) {
+            htmlContent = await res.text();
+          } else {
+            errorLogs.push(`ScraperAPI HTTP Status: ${res.status}`);
+          }
+        } catch (e) {
+          errorLogs.push('ScraperAPI exception: ' + e.message);
+        }
+      }
+
+      // Lớp 3: Gọi trực tiếp từ serverless giả lập User-Agent của Facebook Bot
       if (!htmlContent) {
         try {
           const res = await fetch(cleanShopeeUrl, {
@@ -95,14 +143,14 @@ export default async function handler(request, response) {
           if (res.status === 200) {
             htmlContent = await res.text();
           } else {
-            errorLogs.push(`Lớp 1 HTML HTTP Status: ${res.status}`);
+            errorLogs.push(`Lớp 3 HTML HTTP Status: ${res.status}`);
           }
         } catch (e) {
-          errorLogs.push('Lớp 1 HTML exception: ' + e.message);
+          errorLogs.push('Lớp 3 HTML exception: ' + e.message);
         }
       }
 
-      // Lớp 2: Gọi qua Free CORS Proxy
+      // Lớp 4: Gọi qua Free CORS Proxy
       if (!htmlContent) {
         try {
           const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(cleanShopeeUrl)}`;
@@ -114,10 +162,10 @@ export default async function handler(request, response) {
           if (res.status === 200) {
             htmlContent = await res.text();
           } else {
-            errorLogs.push(`Lớp 2 HTML HTTP Status: ${res.status}`);
+            errorLogs.push(`Lớp 4 HTML HTTP Status: ${res.status}`);
           }
         } catch (e) {
-          errorLogs.push('Lớp 2 HTML exception: ' + e.message);
+          errorLogs.push('Lớp 4 HTML exception: ' + e.message);
         }
       }
 

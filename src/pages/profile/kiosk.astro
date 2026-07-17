@@ -868,6 +868,58 @@ import Layout from '../../layouts/Layout.astro';
         return 'Sản phẩm tiếp thị';
       }
 
+      // Các template mô tả chữa lành (Iyashikei) của DOCA
+      const catDescriptions = [
+        "Bé mèo nhà mình thích mê, cứ thấy gói này là chạy lại quấn quýt không rời 🐾",
+        "Chất lượng rất ổn, bé mèo ăn ngon lành, trộm vía dạo này lông mượt hẳn ra 🐱",
+        "Mùi thơm dễ chịu, bé cưng nhà mình mê tít luôn, lần nào cũng ăn hết sạch.",
+        "Món này bé mèo nhà mình ghiền lắm, ngày nào cũng phải dùng mới chịu nằm yên 🌸"
+      ];
+
+      const dogDescriptions = [
+        "Bạn cún nhà mình cực kỳ thích luôn, nhai nghịch cả ngày không chán 🐕",
+        "Hạt thơm ngon, bé cún ăn thun thút, rất đáng để mua thử nha cả nhà.",
+        "Bé cún nhà mình thích lắm, mỗi lần mang ra là đuôi vẫy rối rít, trộm vía ăn ngoan."
+      ];
+
+      const toyDescriptions = [
+        "Món đồ chơi quốc dân giúp các bé xả stress cực tốt, nghịch cả ngày không biết mệt 🎾",
+        "Thiết kế xinh xắn, bé cưng thích mê, chơi đùa ríu rít suốt cả buổi chiều.",
+        "Đồ chơi chắc chắn, màu sắc rất xinh xắn, các bé quấn quýt chơi cả ngày không chán."
+      ];
+
+      const bookDescriptions = [
+        "Cuốn sách nhẹ nhàng và ấm áp, giúp mình thư giãn tinh thần sau một ngày dài mệt mỏi 📖",
+        "Trang sách chữa lành tâm hồn, rất phù hợp để nhâm nhi cùng một tách trà chiều."
+      ];
+
+      const defaultDescriptions = [
+        "Sản phẩm dùng siêu thích, thiết kế xinh xắn và vô cùng tiện lợi cho các bé cưng 🌸",
+        "Món đồ nhỏ xinh mang lại niềm vui to to, rất đáng yêu và chất lượng ổn áp nha cả nhà.",
+        "Giao hàng nhanh, đóng gói cẩn thận. Bé cưng nhà mình rất thích sản phẩm này."
+      ];
+
+      function getRandomDescription(arr: string[]) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function generateCozyDescription(title: string): string {
+        const text = title.toLowerCase();
+        if (text.includes('meo') || text.includes('cat') || text.includes('pate') || text.includes('catnip') || text.includes('catchy') || text.includes('cào')) {
+          return getRandomDescription(catDescriptions);
+        }
+        if (text.includes('cho') || text.includes('dog') || text.includes('corgi') || text.includes('poodle') || text.includes('hạt') || text.includes('xương')) {
+          return getRandomDescription(dogDescriptions);
+        }
+        if (text.includes('do choi') || text.includes('toy') || text.includes('bong') || text.includes('day') || text.includes('cần câu')) {
+          return getRandomDescription(toyDescriptions);
+        }
+        if (text.includes('sach') || text.includes('book') || text.includes('truyen')) {
+          return getRandomDescription(bookDescriptions);
+        }
+        return getRandomDescription(defaultDescriptions);
+      }
+
       // Sự kiện thay đổi ô nhập URL chỉ cập nhật Live Preview
       urlInput?.addEventListener('input', () => {
         updateLivePreview();
@@ -911,6 +963,12 @@ import Layout from '../../layouts/Layout.astro';
             if (data.title && !data.error) {
               nameInput.value = data.title;
               imageInput.value = data.image || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300';
+              
+              // Tự động gợi ý mô tả cảm xúc chữa lành nếu ô mô tả đang trống
+              if (descInput && !descInput.value.trim()) {
+                descInput.value = generateCozyDescription(data.title);
+              }
+
               success = true;
               if (statusMsg) {
                 statusMsg.style.color = '#2e7d32'; // Green
@@ -927,6 +985,11 @@ import Layout from '../../layouts/Layout.astro';
               const fallbackTitle = getFallbackTitle(urlVal);
               nameInput.value = fallbackTitle;
               imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+              
+              if (descInput && !descInput.value.trim()) {
+                descInput.value = generateCozyDescription(fallbackTitle);
+              }
+
               if ((window as any).showToast) {
                 (window as any).showToast('Lỗi cào dữ liệu, đã dùng thông tin gợi ý. Xem F12 để biết chi tiết 🐾');
               }
@@ -942,6 +1005,11 @@ import Layout from '../../layouts/Layout.astro';
           const fallbackTitle = getFallbackTitle(urlVal);
           nameInput.value = fallbackTitle;
           imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+          
+          if (descInput && !descInput.value.trim()) {
+            descInput.value = generateCozyDescription(fallbackTitle);
+          }
+
           if ((window as any).showToast) (window as any).showToast('Đã lấy thông tin gợi ý từ link sản phẩm 🐾');
         } finally {
           if (spinner) spinner.classList.add('hidden');

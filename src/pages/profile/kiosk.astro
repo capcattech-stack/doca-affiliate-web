@@ -236,6 +236,7 @@ import Layout from '../../layouts/Layout.astro';
                           Kiểm tra
                         </button>
                       </div>
+                      <p id="kiosk-url-status-message" style="margin-top: 4px; font-size: 0.74rem; color: var(--cozy-text-charcoal); line-height: 1.35; display: none;"></p>
                       
                       <div>
                         <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 0.35rem;">Mô tả cảm xúc hoặc đánh giá</label>
@@ -703,6 +704,8 @@ import Layout from '../../layouts/Layout.astro';
           addProductSheet.classList.remove('open');
           document.body.style.overflow = ''; // Mở lại scroll màn hình chính
         }
+        const msg = document.getElementById('kiosk-url-status-message');
+        if (msg) msg.style.display = 'none';
       }
 
       addProductTrigger?.addEventListener('click', openAddProductSheet);
@@ -845,6 +848,7 @@ import Layout from '../../layouts/Layout.astro';
 
       // Hàm gọi API kiểm tra URL Shopee
       const checkBtn = document.getElementById('kiosk-url-check-btn') as HTMLButtonElement;
+      const statusMsg = document.getElementById('kiosk-url-status-message') as HTMLParagraphElement;
       
       async function checkShopeeUrl() {
         const urlVal = urlInput.value.trim();
@@ -866,6 +870,12 @@ import Layout from '../../layouts/Layout.astro';
           checkBtn.innerHTML = '<i class="ph-light ph-circle-notch spin"></i>';
         }
 
+        if (statusMsg) {
+          statusMsg.style.display = 'block';
+          statusMsg.style.color = 'var(--cozy-text-charcoal)';
+          statusMsg.innerHTML = '🐾 Đang kết nối serverless cào dữ liệu Shopee...';
+        }
+
         let success = false;
         try {
           const res = await fetch(`/api/scrape?url=${encodeURIComponent(urlVal)}`);
@@ -875,9 +885,17 @@ import Layout from '../../layouts/Layout.astro';
               nameInput.value = data.title;
               imageInput.value = data.image || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300';
               success = true;
+              if (statusMsg) {
+                statusMsg.style.color = '#2e7d32'; // Green
+                statusMsg.innerHTML = '🎉 Lấy thông tin thành công từ Shopee!';
+              }
               if ((window as any).showToast) (window as any).showToast('Lấy thông tin sản phẩm thành công! 🎉');
             } else {
               console.warn('Shopee scraping details:', data.error);
+              if (statusMsg) {
+                statusMsg.style.color = '#b71c1c'; // Red
+                statusMsg.innerHTML = `⚠️ Không cào được Shopee. Đã dùng thông tin gợi ý.<br/><span style="font-size: 0.68rem; opacity: 0.85;">Lỗi: ${data.error || 'Empty response'}</span>`;
+              }
               // Client-side Fallback
               const fallbackTitle = getFallbackTitle(urlVal);
               nameInput.value = fallbackTitle;
@@ -889,7 +907,11 @@ import Layout from '../../layouts/Layout.astro';
           } else {
             throw new Error(`HTTP Status ${res.status}`);
           }
-        } catch (err) {
+        } catch (err: any) {
+          if (statusMsg) {
+            statusMsg.style.color = '#b71c1c'; // Red
+            statusMsg.innerHTML = `⚠️ Lỗi kết nối serverless.<br/><span style="font-size: 0.68rem; opacity: 0.85;">Chi tiết: ${err.message || err}</span>`;
+          }
           const fallbackTitle = getFallbackTitle(urlVal);
           nameInput.value = fallbackTitle;
           imageInput.value = getFallbackImage(fallbackTitle, urlVal);
@@ -1000,6 +1022,7 @@ import Layout from '../../layouts/Layout.astro';
           descInput.value = '';
           if (imageInput) imageInput.value = '';
           if (productFileInput) productFileInput.value = '';
+          if (statusMsg) statusMsg.style.display = 'none';
           
           // Đóng accordion nâng cao nếu đang mở
           if (advancedFields && !advancedFields.classList.contains('hidden')) {

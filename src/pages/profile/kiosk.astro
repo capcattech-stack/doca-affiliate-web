@@ -225,11 +225,16 @@ import Layout from '../../layouts/Layout.astro';
                   <div class="kiosk-add-link-form" style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 0.85rem;">
                     <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
                       <label style="color: var(--cozy-text-obsidian); font-size: 0.82rem; font-weight: 700; margin-bottom: -0.25rem;">Link sản phẩm Shopee</label>
-                      <div style="position: relative; width: 100%;">
-                        <input type="url" id="kiosk-link-url" class="light-input" placeholder="Dán link Shopee affiliate (ví dụ: https://shopee.vn/...)" style="font-family: inherit; padding-right: 2.25rem;" />
-                        <div id="kiosk-url-loading-spinner" class="hidden" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--cozy-text-charcoal);">
-                          <i class="ph-light ph-spinner-gap spin"></i>
+                      <div style="display: flex; gap: 8px; width: 100%;">
+                        <div style="position: relative; flex: 1;">
+                          <input type="url" id="kiosk-link-url" class="light-input" placeholder="Dán link Shopee affiliate (ví dụ: https://shopee.vn/...)" style="font-family: inherit; padding-right: 2.25rem;" />
+                          <div id="kiosk-url-loading-spinner" class="hidden" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--cozy-text-charcoal);">
+                            <i class="ph-light ph-spinner-gap spin"></i>
+                          </div>
                         </div>
+                        <button type="button" id="kiosk-url-check-btn" class="cozy-btn" style="padding: 0.65rem 1.15rem; font-size: 0.82rem; font-weight: 600; border-radius: 8px; background-color: var(--cozy-bg-beige); border: 1px solid var(--cozy-border-light); color: var(--cozy-text-obsidian); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; transition: all 0.2s ease;">
+                          Kiểm tra
+                        </button>
                       </div>
                       
                       <div>
@@ -791,51 +796,71 @@ import Layout from '../../layouts/Layout.astro';
         return 'Sản phẩm tiếp thị';
       }
 
-      // Tự động cào dữ liệu qua Vercel API / Fallback Client-side
-      let urlTimeout: any = null;
+      // Sự kiện thay đổi ô nhập URL chỉ cập nhật Live Preview
       urlInput?.addEventListener('input', () => {
-        if (urlTimeout) clearTimeout(urlTimeout);
-        
+        updateLivePreview();
+      });
+
+      // Hàm gọi API kiểm tra URL Shopee
+      const checkBtn = document.getElementById('kiosk-url-check-btn') as HTMLButtonElement;
+      
+      async function checkShopeeUrl() {
         const urlVal = urlInput.value.trim();
         if (!urlVal) {
-          updateLivePreview();
-          return;
+          if ((window as any).showToast) (window as any).showToast('Vui lòng nhập link sản phẩm Shopee 🐾');
+          return false;
         }
 
         const isShopee = urlVal.toLowerCase().includes('shopee.vn') || urlVal.toLowerCase().includes('shp.ee') || urlVal.toLowerCase().includes('shope.ee');
-        if (!isShopee) return;
+        if (!isShopee) {
+          if ((window as any).showToast) (window as any).showToast('Đường dẫn không phải link Shopee hợp lệ 🐾');
+          return false;
+        }
 
         const spinner = document.getElementById('kiosk-url-loading-spinner');
         if (spinner) spinner.classList.remove('hidden');
+        if (checkBtn) {
+          checkBtn.disabled = true;
+          checkBtn.innerHTML = '<i class="ph-light ph-circle-notch spin"></i>';
+        }
 
-        urlTimeout = setTimeout(async () => {
-          try {
-            const res = await fetch(`/api/scrape?url=${encodeURIComponent(urlVal)}`);
-            if (res.status === 200) {
-              const data = await res.json();
-              if (spinner) spinner.classList.add('hidden');
-
-              if (data.title && !data.error) {
-                nameInput.value = data.title;
-                imageInput.value = data.image || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300';
-              } else {
-                // Client-side Fallback
-                const fallbackTitle = getFallbackTitle(urlVal);
-                nameInput.value = fallbackTitle;
-                imageInput.value = getFallbackImage(fallbackTitle, urlVal);
-              }
+        let success = false;
+        try {
+          const res = await fetch(`/api/scrape?url=${encodeURIComponent(urlVal)}`);
+          if (res.status === 200) {
+            const data = await res.json();
+            if (data.title && !data.error) {
+              nameInput.value = data.title;
+              imageInput.value = data.image || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300';
+              success = true;
+              if ((window as any).showToast) (window as any).showToast('Lấy thông tin sản phẩm thành công! 🎉');
             } else {
-              throw new Error('API error fallback');
+              // Client-side Fallback
+              const fallbackTitle = getFallbackTitle(urlVal);
+              nameInput.value = fallbackTitle;
+              imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+              if ((window as any).showToast) (window as any).showToast('Đã lấy thông tin gợi ý từ link sản phẩm 🐾');
             }
-          } catch (err) {
-            if (spinner) spinner.classList.add('hidden');
-            const fallbackTitle = getFallbackTitle(urlVal);
-            nameInput.value = fallbackTitle;
-            imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+          } else {
+            throw new Error('API error fallback');
+          }
+        } catch (err) {
+          const fallbackTitle = getFallbackTitle(urlVal);
+          nameInput.value = fallbackTitle;
+          imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+          if ((window as any).showToast) (window as any).showToast('Đã lấy thông tin gợi ý từ link sản phẩm 🐾');
+        } finally {
+          if (spinner) spinner.classList.add('hidden');
+          if (checkBtn) {
+            checkBtn.disabled = false;
+            checkBtn.innerHTML = 'Kiểm tra';
           }
           updateLivePreview();
-        }, 800);
-      });
+        }
+        return success;
+      }
+
+      checkBtn?.addEventListener('click', checkShopeeUrl);
 
       // Chọn nhanh hình ảnh từ danh sách Preset
       presetProdBtns.forEach((btn: any) => {
@@ -851,9 +876,6 @@ import Layout from '../../layouts/Layout.astro';
       // Submit thêm sản phẩm mới
       addBtn?.addEventListener('click', async () => {
         const urlVal = urlInput.value.trim();
-        const nameVal = nameInput ? nameInput.value.trim() : '';
-        const descVal = descInput.value.trim();
-        const imageVal = imageInput ? imageInput.value.trim() : '';
 
         if (!urlVal) {
           if ((window as any).showToast) (window as any).showToast('Vui lòng nhập link sản phẩm Shopee 🐾');
@@ -864,6 +886,22 @@ import Layout from '../../layouts/Layout.astro';
           if ((window as any).showToast) (window as any).showToast('Vui lòng nhập link đầy đủ bao gồm http:// hoặc https:// 🐾');
           return;
         }
+
+        // Tự động kiểm tra URL nếu tên hoặc ảnh sản phẩm đang để trống
+        let nameVal = nameInput ? nameInput.value.trim() : '';
+        let imageVal = imageInput ? imageInput.value.trim() : '';
+        
+        if (!nameVal || !imageVal) {
+          addBtn.disabled = true;
+          addBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang tải thông tin...';
+          await checkShopeeUrl();
+          nameVal = nameInput ? nameInput.value.trim() : '';
+          imageVal = imageInput ? imageInput.value.trim() : '';
+          addBtn.disabled = false;
+          addBtn.innerHTML = 'Bày bán ngay <i class="ph-light ph-plus-circle"></i>';
+        }
+
+        const descVal = descInput.value.trim();
 
         let linkStatus = 'approved';
         let linkRejectReason = null;

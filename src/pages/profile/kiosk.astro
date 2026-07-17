@@ -104,18 +104,18 @@ import Layout from '../../layouts/Layout.astro';
           </div>
 
           <!-- Cấu hình thông tin Kiosk (Settings) -->
-          <div class="kiosk-settings-section" style="background-color: var(--cozy-bg-pure); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid var(--cozy-border-light); box-shadow: 0 2px 8px rgba(0,0,0,0.01);">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--cozy-border-light); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
-              <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="ph-light ph-gear" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i> Thiết lập thông tin Kiosk
+          <div class="kiosk-settings-section">
+            <div class="kiosk-settings-header">
+              <h3>
+                <i class="ph-light ph-gear" style="color: var(--cozy-green-matcha-forest);"></i> Thiết lập thông tin Kiosk
               </h3>
-              <button id="kiosk-save-settings-btn" class="cozy-btn" style="padding: 0.5rem 1.15rem; font-size: 0.82rem; font-weight: 600; background-color: var(--cozy-green-matcha-forest); color: #fff; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer; transition: all 0.2s ease;">
+              <button id="kiosk-save-settings-btn" class="kiosk-save-btn">
                 Lưu cấu hình <i class="ph-light ph-check"></i>
               </button>
             </div>
 
             <!-- Avatar -->
-            <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <div class="kiosk-avatar-row">
               <div id="kiosk-avatar-preview-container" class="avatar-preview-box" style="position: relative; width: 72px; height: 72px; border-radius: 50%; overflow: hidden; background-color: var(--cozy-bg-beige); border: 2.5px solid var(--cozy-green-matcha-forest); flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;">
                 <img id="kiosk-avatar-preview" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150';" />
                 <div class="avatar-hover-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #fff; opacity: 0; transition: opacity 0.2s ease; font-size: 1.1rem;">
@@ -123,13 +123,13 @@ import Layout from '../../layouts/Layout.astro';
                 </div>
               </div>
               
-              <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 250px;">
+              <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 250px; width: 100%;">
                 <label style="font-size: 0.82rem; font-weight: 600; color: var(--cozy-text-obsidian);">Ảnh đại diện Kiosk</label>
-                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 0.25rem;">
-                  <button type="button" id="kiosk-avatar-upload-btn" class="cozy-btn" style="padding: 0.55rem 1rem; font-size: 0.8rem; font-weight: 600; background-color: var(--cozy-bg-beige); border: 1px solid var(--cozy-border-light); color: var(--cozy-text-obsidian); border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: none;">
+                <div class="avatar-upload-actions">
+                  <button type="button" id="kiosk-avatar-upload-btn" class="cozy-btn">
                     <i class="ph-light ph-upload-simple"></i> Chọn ảnh từ thiết bị
                   </button>
-                  <button type="button" id="kiosk-avatar-clear-btn" class="cozy-btn" style="padding: 0.55rem 1rem; font-size: 0.8rem; font-weight: 600; background-color: transparent; border: 1px solid rgba(255,0,0,0.15); color: #FF3B30; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; border: 1px solid rgba(255,0,0,0.15);">
+                  <button type="button" id="kiosk-avatar-clear-btn" class="cozy-btn" style="border: 1px solid rgba(255,0,0,0.15);">
                     <i class="ph-light ph-trash"></i> Xóa
                   </button>
                   <input type="file" id="kiosk-avatar-file" accept="image/*" style="display: none;" />
@@ -156,7 +156,7 @@ import Layout from '../../layouts/Layout.astro';
               <!-- Links social -->
               <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 <label style="font-size: 0.85rem; font-weight: 600; color: var(--cozy-text-obsidian);">Liên kết mạng xã hội khác</label>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+                <div class="kiosk-social-grid">
                   <div style="display: flex; align-items: center; gap: 8px; background-color: var(--cozy-bg-beige); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--cozy-border-light);">
                     <i class="ph-light ph-youtube-logo" style="font-size: 1.2rem; color: #FF0000; flex-shrink: 0;"></i>
                     <input type="url" id="kiosk-social-youtube" class="cozy-input" placeholder="Link kênh YouTube..." style="border: none; background: transparent; padding: 0.5rem 0; width: 100%; font-size: 0.8rem; box-shadow: none;" />
@@ -973,6 +973,121 @@ import Layout from '../../layouts/Layout.astro';
 </script>
 
 <style>
+  /* Kiosk Settings Form - Responsive Mobile First */
+  .kiosk-settings-section {
+    background-color: var(--cozy-bg-pure);
+    padding: 1.25rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--cozy-border-light);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+  }
+
+  .kiosk-settings-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-bottom: 1px dashed var(--cozy-border-light);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  @media (min-width: 576px) {
+    .kiosk-settings-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+  }
+
+  .kiosk-save-btn {
+    padding: 0.55rem 1.15rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background-color: var(--cozy-green-matcha-forest);
+    color: #fff;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+  @media (min-width: 576px) {
+    .kiosk-save-btn {
+      width: auto;
+    }
+  }
+
+  .kiosk-avatar-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (min-width: 576px) {
+    .kiosk-avatar-row {
+      flex-direction: row;
+      align-items: flex-start;
+      text-align: left;
+      gap: 1.5rem;
+    }
+  }
+
+  .avatar-upload-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+  @media (min-width: 375px) {
+    .avatar-upload-actions {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+  @media (min-width: 576px) {
+    .avatar-upload-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  .avatar-upload-actions .cozy-btn {
+    width: 100%;
+    justify-content: center;
+    border: 1px solid var(--cozy-border-light);
+    background-color: var(--cozy-bg-beige);
+    color: var(--cozy-text-obsidian);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  @media (min-width: 375px) {
+    .avatar-upload-actions .cozy-btn {
+      width: auto;
+    }
+  }
+
+  .kiosk-social-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  @media (min-width: 576px) {
+    .kiosk-social-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
   .kiosk-page-view {
     padding: 3rem 1.5rem 6rem;
     background-color: var(--cozy-bg-beige);

@@ -778,8 +778,9 @@ import Layout from '../../layouts/Layout.astro';
 
       // Hàm Fallback Tên sản phẩm
       function getFallbackTitle(url: string) {
-        const matchSlug = url.match(/shopee\.vn\/([^\/]+)-i\.\d+\.\d+/i);
-        const matchProductId = url.match(/shopee\.vn\/product\/(\d+)\/(\d+)/i);
+        const cleanUrl = url.split('?')[0];
+        const matchSlug = cleanUrl.match(/shopee\.vn\/([^\/]+)-i\.\d+\.\d+/i);
+        const matchProductId = cleanUrl.match(/shopee\.vn\/product\/(\d+)\/(\d+)/i);
         if (matchSlug && matchSlug[1]) {
           const slug = matchSlug[1];
           const decoded = decodeURIComponent(slug.replace(/-/g, ' '));
@@ -790,11 +791,8 @@ import Layout from '../../layouts/Layout.astro';
         return 'Sản phẩm tiếp thị';
       }
 
-      // Tự động cào dữ liệu qua Vercel API / Fallback Client-side
-      let urlTimeout: any = null;
+      // Tự động cào dữ liệu trực tiếp bằng client-side regex & keyword mapping (Zero latency)
       urlInput?.addEventListener('input', () => {
-        if (urlTimeout) clearTimeout(urlTimeout);
-        
         const urlVal = urlInput.value.trim();
         if (!urlVal) {
           updateLivePreview();
@@ -804,38 +802,12 @@ import Layout from '../../layouts/Layout.astro';
         const isShopee = urlVal.toLowerCase().includes('shopee.vn') || urlVal.toLowerCase().includes('shp.ee') || urlVal.toLowerCase().includes('shope.ee');
         if (!isShopee) return;
 
-        const spinner = document.getElementById('kiosk-url-loading-spinner');
-        if (spinner) spinner.classList.remove('hidden');
-
-        urlTimeout = setTimeout(async () => {
-          try {
-            // Layer 1: Call Vercel Serverless Scraper
-            const res = await fetch(`/api/scrape?url=${encodeURIComponent(urlVal)}`);
-            if (res.status === 200) {
-              const data = await res.json();
-              if (spinner) spinner.classList.add('hidden');
-
-              if (data.title && !data.error) {
-                nameInput.value = data.title;
-                imageInput.value = data.image || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300';
-              } else {
-                // Layer 2: Client Fallback
-                const fallbackTitle = getFallbackTitle(urlVal);
-                nameInput.value = fallbackTitle;
-                imageInput.value = getFallbackImage(fallbackTitle, urlVal);
-              }
-            } else {
-              // Localhost dev/Vercel fail fallback
-              throw new Error('Fallback trigger');
-            }
-          } catch (err) {
-            if (spinner) spinner.classList.add('hidden');
-            const fallbackTitle = getFallbackTitle(urlVal);
-            nameInput.value = fallbackTitle;
-            imageInput.value = getFallbackImage(fallbackTitle, urlVal);
-          }
-          updateLivePreview();
-        }, 800);
+        // Điền trực tiếp tức thì
+        const fallbackTitle = getFallbackTitle(urlVal);
+        nameInput.value = fallbackTitle;
+        imageInput.value = getFallbackImage(fallbackTitle, urlVal);
+        
+        updateLivePreview();
       });
 
       // Chọn nhanh hình ảnh từ danh sách Preset

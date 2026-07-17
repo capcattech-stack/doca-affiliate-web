@@ -16,17 +16,28 @@ export default async function handler(request, response) {
 
   let targetUrl = url;
 
-  function parseShopeeUrl(shopeeUrl) {
-    const cleanUrl = shopeeUrl.split('?')[0];
-    const matchProductId = cleanUrl.match(/shopee\.vn\/product\/(\d+)\/(\d+)/i);
-    if (matchProductId) {
-      return { shopId: matchProductId[1], itemId: matchProductId[2] };
+  function decodeHtmlEntities(str) {
+    return str.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+              .replace(/&amp;/g, '&')
+              .replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+              .replace(/&quot;/g, '"')
+              .replace(/&apos;/g, "'");
+  }
+
+  function extractMeta(html) {
+    const titleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) || 
+                       html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
+    const imageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) || 
+                       html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+                       
+    let title = titleMatch ? decodeHtmlEntities(titleMatch[1]) : '';
+    let image = imageMatch ? imageMatch[1] : '';
+    
+    if (title) {
+      title = title.replace(/\s*\|\s*Shopee\s*Việt\s*Nam\s*$/i, '').trim();
     }
-    const matchSlug = cleanUrl.match(/-i\.(\d+)\.(\d+)/i);
-    if (matchSlug) {
-      return { shopId: matchSlug[1], itemId: matchSlug[2] };
-    }
-    return null;
+    return { title, image };
   }
 
   try {
@@ -44,100 +55,83 @@ export default async function handler(request, response) {
 
     const isShopee = targetUrl.toLowerCase().includes('shopee.vn');
     if (isShopee) {
-      const shopeeParams = parseShopeeUrl(targetUrl);
-      if (shopeeParams) {
-        const { shopId, itemId } = shopeeParams;
-        const shopeeApiUrl = `https://shopee.vn/api/v4/item/get?itemid=${itemId}&shopid=${shopId}`;
-        let apiData = null;
-        const errorLogs = [];
+      const cleanShopeeUrl = targetUrl.split('?')[0];
+      let htmlContent = '';
+      const errorLogs = [];
 
-        const shoperProxyUrl = process.env.SHOPER_PROXY_URL;
+      const shoperProxyUrl = process.env.SHOPER_PROXY_URL;
 
-        // Lớp 0: Gọi qua Google Apps Script Proxy (Nếu được cấu hình trong .env)
-        if (shoperProxyUrl) {
-          try {
-            const requestUrl = `${shoperProxyUrl}${shoperProxyUrl.includes('?') ? '&' : '?'}url=${encodeURIComponent(shopeeApiUrl)}`;
-            const res = await fetch(requestUrl);
-            if (res.status === 200) {
-              const json = await res.json();
-              if (json && json.data) {
-                apiData = json.data;
-              } else if (json && json.error) {
-                errorLogs.push('GAS Script error: ' + json.error);
-              } else {
-                errorLogs.push('GAS JSON empty data');
-              }
-            } else {
-              errorLogs.push(`GAS HTTP Status: ${res.status}`);
+      // Lớp 0: Gửi yêu cầu qua GAS Proxy
+      if (shoperProxyUrl) {
+        try {
+          const requestUrl = `${shoperProxyUrl}${shoperProxyUrl.includes('?') ? '&' : '?'}url=${encodeURIComponent(cleanShopeeUrl)}`;
+          const res = await fetch(requestUrl);
+          if (res.status === 200) {
+            htmlContent = await res.text();
+            if (!htmlContent || htmlContent.trim() === '') {
+              errorLogs.push('GAS HTML empty response');
+              htmlContent = '';
             }
-          } catch (e) {
-            errorLogs.push('GAS exception: ' + e.message);
+          } else {
+            errorLogs.push(`GAS HTTP Status: ${res.status}`);
           }
-        } else {
-          errorLogs.push('Chưa cấu hình SHOPER_PROXY_URL trong .env');
-        }
-
-        // Lớp 1: Gọi trực tiếp API Shopee từ Serverless
-        if (!apiData) {
-          try {
-            const res = await fetch(shopeeApiUrl, {
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Referer': 'https://shopee.vn/'
-              }
-            });
-            if (res.status === 200) {
-              const json = await res.json();
-              if (json && json.data) {
-                apiData = json.data;
-              } else {
-                errorLogs.push('Lớp 1 JSON empty data');
-              }
-            } else {
-              errorLogs.push(`Lớp 1 HTTP Status: ${res.status}`);
-            }
-          } catch (e) {
-            errorLogs.push('Lớp 1 exception: ' + e.message);
-          }
-        }
-
-        // Lớp 2: Gọi API qua Free CORS Proxy nếu trực tiếp bị chặn
-        if (!apiData) {
-          try {
-            const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(shopeeApiUrl)}`;
-            const res = await fetch(proxyUrl, {
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
-              }
-            });
-            if (res.status === 200) {
-              const json = await res.json();
-              if (json && json.data) {
-                apiData = json.data;
-              } else {
-                errorLogs.push('Lớp 2 JSON empty data');
-              }
-            } else {
-              errorLogs.push(`Lớp 2 HTTP Status: ${res.status}`);
-            }
-          } catch (e) {
-            errorLogs.push('Lớp 2 exception: ' + e.message);
-          }
-        }
-
-        if (apiData && apiData.name) {
-          const title = apiData.name || '';
-          const imageId = apiData.image || (apiData.images && apiData.images[0]) || '';
-          const image = imageId ? `https://down-vn.img.susercontent.com/file/${imageId}` : '';
-          return response.status(200).json({ title, image });
-        } else {
-          return response.status(200).json({ error: errorLogs.join(' | '), fallback: true });
+        } catch (e) {
+          errorLogs.push('GAS exception: ' + e.message);
         }
       } else {
-        return response.status(200).json({ error: 'Không thể phân tách mã shopId và itemId từ link Shopee này.', fallback: true });
+        errorLogs.push('Chưa cấu hình SHOPER_PROXY_URL trong .env');
       }
+
+      // Lớp 1: Gọi trực tiếp từ serverless giả lập User-Agent của Facebook Bot
+      if (!htmlContent) {
+        try {
+          const res = await fetch(cleanShopeeUrl, {
+            headers: {
+              'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'vi,en-US;q=0.7,en;q=0.3'
+            }
+          });
+          if (res.status === 200) {
+            htmlContent = await res.text();
+          } else {
+            errorLogs.push(`Lớp 1 HTML HTTP Status: ${res.status}`);
+          }
+        } catch (e) {
+          errorLogs.push('Lớp 1 HTML exception: ' + e.message);
+        }
+      }
+
+      // Lớp 2: Gọi qua Free CORS Proxy
+      if (!htmlContent) {
+        try {
+          const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(cleanShopeeUrl)}`;
+          const res = await fetch(proxyUrl, {
+            headers: {
+              'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'
+            }
+          });
+          if (res.status === 200) {
+            htmlContent = await res.text();
+          } else {
+            errorLogs.push(`Lớp 2 HTML HTTP Status: ${res.status}`);
+          }
+        } catch (e) {
+          errorLogs.push('Lớp 2 HTML exception: ' + e.message);
+        }
+      }
+
+      // Phân tích cú pháp HTML để bóc tách tiêu đề và ảnh
+      if (htmlContent) {
+        const { title, image } = extractMeta(htmlContent);
+        if (title && image) {
+          return response.status(200).json({ title, image });
+        } else {
+          errorLogs.push(`Không thể bóc tách meta từ HTML (Title length: ${title.length}, Image: ${image ? 'Có' : 'Không'})`);
+        }
+      }
+
+      return response.status(200).json({ error: errorLogs.join(' | '), fallback: true });
     }
 
     const scrapeDoToken = process.env.SCRAPE_DO_TOKEN;

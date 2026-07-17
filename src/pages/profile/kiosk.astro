@@ -211,7 +211,7 @@ import Layout from '../../layouts/Layout.astro';
             <div class="cozy-sheet-content">
               <div class="cozy-sheet-drag-handle"></div>
               <div class="cozy-sheet-header" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem 0.5rem; border-bottom: 1px dashed var(--cozy-border-light);">
-                <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                <h3 id="kiosk-sheet-title" style="font-size: 0.95rem; font-weight: 700; color: var(--cozy-text-obsidian); margin: 0; display: flex; align-items: center; gap: 0.35rem;">
                   <i class="ph-light ph-shopping-bag" style="color: var(--cozy-green-matcha-forest); font-size: 1.2rem;"></i> Thêm sản phẩm mới
                 </h3>
                 <button type="button" id="kiosk-sheet-close-btn" style="background: none; border: none; font-size: 1.35rem; color: var(--cozy-text-charcoal); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
@@ -692,27 +692,7 @@ import Layout from '../../layouts/Layout.astro';
       const sheetCloseBtn = document.getElementById('kiosk-sheet-close-btn');
       const sheetBackdrop = document.getElementById('kiosk-sheet-backdrop');
 
-      function openAddProductSheet() {
-        if (addProductSheet) {
-          addProductSheet.classList.add('open');
-          document.body.style.overflow = 'hidden'; // Khóa scroll màn hình chính
-        }
-      }
-
-      function closeAddProductSheet() {
-        if (addProductSheet) {
-          addProductSheet.classList.remove('open');
-          document.body.style.overflow = ''; // Mở lại scroll màn hình chính
-        }
-        const msg = document.getElementById('kiosk-url-status-message');
-        if (msg) msg.style.display = 'none';
-      }
-
-      addProductTrigger?.addEventListener('click', openAddProductSheet);
-      sheetCloseBtn?.addEventListener('click', closeAddProductSheet);
-      sheetBackdrop?.addEventListener('click', closeAddProductSheet);
-
-      // --- Xử lý thêm Link Shopee mới & Live Preview ---
+      // Khai báo các biến DOM của form thêm/sửa sản phẩm lên trên để hàm đóng sheet truy cập được
       const addBtn = document.getElementById('kiosk-link-add-btn') as HTMLButtonElement;
       const urlInput = document.getElementById('kiosk-link-url') as HTMLInputElement;
       const nameInput = document.getElementById('kiosk-link-name') as HTMLInputElement;
@@ -731,6 +711,53 @@ import Layout from '../../layouts/Layout.astro';
       const toggleAdvancedBtn = document.getElementById('kiosk-toggle-advanced-btn');
       const advancedFields = document.getElementById('kiosk-advanced-fields');
       const advancedChevron = document.getElementById('kiosk-advanced-chevron');
+
+      // Biến state theo dõi sản phẩm đang chỉnh sửa
+      let editLinkId: string | null = null;
+
+      function openAddProductSheet() {
+        if (addProductSheet) {
+          addProductSheet.classList.add('open');
+          document.body.style.overflow = 'hidden'; // Khóa scroll màn hình chính
+        }
+      }
+
+      function closeAddProductSheet() {
+        if (addProductSheet) {
+          addProductSheet.classList.remove('open');
+          document.body.style.overflow = ''; // Mở lại scroll màn hình chính
+        }
+        const msg = document.getElementById('kiosk-url-status-message');
+        if (msg) msg.style.display = 'none';
+
+        // Reset trạng thái sửa
+        editLinkId = null;
+        const sheetTitle = document.getElementById('kiosk-sheet-title');
+        if (sheetTitle) {
+          sheetTitle.innerHTML = '<i class="ph-light ph-shopping-bag" style="color: var(--cozy-green-matcha-forest); font-size: 1.2rem;"></i> Thêm sản phẩm mới';
+        }
+        if (addBtn) {
+          addBtn.innerHTML = 'Bày bán ngay <i class="ph-light ph-plus-circle"></i>';
+        }
+
+        // Reset form inputs
+        if (urlInput) urlInput.value = '';
+        if (nameInput) nameInput.value = '';
+        if (descInput) descInput.value = '';
+        if (imageInput) imageInput.value = '';
+        if (productFileInput) productFileInput.value = '';
+
+        // Đóng accordion nâng cao nếu đang mở
+        if (advancedFields && !advancedFields.classList.contains('hidden')) {
+          advancedFields.classList.add('hidden');
+          if (advancedChevron) advancedChevron.className = 'ph-light ph-caret-down';
+        }
+        updateLivePreview();
+      }
+
+      addProductTrigger?.addEventListener('click', openAddProductSheet);
+      sheetCloseBtn?.addEventListener('click', closeAddProductSheet);
+      sheetBackdrop?.addEventListener('click', closeAddProductSheet);
 
       toggleAdvancedBtn?.addEventListener('click', () => {
         if (advancedFields) {
@@ -990,29 +1017,59 @@ import Layout from '../../layouts/Layout.astro';
         }
 
         addBtn.disabled = true;
-        addBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang bày bán...';
+        if (editLinkId) {
+          addBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang cập nhật...';
+        } else {
+          addBtn.innerHTML = '<i class="ph-light ph-circle-notch spinner-icon spin"></i> Đang bày bán...';
+        }
 
-        const { error } = await client.from('kiosk_links').insert({
-          kiosk_id: kiosk.id,
-          affiliate_url: urlVal,
-          product_name: nameVal || null,
-          product_image_url: imageVal || null,
-          description: descVal || null,
-          status: linkStatus,
-          rejection_reason: linkRejectReason
-        });
+        let dbResult;
+        if (editLinkId) {
+          dbResult = await client.from('kiosk_links').update({
+            affiliate_url: urlVal,
+            product_name: nameVal || null,
+            product_image_url: imageVal || null,
+            description: descVal || null,
+            status: linkStatus,
+            rejection_reason: linkRejectReason
+          }).eq('id', editLinkId);
+        } else {
+          dbResult = await client.from('kiosk_links').insert({
+            kiosk_id: kiosk.id,
+            affiliate_url: urlVal,
+            product_name: nameVal || null,
+            product_image_url: imageVal || null,
+            description: descVal || null,
+            status: linkStatus,
+            rejection_reason: linkRejectReason
+          });
+        }
+
+        const { error } = dbResult;
 
         addBtn.disabled = false;
-        addBtn.innerHTML = 'Bày bán ngay <i class="ph-light ph-plus-circle"></i>';
+        if (editLinkId) {
+          addBtn.innerHTML = 'Cập nhật sản phẩm <i class="ph-light ph-check-circle"></i>';
+        } else {
+          addBtn.innerHTML = 'Bày bán ngay <i class="ph-light ph-plus-circle"></i>';
+        }
 
         if (error) {
           if ((window as any).showToast) (window as any).showToast('Lỗi ghi DB: ' + error.message);
         } else {
           if ((window as any).showToast) {
-            if (linkStatus === 'approved') {
-              (window as any).showToast('Đã thêm sản phẩm lên Kiosk của bạn thành công! 🎉');
+            if (editLinkId) {
+              if (linkStatus === 'approved') {
+                (window as any).showToast('Đã cập nhật sản phẩm thành công! 🎉');
+              } else {
+                (window as any).showToast(`Sản phẩm cập nhật bị từ chối duyệt: ${linkRejectReason} ⚠️`);
+              }
             } else {
-              (window as any).showToast(`Sản phẩm bị từ chối duyệt: ${linkRejectReason} ⚠️`);
+              if (linkStatus === 'approved') {
+                (window as any).showToast('Đã thêm sản phẩm lên Kiosk của bạn thành công! 🎉');
+              } else {
+                (window as any).showToast(`Sản phẩm bị từ chối duyệt: ${linkRejectReason} ⚠️`);
+              }
             }
           }
           
@@ -1024,6 +1081,16 @@ import Layout from '../../layouts/Layout.astro';
           if (productFileInput) productFileInput.value = '';
           if (statusMsg) statusMsg.style.display = 'none';
           
+          // Reset trạng thái sửa
+          editLinkId = null;
+          const sheetTitle = document.getElementById('kiosk-sheet-title');
+          if (sheetTitle) {
+            sheetTitle.innerHTML = '<i class="ph-light ph-shopping-bag" style="color: var(--cozy-green-matcha-forest); font-size: 1.2rem;"></i> Thêm sản phẩm mới';
+          }
+          if (addBtn) {
+            addBtn.innerHTML = 'Bày bán ngay <i class="ph-light ph-plus-circle"></i>';
+          }
+
           // Đóng accordion nâng cao nếu đang mở
           if (advancedFields && !advancedFields.classList.contains('hidden')) {
             advancedFields.classList.add('hidden');
@@ -1082,7 +1149,10 @@ import Layout from '../../layouts/Layout.astro';
                   <div style="position: absolute; top: 8px; left: 8px; z-index: 5;">
                     <input type="checkbox" class="kiosk-item-checkbox" data-id="${link.id}" style="margin: 0; cursor: pointer; width: 15px; height: 15px; accent-color: var(--cozy-green-matcha-forest);" />
                   </div>
-                  <div style="position: absolute; top: 8px; right: 8px; z-index: 5;">
+                  <div style="position: absolute; top: 8px; right: 8px; z-index: 5; display: flex; gap: 4px;">
+                    <button type="button" class="kiosk-item-edit-btn" data-id="${link.id}" data-url="${escapeHtml(link.affiliate_url)}" data-name="${escapeHtml(link.product_name || '')}" data-desc="${escapeHtml(link.description || '')}" data-image="${escapeHtml(link.product_image_url || '')}" title="Sửa sản phẩm" style="background: rgba(255,255,255,0.9); border: 1px solid var(--cozy-border-light); color: var(--cozy-text-obsidian); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+                      <i class="ph-light ph-pencil" style="font-size: 0.85rem;"></i>
+                    </button>
                     <button type="button" class="kiosk-item-delete-btn" data-id="${link.id}" title="Xóa liên kết" style="background: rgba(255,255,255,0.9); border: 1px solid var(--cozy-border-light); color: #ff4d4f; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
                       <i class="ph-light ph-trash" style="font-size: 0.85rem;"></i>
                     </button>
@@ -1173,6 +1243,48 @@ import Layout from '../../layouts/Layout.astro';
 
             // Khởi chạy phân trang lần đầu
             updatePagination();
+
+            // Edit link handler
+            listEl.querySelectorAll('.kiosk-item-edit-btn').forEach((btn: any) => {
+              btn.addEventListener('click', () => {
+                const linkId = btn.getAttribute('data-id');
+                const linkUrl = btn.getAttribute('data-url');
+                const linkName = btn.getAttribute('data-name');
+                const linkDesc = btn.getAttribute('data-desc');
+                const linkImage = btn.getAttribute('data-image');
+
+                editLinkId = linkId;
+
+                // Nạp dữ liệu vào form
+                urlInput.value = linkUrl || '';
+                if (nameInput) nameInput.value = linkName || '';
+                descInput.value = linkDesc || '';
+                if (imageInput) imageInput.value = linkImage || '';
+                
+                // Mở cấu hình nâng cao nếu tiêu đề hoặc ảnh có dữ liệu khác rỗng
+                if ((linkName || linkImage) && advancedFields && advancedFields.classList.contains('hidden')) {
+                  advancedFields.classList.remove('hidden');
+                  if (advancedChevron) advancedChevron.className = 'ph-light ph-caret-up';
+                }
+
+                // Cập nhật tiêu đề sheet và text nút submit
+                const sheetTitle = document.getElementById('kiosk-sheet-title');
+                if (sheetTitle) {
+                  sheetTitle.innerHTML = '<i class="ph-light ph-pencil" style="color: var(--cozy-green-matcha-forest); font-size: 1.2rem;"></i> Chỉnh sửa sản phẩm';
+                }
+                if (addBtn) {
+                  addBtn.innerHTML = 'Cập nhật sản phẩm <i class="ph-light ph-check-circle"></i>';
+                }
+
+                // Reset status message nếu có
+                const msg = document.getElementById('kiosk-url-status-message');
+                if (msg) msg.style.display = 'none';
+
+                // Cập nhật Live Preview và mở Bottom Sheet
+                updateLivePreview();
+                openAddProductSheet();
+              });
+            });
 
             // Delete link handler
             listEl.querySelectorAll('.kiosk-item-delete-btn').forEach((btn: any) => {

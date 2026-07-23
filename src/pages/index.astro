@@ -444,6 +444,18 @@ const getCategoryLabel = (cat: string) => {
       </div>
     </section>
 
+    <!-- Kiosk Banner Section -->
+    <section class="kiosk-banner-section">
+      <div class="kiosk-banner-container">
+        <a href="/profile/kiosk" class="kiosk-banner-link">
+          <picture>
+            <source media="(max-width: 768px)" srcset="/images/kiosk-banner-mobile.jpg" />
+            <img src="/images/kiosk-banner-desktop.jpg" alt="Mở Kiot Doca cùng Tina" class="kiosk-banner-img" />
+          </picture>
+        </a>
+      </div>
+    </section>
+
     <!-- Namiya Mailbox Widget -->
     <section class="mailbox-section">
       <div class="container mailbox-section-container">
@@ -514,6 +526,40 @@ const getCategoryLabel = (cat: string) => {
 <style>
   .home-view {
     padding-bottom: 5rem;
+  }
+
+  /* Kiosk Banner */
+  .kiosk-banner-section {
+    margin: 2.5rem 0;
+    padding: 0 1.5rem;
+  }
+
+  .kiosk-banner-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--cozy-border-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .kiosk-banner-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .kiosk-banner-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .kiosk-banner-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
   }
 
   .text-center {

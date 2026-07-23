@@ -2053,6 +2053,35 @@ const getCategoryLabel = (cat: string) => {
 
     async function loadPlaylist() {
       const weather = await fetchWeather();
+      const r2Domain = (window as any).PUBLIC_R2_PUBLIC_DOMAIN || import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || '';
+      
+      // 1. Thử tải playlist.json từ Cloudflare R2
+      if (r2Domain) {
+        const r2PlaylistUrl = `${r2Domain.replace(/\/$/, '')}/playlist.json`;
+        try {
+          const res = await fetch(r2PlaylistUrl);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.tracks && data.playlists) {
+              // Chuẩn hóa URL cho các track lưu đường dẫn tương đối
+              const normalizedTracks = data.tracks.map((track: any) => {
+                if (track.url && !track.url.startsWith('http://') && !track.url.startsWith('https://')) {
+                  const relativeUrl = track.url.startsWith('/') ? track.url : `/${track.url}`;
+                  return { ...track, url: `${r2Domain.replace(/\/$/, '')}${relativeUrl}` };
+                }
+                return track;
+              });
+              initPlaylist(normalizedTracks, data.playlists, weather);
+              isPlaylistLoaded = true;
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to load playlist.json from Cloudflare R2, trying Supabase...", err);
+        }
+      }
+
+      // 2. Thử tải playlist.json từ Supabase Storage (luồng cũ)
       const sbUrl = (window as any).PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || '';
       if (sbUrl) {
         const playlistUrl = `${sbUrl}/storage/v1/object/public/audio/playlist.json`;

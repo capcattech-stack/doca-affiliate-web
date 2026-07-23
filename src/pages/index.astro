@@ -565,6 +565,23 @@ const getCategoryLabel = (cat: string) => {
     object-fit: cover;
   }
 
+  @media (max-width: 768px) {
+    .kiosk-banner-container-wrapper {
+      padding: 0;
+      margin-bottom: 1.5rem;
+    }
+    .kiosk-banner-container-wrapper .container {
+      padding: 0;
+      max-width: 100%;
+    }
+    .kiosk-banner-container {
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      box-shadow: none;
+    }
+  }
+
   .text-center {
     text-align: center;
   }

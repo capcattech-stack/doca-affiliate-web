@@ -6,6 +6,9 @@ import subprocess
 import wave
 import io
 import sys
+import urllib.request
+import urllib.parse
+from datetime import datetime, timedelta
 import boto3
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -91,57 +94,280 @@ def get_existing_playlist(r2_client, bucket_name):
         print("Cảnh báo: Không tìm thấy file playlist.json cũ trên R2 hoặc lỗi đọc file. Khởi tạo danh sách mới.")
         return {"tracks": [], "playlists": {}}
 
-def distribute_tracks_to_playlists(tracks):
-    """
-    Phân bổ xoay vòng các bài hát vào 7 ngày trong tuần, mỗi ngày có 3 slot: morning, afternoon, evening.
-    Đảm bảo 100% tất cả 21 slots đều có ít nhất 1 bài hát (nếu tổng số bài hát >= 1).
-    """
-    slots = ["morning", "afternoon", "evening"]
-    playlists = {}
+def map_weather_code(code):
+    if code == 0: return "trời nắng trong xanh"
+    if code in [1, 2, 3]: return "mây nhẹ mát mẻ"
+    if code in [45, 48]: return "sương mù nhẹ"
+    if code in [51, 53, 55]: return "mưa phùn nhẹ"
+    if code in [61, 63, 65]: return "mưa rào"
+    if code in [71, 73, 75]: return "se se lạnh"
+    if code in [80, 81, 82]: return "mưa giông"
+    if code in [95, 96, 99]: return "giông bão"
+    return "mát mẻ"
+
+def get_tomorrow_weather():
+    url = "https://api.open-meteo.com/v1/forecast?latitude=10.7222&longitude=106.6783&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Asia%2FSingapore"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'DOCABot/1.0'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            if "daily" in data and len(data["daily"]["weather_code"]) > 1:
+                weather_code = data["daily"]["weather_code"][1]
+                temp_max = data["daily"]["temperature_2m_max"][1]
+                temp_min = data["daily"]["temperature_2m_min"][1]
+                return {
+                    "code": weather_code,
+                    "temp_max": temp_max,
+                    "temp_min": temp_min
+                }
+    except Exception as e:
+        print(f"Cảnh báo: Không lấy được dự báo thời tiết ngày mai ({e}). Sử dụng giá trị mặc định.")
+    return {"code": 3, "temp_max": 32, "temp_min": 25}
+
+def generate_story_via_gemini(api_key, weather_desc, slot, song_titles):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    slot_vn = "buổi sáng" if slot == "morning" else "buổi chiều" if slot == "afternoon" else "buổi tối"
     
+    prompt = f"""
+    Bạn là Tina, host ảo của radio chữa lành DOCA FM cho thú cưng và chủ nuôi.
+    Hãy viết lời tựa (story) và lời dẫn (intro) cho khung giờ phát nhạc '{slot_vn}' ngày mai.
+    
+    Thông tin đầu vào:
+    - Khung giờ: {slot_vn}
+    - Thời tiết ngày mai dự kiến: {weather_desc}
+    - Danh sách tên các bài phát: {", ".join(song_titles)}
+    
+    Yêu cầu:
+    1. Lời tựa câu chuyện (story): Viết 2-3 câu kể về Boss (thú cưng) và Sen (chủ nuôi) theo phong cách tiểu thuyết Nhật Bản (nhẹ nhàng, lững lờ, Iyashikei chữa lành). Lồng ghép khéo léo và tự nhiên tên các bài hát trên vào câu chuyện (có thể dịch nghĩa hoặc giữ nguyên tiếng Anh trong văn cảnh tiếng Việt sao cho mượt mà).
+    2. Tiêu đề câu chuyện (story_title): 1 tiêu đề ngắn gọn mang vibe tiểu thuyết Nhật Bản.
+    3. Lời dẫn (intro): Lời chào ấm áp, thân thương của Tina gửi tới cô/chú, đề cập đến thời tiết ngày mai ({weather_desc}) và giới thiệu playlist. Giọng điệu Empathetic, Iyashikei chữa lành.
+    4. Trả về đúng 1 đối tượng JSON duy nhất có dạng:
+    {{
+        "title": "tiêu đề vibe badge kèm emoji dài khoảng 3-5 từ (ví dụ: Thanh Âm Chiếu Chiếu 🍵, Chiều Mưa Kissaten 🌧️, Nắng Sớm Bên Hiên ☕)",
+        "story_title": "tiêu đề câu chuyện",
+        "story": "nội dung lời tựa lồng ghép tên các bài hát",
+        "intro": "lời dẫn của Tina"
+    }}
+    Lưu ý: Chỉ trả về chuỗi JSON thuần túy, không có thẻ ```json hoặc các định dạng text khác.
+    """
+    
+    payload = {
+        "contents": [{
+            "parts": [{
+                "text": prompt
+            }]
+        }],
+        "generationConfig": {
+            "responseMimeType": "application/json"
+        }
+    }
+    
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            text_response = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            if text_response.startswith("```"):
+                lines = text_response.splitlines()
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                text_response = "\n".join(lines).strip()
+            return json.loads(text_response)
+    except Exception as e:
+        print(f"Lỗi khi gọi Gemini API cho slot {slot}: {e}")
+        return None
+
+def generate_story_fallback(weather_desc, slot, song_titles):
+    if slot == "morning":
+        title = "Nắng Sớm Bên Hiên ☕"
+        story_title = "Màn Sương Sớm Trên Lớp Rêu Xanh"
+        story = f"Nắng mai lấp lánh khẽ đánh thức cả căn phòng. Giữa không gian yên bình ấy, bản nhạc {', '.join(song_titles[:2])} ngân nga đưa chú mèo và Sen bước vào một ngày mới thật dịu ngọt."
+        intro = f"Chào cô/chú nhé! Sáng mai trời {weather_desc} thật dễ chịu. Tina mời cả nhà cùng thưởng tách trà xanh ấm và lắng nghe tiếng jazz dịu êm đón ngày mới... 🐾"
+    elif slot == "afternoon":
+        title = "Góc Khuất Bình Yên 🍃"
+        story_title = "Cửa Gỗ Sồi Và Mùi Cà Phê Mộc"
+        story = f"Chú cún nằm lười bên cửa sổ ngắm lá rụng thong thả. Khi giai điệu {', '.join(song_titles[:2])} dịu dàng cất lên, mọi lo toan dường như được gió trưa cuốn trôi."
+        intro = f"Tina chào cả nhà nhé! Trưa chiều mai trời {weather_desc}, cô/chú đã nghỉ ngơi chưa nhỉ? Ghé lại góc nhỏ quen thuộc này và thả hồn vào những thanh âm mộc mạc nhé... 🍃"
+    else:
+        title = "Đèn Vàng Vĩ Tuyến 🌙"
+        story_title = "Đom Đóm Bay Qua Cửa Sổ Tròn"
+        story = f"Ánh đèn ngủ vàng ấm áp bao trùm lấy góc nhỏ thân thương. Cùng bé cưng nghe bản nhạc {', '.join(song_titles[:2])} êm dịu gác lại một ngày dài bình yên."
+        intro = f"Tối muộn rồi cô/chú ơi, đêm mai trời có vẻ {weather_desc} đấy. Cùng bé cưng đắp chiếc chăn mỏng, nghe bản nhạc êm dịu này và chìm vào giấc ngủ ngon nhé... 🌙"
+        
+    return {
+        "title": title,
+        "story_title": story_title,
+        "story": story,
+        "intro": intro
+    }
+
+def update_tomorrow_playlist(tracks, existing_playlists=None):
+    playlists = existing_playlists or {}
     day_names = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
+    slots = ["morning", "afternoon", "evening"]
     
-    # Khởi tạo khung cấu trúc trống cho 7 ngày (0: Chủ nhật, 1: Thứ hai, ...)
+    # 1. Baseline initialization if day structure is missing
     for d in range(7):
-        playlists[str(d)] = {
-            "morning": {
-                "title": f"Nắng Sớm Bên Hiên ({day_names[d]}) ☕",
-                "story_title": "Tách Trà Sớm Và Tiếng Đuôi Gõ Nhịp",
-                "story": "Mở đầu ngày mới bên tách trà sớm ấm áp và ngọt lành của bé cưng.",
-                "tracks": []
-            },
-            "afternoon": {
-                "title": f"Góc Khuất Bình Yên ({day_names[d]}) 🍃",
-                "story_title": "Nắng Trưa Đậu Trên Bộ Lông Khô Ráo",
-                "story": "Góc nằm lười trưa nắng bên cửa sổ đón ngọn gió mát lành.",
-                "tracks": []
-            },
-            "evening": {
-                "title": f"Đèn Vàng Vĩ Tuyến ({day_names[d]}) 🌙",
-                "story_title": "Đèn Đêm Vàng Và Giấc Mộng Màu Xanh",
-                "story": "Ánh đèn đêm ấm áp vang lên bản jazz êm đềm xoa dịu những nhọc nhằn.",
-                "tracks": []
+        d_str = str(d)
+        if d_str not in playlists or not playlists[d_str]:
+            playlists[d_str] = {
+                "morning": {
+                    "title": f"Nắng Sớm Bên Hiên ({day_names[d]}) ☕",
+                    "story_title": "Tách Trà Sớm Và Tiếng Đuôi Gõ Nhịp",
+                    "story": "Mở đầu ngày mới bên tách trà sớm ấm áp và ngọt lành của bé cưng.",
+                    "tracks": []
+                },
+                "afternoon": {
+                    "title": f"Góc Khuất Bình Yên ({day_names[d]}) 🍃",
+                    "story_title": "Nắng Trưa Đậu Trên Bộ Lông Khô Ráo",
+                    "story": "Góc nằm lười trưa nắng bên cửa sổ đón ngọn gió mát lành.",
+                    "tracks": []
+                },
+                "evening": {
+                    "title": f"Đèn Vàng Vĩ Tuyến ({day_names[d]}) 🌙",
+                    "story_title": "Đèn Đêm Vàng Và Giấc Mộng Màu Xanh",
+                    "story": "Ánh đèn đêm ấm áp vang lên bản jazz êm đềm xoa dịu những nhọc nhằn.",
+                    "tracks": []
+                }
             }
+            num_tracks = len(tracks)
+            if num_tracks > 0:
+                for s_idx, slot in enumerate(slots):
+                    idx = d + s_idx * 7
+                    for offset in range(4):
+                        track_idx = (idx + offset * 21) % num_tracks
+                        track_id = tracks[track_idx]["id"]
+                        if track_id not in playlists[d_str][slot]["tracks"]:
+                            playlists[d_str][slot]["tracks"].append(track_id)
+                            
+    # 2. Calculate tomorrow date in Vietnam time (ICT, UTC+7)
+    utc_now = datetime.utcnow()
+    vietnam_now = utc_now + timedelta(hours=7)
+    tomorrow = vietnam_now + timedelta(days=1)
+    tomorrow_day_idx = (tomorrow.weekday() + 1) % 7
+    tomorrow_day_str = str(tomorrow_day_idx)
+    tomorrow_day_name = day_names[tomorrow_day_idx]
+    
+    print(f"\n[Curation] Thời gian hiện tại (ICT): {vietnam_now.strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"[Curation] Chuẩn bị danh sách phát cho ngày mai: {tomorrow.strftime('%Y-%m-%d')} ({tomorrow_day_name}, Index: {tomorrow_day_idx})")
+    
+    # 3. Lấy thời tiết ngày mai
+    weather = get_tomorrow_weather()
+    weather_desc = map_weather_code(weather["code"])
+    temp_max = weather["temp_max"]
+    temp_min = weather["temp_min"]
+    weather_info_str = f"{weather_desc} ({temp_min}°C - {temp_max}°C)"
+    print(f"[Curation] Thời tiết ngày mai dự kiến: {weather_info_str}")
+    
+    # 4. Phân nhóm bài hát dựa trên thư mục trong URL
+    grouped_tracks = {
+        "morning_brighter": [],
+        "sleepy_ambient": [],
+        "focused_study": [],
+        "nostalgic_retro": [],
+        "classic_jazz": [],
+        "all": []
+    }
+    
+    for t in tracks:
+        url_lower = t.get("url", "").lower()
+        grouped_tracks["all"].append(t)
+        if "morning tea" in url_lower or "soft morning" in url_lower:
+            grouped_tracks["morning_brighter"].append(t)
+        elif "deep sleep" in url_lower:
+            grouped_tracks["sleepy_ambient"].append(t)
+        elif "cozy library" in url_lower:
+            grouped_tracks["focused_study"].append(t)
+        elif "old love letters" in url_lower:
+            grouped_tracks["nostalgic_retro"].append(t)
+        elif "1940s vintage cafe" in url_lower:
+            grouped_tracks["classic_jazz"].append(t)
+            
+    # 5. Phân nhóm thời tiết để chọn pool nhạc phù hợp
+    is_rainy = weather["code"] in [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99]
+    is_sunny = weather["code"] == 0 or temp_max >= 31
+    weather_cond = "rainy" if is_rainy else "sunny" if is_sunny else "cloudy"
+    print(f"[Curation] Nhóm thời tiết: {weather_cond.upper()}")
+    
+    pools = {
+        "morning": [],
+        "afternoon": [],
+        "evening": []
+    }
+    
+    if weather_cond == "rainy":
+        pools["morning"] = grouped_tracks["morning_brighter"] + grouped_tracks["focused_study"]
+        pools["afternoon"] = grouped_tracks["focused_study"] + grouped_tracks["classic_jazz"]
+        pools["evening"] = grouped_tracks["sleepy_ambient"] + grouped_tracks["focused_study"]
+    elif weather_cond == "sunny":
+        pools["morning"] = grouped_tracks["morning_brighter"]
+        pools["afternoon"] = grouped_tracks["morning_brighter"] + grouped_tracks["nostalgic_retro"]
+        pools["evening"] = grouped_tracks["classic_jazz"] + grouped_tracks["nostalgic_retro"]
+    else: # cloudy
+        pools["morning"] = grouped_tracks["morning_brighter"]
+        pools["afternoon"] = grouped_tracks["nostalgic_retro"] + grouped_tracks["focused_study"]
+        pools["evening"] = grouped_tracks["classic_jazz"] + grouped_tracks["sleepy_ambient"]
+        
+    for slot in slots:
+        if not pools[slot]:
+            pools[slot] = grouped_tracks["all"]
+            
+    # 6. Chọn bài hát (4 bài mỗi slot) dựa trên ngày của ngày mai để đa dạng hóa
+    selected_ids = {}
+    selected_titles = {}
+    tomorrow_day = tomorrow.day
+    
+    for slot in slots:
+        pool = pools[slot]
+        unique_pool = []
+        seen = set()
+        for t in pool:
+            if t["id"] not in seen:
+                unique_pool.append(t)
+                seen.add(t["id"])
+        if len(unique_pool) < 4:
+            for t in grouped_tracks["all"]:
+                if t["id"] not in seen:
+                    unique_pool.append(t)
+                    seen.add(t["id"])
+                    
+        selected = []
+        for i in range(4):
+            idx = (tomorrow_day * 3 + i) % len(unique_pool)
+            selected.append(unique_pool[idx])
+            
+        selected_ids[slot] = [t["id"] for t in selected]
+        selected_titles[slot] = [t["title"] for t in selected]
+        
+    # 7. Gọi Gemini API để tự động sinh lời tựa và lời dẫn
+    gemini_key = os.environ.get("PUBLIC_GEMINI_API_KEY")
+    
+    for slot in slots:
+        story_data = None
+        if gemini_key:
+            print(f"[Curation] Đang dùng Gemini API viết truyện cho slot {slot}...")
+            story_data = generate_story_via_gemini(gemini_key, weather_info_str, slot, selected_titles[slot])
+            
+        if not story_data:
+            print(f"[Curation] Sử dụng nội dung dự phòng (fallback) cho slot {slot}.")
+            story_data = generate_story_fallback(weather_info_str, slot, selected_titles[slot])
+            
+        playlists[tomorrow_day_str][slot] = {
+            "title": story_data.get("title", f"{slot.capitalize()} FM"),
+            "story_title": story_data.get("story_title", "Cốt truyện chữa lành"),
+            "story": story_data.get("story", ""),
+            "intro": story_data.get("intro", ""),
+            "tracks": selected_ids[slot]
         }
         
-    num_tracks = len(tracks)
-    if num_tracks == 0:
-        return playlists
-
-    # Điền nhạc xoay vòng (round-robin) vào 21 slots đầu tiên
-    for idx in range(21):
-        day_idx = idx % 7
-        slot_name = slots[(idx // 7) % 3]
-        track_selected = tracks[idx % num_tracks]
-        playlists[str(day_idx)][slot_name]["tracks"].append(track_selected["id"])
-        
-    # Nếu có nhiều hơn 21 bài hát, tiếp tục phân bổ đều phần còn lại
-    if num_tracks > 21:
-        for idx in range(21, num_tracks):
-            day_idx = idx % 7
-            slot_name = slots[(idx // 7) % 3]
-            playlists[str(day_idx)][slot_name]["tracks"].append(tracks[idx]["id"])
-            
+    print(f"[Curation] Đã cập nhật thành công danh sách phát cho ngày mai ({tomorrow_day_name}).")
     return playlists
 
 def get_all_wav_files_recursive(drive_service, parent_id, current_path=""):
@@ -325,32 +551,32 @@ def main():
                     except OSError:
                         pass
                         
-    # 4. Nếu có nhạc mới, cập nhật lại cấu trúc playlist và upload đè playlist.json lên R2
-    if new_tracks_uploaded or not playlist_data.get("playlists"):
-        print("\nĐang cập nhật lại tệp playlist.json...")
-        
-        # Phân phối xoay vòng lại nhạc vào các slot 7 ngày
-        playlists_config = distribute_tracks_to_playlists(tracks_list)
-        
-        updated_playlist_data = {
-            "tracks": tracks_list,
-            "playlists": playlists_config
-        }
-        
-        # Upload playlist.json lên R2
-        try:
-            r2_client.put_object(
-                Bucket=r2_bucket,
-                Key='playlist.json',
-                Body=json.dumps(updated_playlist_data, ensure_ascii=False, indent=2),
-                ContentType='application/json'
-            )
-            print("Đã tải tệp tin playlist.json mới lên Cloudflare R2 thành công!")
-        except Exception as e:
-            print(f"LỖI: Không thể upload playlist.json lên R2: {e}")
-            sys.exit(1)
-    else:
-        print("\nKhông phát hiện bài hát mới nào cần đồng bộ.")
+    # 4. Luôn cập nhật danh sách phát ngày mai và upload playlist.json lên R2
+    print("\n--- Đang chuẩn bị và cập nhật danh sách phát ngày mai (Weather-based Curation) ---")
+    
+    # Đọc existing playlists từ playlist_data
+    existing_playlists = playlist_data.get("playlists", {})
+    
+    # Cập nhật danh sách phát ngày mai
+    updated_playlists = update_tomorrow_playlist(tracks_list, existing_playlists)
+    
+    updated_playlist_data = {
+        "tracks": tracks_list,
+        "playlists": updated_playlists
+    }
+    
+    # Upload playlist.json lên R2
+    try:
+        r2_client.put_object(
+            Bucket=r2_bucket,
+            Key='playlist.json',
+            Body=json.dumps(updated_playlist_data, ensure_ascii=False, indent=2),
+            ContentType='application/json'
+        )
+        print("Đã tải tệp tin playlist.json mới lên Cloudflare R2 thành công!")
+    except Exception as e:
+        print(f"LỖI: Không thể upload playlist.json lên R2: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

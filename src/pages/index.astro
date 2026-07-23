@@ -398,6 +398,20 @@ const getCategoryLabel = (cat: string) => {
 
     <!-- Curated Shelf (Kệ sản phẩm Affiliate) -->
     <section id="shelf-section" class="shelf-section">
+      <!-- Kiosk Banner inside shelf section, above title -->
+      <div class="kiosk-banner-container-wrapper">
+        <div class="container">
+          <div class="kiosk-banner-container">
+            <a href="/profile" class="kiosk-banner-link" id="kiosk-banner-trigger">
+              <picture>
+                <source media="(max-width: 768px)" srcset="/images/kiosk-banner-mobile.png" />
+                <img src="/images/kiosk-banner-desktop.jpg" alt="Mở Kiot Doca cùng Tina" class="kiosk-banner-img" />
+              </picture>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div class="container">
         <div class="shelf-header">
           <div class="shelf-header-info">
@@ -444,17 +458,6 @@ const getCategoryLabel = (cat: string) => {
       </div>
     </section>
 
-    <!-- Kiosk Banner Section -->
-    <section class="kiosk-banner-section">
-      <div class="kiosk-banner-container">
-        <a href="/profile/kiosk" class="kiosk-banner-link">
-          <picture>
-            <source media="(max-width: 768px)" srcset="/images/kiosk-banner-mobile.jpg" />
-            <img src="/images/kiosk-banner-desktop.jpg" alt="Mở Kiot Doca cùng Tina" class="kiosk-banner-img" />
-          </picture>
-        </a>
-      </div>
-    </section>
 
     <!-- Namiya Mailbox Widget -->
     <section class="mailbox-section">
@@ -529,8 +532,8 @@ const getCategoryLabel = (cat: string) => {
   }
 
   /* Kiosk Banner */
-  .kiosk-banner-section {
-    margin: 2.5rem 0;
+  .kiosk-banner-container-wrapper {
+    margin-bottom: 2rem;
     padding: 0 1.5rem;
   }
 
@@ -2520,6 +2523,28 @@ const getCategoryLabel = (cat: string) => {
           updateActiveCard();
         }, 120);
       }
+    }
+
+    // --- KIOSK BANNER CLICK HANDLER ---
+    const kioskBannerTrigger = document.getElementById('kiosk-banner-trigger');
+    if (kioskBannerTrigger) {
+      kioskBannerTrigger.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const { getSupabase, loginWithGoogle } = await import('../scripts/supabase');
+        const client = getSupabase();
+        if (!client) {
+          window.location.href = '/profile';
+          return;
+        }
+
+        const { data: { session } } = await client.auth.getSession();
+        if (session?.user) {
+          window.location.href = '/profile';
+        } else {
+          localStorage.setItem('auth_redirect_origin', window.location.origin + '/profile');
+          await loginWithGoogle();
+        }
+      });
     }
   });
 </script>

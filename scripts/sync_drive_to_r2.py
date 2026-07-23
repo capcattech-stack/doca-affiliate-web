@@ -125,7 +125,7 @@ def get_tomorrow_weather():
     return {"code": 3, "temp_max": 32, "temp_min": 25}
 
 def generate_story_via_gemini(api_key, weather_desc, slot, song_titles):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
     slot_vn = "buổi sáng" if slot == "morning" else "buổi chiều" if slot == "afternoon" else "buổi tối"
     
     prompt = f"""
@@ -169,7 +169,7 @@ def generate_story_via_gemini(api_key, weather_desc, slot, song_titles):
             headers={'Content-Type': 'application/json'},
             method='POST'
         )
-        with urllib.request.urlopen(req, timeout=5) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             res_data = json.loads(response.read().decode('utf-8'))
             text_response = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
             if text_response.startswith("```"):

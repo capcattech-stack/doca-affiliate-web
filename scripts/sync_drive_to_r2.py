@@ -202,13 +202,18 @@ def main():
     load_env()
     check_env_vars()
     
-    # Đọc cấu hình môi trường
-    sa_json = os.environ["GD_SERVICE_ACCOUNT_JSON"]
-    drive_folder_id = os.environ["GD_FOLDER_ID"]
-    r2_access_key = os.environ["R2_ACCESS_KEY_ID"]
-    r2_secret_key = os.environ["R2_SECRET_ACCESS_KEY"]
-    r2_endpoint = os.environ["R2_ENDPOINT"]
-    r2_bucket = os.environ["R2_BUCKET_NAME"]
+    # Đọc cấu hình môi trường và tự động làm sạch ký tự xuống dòng (\r, \n) hay khoảng trắng
+    sa_json = os.environ["GD_SERVICE_ACCOUNT_JSON"].strip()
+    drive_folder_id = os.environ["GD_FOLDER_ID"].strip()
+    r2_access_key = os.environ["R2_ACCESS_KEY_ID"].strip()
+    
+    # Làm sạch khóa bí mật đề phòng dính cả tiền tố R2_SECRET_ACCESS_KEY=
+    r2_secret_key = os.environ["R2_SECRET_ACCESS_KEY"].strip().strip('"').strip("'")
+    if r2_secret_key.startswith("R2_SECRET_ACCESS_KEY="):
+        r2_secret_key = r2_secret_key.split("=", 1)[1].strip().strip('"').strip("'")
+        
+    r2_endpoint = os.environ["R2_ENDPOINT"].strip()
+    r2_bucket = os.environ["R2_BUCKET_NAME"].strip()
     
     # Khởi tạo kết nối dịch vụ
     drive_service = get_drive_service(sa_json)

@@ -78,14 +78,16 @@ def upload_to_supabase(sb_url, sb_key, bucket, dest_name, file_path):
         print(f"Error uploading to Supabase: {e}", file=sys.stderr)
         return None, str(e)
 
-def fetch_current_playlist(sb_url):
-    url = f"{sb_url}/storage/v1/object/public/audio/playlist.json"
+def fetch_current_playlist(r2_domain):
+    if not r2_domain:
+        return None
+    url = f"{r2_domain.rstrip('/')}/playlist.json"
     req = urllib.request.Request(url, headers={'User-Agent': 'DOCABot/1.0'})
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=5) as response:
             return json.loads(response.read().decode('utf-8'))
     except Exception:
-        # File doesn't exist yet
+        # File doesn't exist yet on R2
         return None
 
 def generate_playlist_for_day(day_idx, playlist_tracks, seed_slots, seed_cultures):

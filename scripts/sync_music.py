@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# NOTE: Legacy Supabase Storage sync script.
+# Production DOCA FM music sync now uses 100% Cloudflare R2 via scripts/sync_drive_to_r2.py
 import os
 import json
 import urllib.request

@@ -438,8 +438,9 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
       else if (width < 1024) colCount = 3;  // Tablet 3 cột
       else if (width < 1280) colCount = 4;  // Desktop vừa 4 cột
 
-      // Lấy tất cả card và skeleton đang có trong grid (không quan tâm đang nằm ở cột nào)
-      const cards = Array.from(grid.querySelectorAll('.polaroid-card, .polaroid-skeleton')) as HTMLElement[];
+      // Chỉ lấy các card và skeleton đang hiển thị để sắp xếp vào cột
+      const visibleCards = Array.from(grid.querySelectorAll('.polaroid-card:not(.hidden-card), .polaroid-skeleton:not(.hidden-card)')) as HTMLElement[];
+      const hiddenCards = Array.from(grid.querySelectorAll('.polaroid-card.hidden-card, .polaroid-skeleton.hidden-card')) as HTMLElement[];
 
       grid.innerHTML = '';
 
@@ -451,9 +452,14 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
         colElements.push(col);
       }
 
-      cards.forEach((card, index) => {
+      visibleCards.forEach((card, index) => {
         const colIndex = index % colCount;
         colElements[colIndex].appendChild(card);
+      });
+
+      // Lưu lại các card đang ẩn ở gốc container để nút "Xem thêm" có thể tìm thấy và hiển thị tiếp
+      hiddenCards.forEach(card => {
+        grid.appendChild(card);
       });
     }
 
@@ -652,6 +658,7 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
       });
       
       updateLoadMoreButtonState();
+      layoutMasonry(); // Sắp xếp lại lưới khi có thêm hình mới hiển thị
     });
 
     // --- 5. MODAL FOR UPLOADING PHOTO ---

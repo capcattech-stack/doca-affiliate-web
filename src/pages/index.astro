@@ -2119,53 +2119,57 @@ const getCategoryLabel = (cat: string) => {
 
     async function loadPlaylist() {
       const weather = await fetchWeather();
-      const r2Domain = (window as any).PUBLIC_R2_PUBLIC_DOMAIN || import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || '';
+      const r2Domain = (window as any).PUBLIC_R2_PUBLIC_DOMAIN || import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev';
       
-      // 1. Thử tải playlist.json từ Cloudflare R2
+      // Helper function to process data and initialize playlist
+      function setupPlaylistData(data: any) {
+        if (data && data.tracks && data.playlists) {
+          const normalizedTracks = data.tracks.map((track: any) => {
+            if (track.url && !track.url.startsWith('http://') && !track.url.startsWith('https://')) {
+              const relativeUrl = track.url.startsWith('/') ? track.url : `/${track.url}`;
+              return { ...track, url: `${r2Domain.replace(/\/$/, '')}${relativeUrl}` };
+            }
+            return track;
+          });
+          initPlaylist(normalizedTracks, data.playlists, weather);
+          isPlaylistLoaded = true;
+          return true;
+        }
+        return false;
+      }
+
+      // 1. Thử tải từ đường dẫn tương đối gốc /playlist.json (Tránh CORS lỗi trên Local và Prod)
+      try {
+        const res = await fetch('/playlist.json');
+        if (res.ok) {
+          const data = await res.json();
+          if (setupPlaylistData(data)) {
+            console.log("Successfully loaded playlist.json from local relative path");
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load playlist.json from relative path, trying CDN...", err);
+      }
+
+      // 2. Dự phòng 1: Tải trực tiếp từ Cloudflare R2 CDN URL
       if (r2Domain) {
         const r2PlaylistUrl = `${r2Domain.replace(/\/$/, '')}/playlist.json`;
         try {
           const res = await fetch(r2PlaylistUrl);
           if (res.ok) {
             const data = await res.json();
-            if (data && data.tracks && data.playlists) {
-              // Chuẩn hóa URL cho các track lưu đường dẫn tương đối
-              const normalizedTracks = data.tracks.map((track: any) => {
-                if (track.url && !track.url.startsWith('http://') && !track.url.startsWith('https://')) {
-                  const relativeUrl = track.url.startsWith('/') ? track.url : `/${track.url}`;
-                  return { ...track, url: `${r2Domain.replace(/\/$/, '')}${relativeUrl}` };
-                }
-                return track;
-              });
-              initPlaylist(normalizedTracks, data.playlists, weather);
-              isPlaylistLoaded = true;
+            if (setupPlaylistData(data)) {
+              console.log("Successfully loaded playlist.json from R2 CDN URL");
               return;
             }
           }
         } catch (err) {
-          console.warn("Failed to load playlist.json from Cloudflare R2, trying Supabase...", err);
+          console.warn("Failed to load playlist.json from Cloudflare R2 CDN", err);
         }
       }
 
-      // 2. Thử tải playlist.json từ Supabase Storage (luồng cũ)
-      const sbUrl = (window as any).PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || '';
-      if (sbUrl) {
-        const playlistUrl = `${sbUrl}/storage/v1/object/public/audio/playlist.json`;
-        try {
-          const res = await fetch(playlistUrl);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.tracks && data.playlists) {
-              initPlaylist(data.tracks, data.playlists, weather);
-              isPlaylistLoaded = true;
-              return;
-            }
-          }
-        } catch (err) {
-          console.warn("Failed to load playlist.json from Supabase Storage, using fallback", err);
-        }
-      }
-      
+      // 3. Dự phòng 2: Offline hoàn toàn
       const fallbackTracks = [
         { id: "tina_morning_01", title: "Airmail Special ✈️", artist: "U.S. Air Force Band", url: "https://upload.wikimedia.org/wikipedia/commons/d/de/Airmail_Special_-_Airmen_of_Note.mp3", duration: 199 },
         { id: "tina_afternoon_01", title: "Stardust 🌟", artist: "U.S. Army Blues", url: "https://upload.wikimedia.org/wikipedia/commons/2/29/US_Army_Blues_-_05_-_Stardust.ogg", duration: 205 },

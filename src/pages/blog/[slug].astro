@@ -491,6 +491,16 @@ const getCategoryLabel = (cat: string, pil?: string) => {
     color: var(--cozy-text-obsidian);
   }
 
+  .markdown-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.5rem auto;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--cozy-border-light);
+    box-shadow: var(--cozy-shadow-default);
+  }
+
   .markdown-content :global(h3) {
     font-family: 'Inter', sans-serif;
     font-size: 1.25rem;

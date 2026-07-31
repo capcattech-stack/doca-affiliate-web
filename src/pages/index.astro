@@ -2206,7 +2206,16 @@ const getCategoryLabel = (cat: string, pil?: string) => {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
 
-    menuToggleBtn?.addEventListener('click', () => {
+    const closeMobileMenu = () => {
+      if (mobileMenu?.classList.contains('active')) {
+        menuToggleBtn?.setAttribute('aria-expanded', 'false');
+        menuToggleBtn?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+      }
+    };
+
+    menuToggleBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
       const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
       menuToggleBtn.setAttribute('aria-expanded', (!isExpanded).toString());
       menuToggleBtn.classList.toggle('active');
@@ -2215,20 +2224,27 @@ const getCategoryLabel = (cat: string, pil?: string) => {
 
     mobileMenuLinks.forEach(link => {
       link.addEventListener('click', () => {
-        menuToggleBtn?.setAttribute('aria-expanded', 'false');
-        menuToggleBtn?.classList.remove('active');
-        mobileMenu?.classList.remove('active');
+        closeMobileMenu();
       });
     });
 
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (!menuToggleBtn?.contains(target) && !mobileMenu?.contains(target)) {
-        menuToggleBtn?.setAttribute('aria-expanded', 'false');
-        menuToggleBtn?.classList.remove('active');
-        mobileMenu?.classList.remove('active');
+        closeMobileMenu();
       }
     });
+
+    document.addEventListener('touchstart', (e) => {
+      const target = e.target as HTMLElement;
+      if (!menuToggleBtn?.contains(target) && !mobileMenu?.contains(target)) {
+        closeMobileMenu();
+      }
+    }, { passive: true });
+
+    window.addEventListener('scroll', () => {
+      closeMobileMenu();
+    }, { passive: true });
 
     // --- 1. COZY MUSIC PLAYER HANDLER (DOCA FM RADIO SYNCED) ---
     const audio = document.getElementById('cozy-audio-player') as HTMLAudioElement;

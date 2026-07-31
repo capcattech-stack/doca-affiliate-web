@@ -672,7 +672,16 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
     const menuToggleBtn = document.getElementById('menu-toggle-btn');
     const mobileMenu = document.getElementById('mobile-menu');
 
-    menuToggleBtn?.addEventListener('click', () => {
+    const closeMobileMenu = () => {
+      if (mobileMenu?.classList.contains('active')) {
+        menuToggleBtn?.setAttribute('aria-expanded', 'false');
+        menuToggleBtn?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+      }
+    };
+
+    menuToggleBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
       const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
       menuToggleBtn.setAttribute('aria-expanded', (!isExpanded).toString());
       menuToggleBtn.classList.toggle('active');
@@ -682,11 +691,20 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (!menuToggleBtn?.contains(target) && !mobileMenu?.contains(target)) {
-        menuToggleBtn?.setAttribute('aria-expanded', 'false');
-        menuToggleBtn?.classList.remove('active');
-        mobileMenu?.classList.remove('active');
+        closeMobileMenu();
       }
     });
+
+    document.addEventListener('touchstart', (e) => {
+      const target = e.target as HTMLElement;
+      if (!menuToggleBtn?.contains(target) && !mobileMenu?.contains(target)) {
+        closeMobileMenu();
+      }
+    }, { passive: true });
+
+    window.addEventListener('scroll', () => {
+      closeMobileMenu();
+    }, { passive: true });
 
     // 2. BLOG PILLAR TABS FILTER
     const tabButtons = document.querySelectorAll('.tab-btn');

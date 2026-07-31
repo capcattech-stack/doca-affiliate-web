@@ -1279,26 +1279,26 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       const playlistUrl = `${r2Domain.replace(/\/$/, '')}/playlist.json`;
       
       try {
-        let res = await fetch(playlistUrl);
-        if (!res.ok) throw new Error("Không thể nạp playlist trực tiếp");
+        // 1. Thử tải từ đường dẫn tương đối gốc /playlist.json trước (Tránh CORS trên cả Local và Prod)
+        let res = await fetch('/playlist.json');
+        if (!res.ok) throw new Error("Không thể nạp playlist tương đối");
         const data = await res.json();
+        console.log("Successfully loaded playlist.json from relative path in music.astro");
         
         allTracks = data.tracks || [];
         processGroupedPlaylists();
         renderPlaylists();
         
-        // Mặc định chọn playlist đầu tiên có nhạc
         const keys = Object.keys(groupedPlaylists);
         if (keys.length > 0) {
           selectPlaylist(keys[0]);
         }
-      } catch (err) {
-        console.warn("Lỗi nạp nhạc R2 trực tiếp, thử qua CORS proxy:", err);
+      } catch (relativeErr) {
+        console.warn("Lỗi nạp nhạc tương đối, thử nạp trực tiếp R2 CDN:", relativeErr);
         try {
-          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(playlistUrl)}`;
-          const proxyRes = await fetch(proxyUrl);
-          if (!proxyRes.ok) throw new Error("Không thể nạp qua CORS proxy");
-          const data = await proxyRes.json();
+          let res = await fetch(playlistUrl);
+          if (!res.ok) throw new Error("Không thể nạp playlist trực tiếp");
+          const data = await res.json();
           
           allTracks = data.tracks || [];
           processGroupedPlaylists();
@@ -1308,17 +1308,34 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
           if (keys.length > 0) {
             selectPlaylist(keys[0]);
           }
-        } catch (proxyErr) {
-          console.error("Cả fetch trực tiếp và CORS proxy đều lỗi, chuyển sang offline fallback:", proxyErr);
-          // Fallback offline
-          allTracks = [
-            { id: "fallback_01", title: "Airmail Special ✈️", artist: "Tina's Cozy Song", url: "https://upload.wikimedia.org/wikipedia/commons/d/de/Airmail_Special_-_Airmen_of_Note.mp3", duration: 199 },
-            { id: "fallback_02", title: "Stardust 🌟", artist: "Latte's Cozy Song", url: "https://upload.wikimedia.org/wikipedia/commons/2/29/US_Army_Blues_-_05_-_Stardust.ogg", duration: 205 },
-            { id: "fallback_03", title: "Amazing Grace ✨", artist: "Muối's Cozy Song", url: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Amazing_Grace_%28USAFB_jazz_vocal%29.ogg", duration: 385 }
-          ];
-          processGroupedPlaylists();
-          renderPlaylists();
-          selectPlaylist('tina_tuyen_chon');
+        } catch (err) {
+          console.warn("Lỗi nạp nhạc R2 trực tiếp, thử qua CORS proxy:", err);
+          try {
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(playlistUrl)}`;
+            const proxyRes = await fetch(proxyUrl);
+            if (!proxyRes.ok) throw new Error("Không thể nạp qua CORS proxy");
+            const data = await proxyRes.json();
+            
+            allTracks = data.tracks || [];
+            processGroupedPlaylists();
+            renderPlaylists();
+            
+            const keys = Object.keys(groupedPlaylists);
+            if (keys.length > 0) {
+              selectPlaylist(keys[0]);
+            }
+          } catch (proxyErr) {
+            console.error("Cả fetch trực tiếp và CORS proxy đều lỗi, chuyển sang offline fallback:", proxyErr);
+            // Fallback offline với nhạc MP3 cực kì sạch sẽ của chính dự án từ R2 CDN
+            allTracks = [
+              { id: "fallback_01", title: "New Day Waltz ☕", artist: "Tina's Cozy Song", url: "https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev/tracks/Morning%20Tea%20%26%20Cake%20%E2%98%95%201940s%20Vintage%20Cafe%20Ambience%20%E2%80%93%20A%20Sweet%20%26%20Peaceful%20Corner%20for%20You/New%20Day%20Waltz.mp3", duration: 194 },
+              { id: "fallback_02", title: "Cozy Garden 🌿", artist: "Latte's Cozy Song", url: "https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev/tracks/Morning%20Tea%20%26%20Cake%20%E2%98%95%201940s%20Vintage%20Cafe%20Ambience%20%E2%80%93%20A%20Sweet%20%26%20Peaceful%20Corner%20for%20You/Cozy%20Garden.mp3", duration: 180 },
+              { id: "fallback_03", title: "My Late Night Monologue 🌙", artist: "Muối's Cozy Song", url: "https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev/tracks/1940s%20VINTAGE%20CAFE%20AMBIENCE%20-%20A%20LITTLE%20CALM%20FOR%20YOU%20TODAY/My%20Late%20Night%20Monologue.mp3", duration: 217 }
+            ];
+            processGroupedPlaylists();
+            renderPlaylists();
+            selectPlaylist('tina_tuyen_chon');
+          }
         }
       }
     }

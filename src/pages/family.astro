@@ -32,6 +32,13 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
     <!-- Navbar -->
     <nav class="navbar">
       <div class="container nav-container">
+        <!-- Hamburger toggle -->
+        <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
         <a href="/" class="logo-wrapper">
           <img src="/images/brand/logo-light.png" alt="doca.pet Logo" class="brand-logo-img" />
         </a>
@@ -44,13 +51,6 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
             <a href="/blog" class="nav-link-text">Blog</a>
             <a href="/about" class="nav-link-text">About Us</a>
           </div>
-
-          <!-- Hamburger toggle -->
-          <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
 
           <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
         </div>

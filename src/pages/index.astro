@@ -478,15 +478,15 @@ const getCategoryLabel = (cat: string, pil?: string) => {
           })}
         </div>
 
+        <p class="blog-desc-bottom">
+          Những mẩu chuyện nhỏ giúp xoa dịu tâm hồn, thấu hiểu chú thú cưng và cùng cô/chú đắp xây một cuộc sống thật bình yên. 🐾
+        </p>
+
         <div class="blog-view-more-container">
           <a href="/blog" class="blog-view-more-btn">
             Xem thêm nhật ký <i class="ph-light ph-book-open"></i>
           </a>
         </div>
-
-        <p class="blog-desc-bottom">
-          Những mẩu chuyện nhỏ giúp xoa dịu tâm hồn, thấu hiểu chú thú cưng và cùng cô/chú đắp xây một cuộc sống thật bình yên. 🐾
-        </p>
       </div>
     </section>
 
@@ -543,7 +543,7 @@ const getCategoryLabel = (cat: string, pil?: string) => {
           ))}
         </div>
 
-        <div class="blog-view-more-container" style="margin-top: 2.5rem; margin-bottom: 0;">
+        <div class="blog-view-more-container" style="margin-top: 2.5rem; margin-bottom: 3rem;">
           <a href="/product" class="blog-view-more-btn">
             Vào Kệ Quà Của Mẹ <i class="ph-light ph-gift"></i>
           </a>
@@ -1680,8 +1680,18 @@ const getCategoryLabel = (cat: string, pil?: string) => {
   .blog-view-more-container {
     display: flex;
     justify-content: center;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+    margin-top: 1.25rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .blog-desc-bottom {
+    text-align: center;
+    font-size: 0.92rem;
+    color: #8E8E93;
+    max-width: 600px;
+    margin: 2.5rem auto 0;
+    line-height: 1.6;
+    padding: 0 1rem;
   }
 
   .blog-view-more-btn {

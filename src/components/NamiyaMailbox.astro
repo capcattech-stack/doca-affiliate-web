@@ -12,36 +12,66 @@
     </div>
   </div>
   
-  <p class="mailbox-desc">
-    Lấy cảm hứng từ tiệm tạp hóa kỳ diệu Namiya, tụi con — ba chú mèo nhỏ ở đây — mở chiếc hòm gỗ này để nhận hết mọi âu lo của cô/chú. Cô/chú cứ trút bỏ muộn phiền vào đây nhé, tụi con sẽ giữ kín và hồi đáp xoa dịu qua hòm thư của cô/chú trước khi nắng mai lên. 🐾
-  </p>
-
-  <form id="namiya-confession-form" class="mailbox-form" novalidate>
-    <div class="form-group">
-      <label for="confession-content" class="form-label">Lời tâm sự của bạn...</label>
-      <textarea 
-        id="confession-content" 
-        class="form-input form-textarea" 
-        placeholder="Hôm nay bạn có điều gì phiền muộn muốn kể với tụi con không?..." 
-        required
-      ></textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="confession-email" class="form-label">Email của bạn (để nhận thư phản hồi)</label>
-      <input 
-        type="email" 
-        id="confession-email" 
-        class="form-input" 
-        placeholder="email_cua_ban@example.com" 
-        required
-      />
-    </div>
-
-    <button type="submit" class="cozy-btn cozy-btn-primary cozy-btn-block submit-btn">
-      Gửi Thư Vào Hòm Gỗ <i class="ph-light ph-paper-plane"></i>
+  <!-- Collapsed State: Chỉ hiện nút viết thư -->
+  <div id="namiya-collapsed-state" class="namiya-collapsed-state">
+    <button id="namiya-toggle-btn" class="cozy-btn cozy-btn-primary namiya-toggle-btn">
+      Viết thư gửi gắm tâm sự ✉
     </button>
-  </form>
+  </div>
+
+  <!-- Expanded State: Form trượt mở -->
+  <div id="namiya-form-container" class="namiya-form-container">
+    <p class="mailbox-desc">
+      Lấy cảm hứng từ tiệm tạp hóa kỳ diệu Namiya, tụi con — ba chú mèo nhỏ ở đây — mở chiếc hòm gỗ này để nhận hết mọi âu lo của cô/chú. Cô/chú cứ trút bỏ muộn phiền vào đây nhé, tụi con sẽ giữ kín và hồi đáp xoa dịu qua hòm thư của cô/chú trước khi nắng mai lên. 🐾
+    </p>
+
+    <form id="namiya-confession-form" class="mailbox-form" novalidate>
+      <div class="form-group">
+        <label for="confession-content" class="form-label">Lời tâm sự của bạn...</label>
+        <textarea 
+          id="confession-content" 
+          class="form-input form-textarea" 
+          placeholder="Hôm nay bạn có điều gì phiền muộn muốn kể với tụi con không? (tối thiểu 10 ký tự)..." 
+          required
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="confession-email" class="form-label">Email của bạn (để nhận thư phản hồi)</label>
+        <div class="email-input-wrapper">
+          <input 
+            type="email" 
+            id="confession-email" 
+            class="form-input" 
+            placeholder="email_cua_ban@example.com" 
+            required
+          />
+          <button type="button" id="namiya-google-sso-btn" class="namiya-google-sso-btn" title="Điền nhanh bằng Google">
+            <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.87-2.6-5.29-4.53-6.16-4.53z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+          </button>
+          <span id="namiya-email-verified-badge" class="email-verified-badge hidden" title="Đã xác thực Google">
+            <i class="ph-fill ph-check-circle"></i>
+          </span>
+        </div>
+      </div>
+
+      <button type="submit" id="namiya-submit-btn" class="cozy-btn cozy-btn-primary cozy-btn-block submit-btn" disabled>
+        Gửi Thư Vào Hòm Gỗ <i class="ph-light ph-paper-plane"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- Letter Fly Animation Overlay -->
+  <div id="mailbox-letter-animation" class="mailbox-letter-animation hidden">
+    <div class="letter-fly-icon">
+      <i class="ph-light ph-envelope-open"></i>
+    </div>
+  </div>
 
   <!-- Custom Friendly Error Notification -->
   <div id="mailbox-error-msg" class="mailbox-error-msg hidden">
@@ -51,8 +81,8 @@
 
   <div id="mailbox-success-msg" class="mailbox-success hidden">
     <span class="success-icon" style="color: var(--cozy-green-matcha);"><i class="ph-light ph-paw"></i></span>
-    <h4>Thư đã lọt thỏm vào hòm gỗ!</h4>
-    <p>Cảm ơn bạn đã tin tưởng chia sẻ nỗi lòng. Tụi con và ông già Namiya sẽ gửi thư hồi đáp sớm qua hòm thư của bạn nhé.</p>
+    <h4>Thư đã lọt thỏm vào hòm gỗ! 🎐</h4>
+    <p>Cảm ơn cô/chú đã tin tưởng chia sẻ nỗi lòng. Tụi con và ông già Namiya sẽ gửi thư hồi đáp sớm qua hòm thư của cô/chú nhé.</p>
     <button id="reset-mailbox-btn" class="cozy-btn cozy-btn-secondary btn-sm">
       Gửi thêm lá thư khác
     </button>
@@ -70,6 +100,8 @@
     position: relative;
     z-index: 1; /* Sits on top of the section watermark */
     overflow: hidden;
+    border-radius: 24px;
+    padding: 1.75rem;
   }
 
   /* Tạo vệt gỗ tinh tế phía trên */
@@ -135,19 +167,54 @@
     letter-spacing: 0.2px;
   }
 
+  .namiya-collapsed-state {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem 0;
+  }
+
+  .namiya-toggle-btn {
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .namiya-toggle-btn:hover {
+    background-color: #76C123; /* Neon Green */
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 12px rgba(118, 193, 35, 0.25);
+  }
+
+  .namiya-form-container {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .namiya-form-container.open {
+    max-height: 800px;
+    opacity: 1;
+  }
+
   .mailbox-desc {
     font-size: 0.9rem;
     color: var(--cozy-text-obsidian); /* Chữ màu mực obsidian */
     line-height: 1.5;
     position: relative;
     z-index: 1;
+    margin: 0;
   }
 
   .mailbox-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    transition: opacity 0.3s ease;
     position: relative;
     z-index: 1;
   }
@@ -164,12 +231,55 @@
     color: var(--cozy-text-obsidian);
   }
 
+  .email-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .email-input-wrapper .form-input {
+    padding-right: 42px; /* Chừa chỗ cho nút Google */
+  }
+
+  .namiya-google-sso-btn {
+    position: absolute;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--cozy-border-light);
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    padding: 0;
+    outline: none;
+  }
+
+  .namiya-google-sso-btn:hover {
+    transform: scale(1.1);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  .email-verified-badge {
+    position: absolute;
+    right: 12px;
+    color: #76C123; /* Neon Green */
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+  }
+
   .form-input {
     width: 100%;
     font-family: 'Inter', sans-serif;
     font-size: 0.95rem;
     padding: 0.75rem;
-    border-radius: var(--radius-button);
+    border-radius: 12px;
     border: 1px solid var(--cozy-border-light);
     background-color: var(--cozy-bg-pure);
     color: var(--cozy-text-obsidian);
@@ -192,10 +302,52 @@
     margin-top: 0.25rem;
     background-color: var(--cozy-wood-sugi); /* Nút màu gỗ tuyết tùng */
     color: var(--cozy-bg-pure);
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s ease;
   }
 
-  .submit-btn:hover {
+  .submit-btn:hover:not(:disabled) {
     background-color: var(--cozy-wood-kogecha); /* Hover sang gỗ nâu cháy đậm */
+  }
+
+  .submit-btn:disabled {
+    background-color: var(--cozy-border-light);
+    color: rgba(28, 28, 30, 0.3);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Fly animation styles */
+  .mailbox-letter-animation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .letter-fly-icon {
+    font-size: 3.5rem;
+    color: var(--cozy-wood-sugi);
+    animation: fly-to-box 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+
+  @keyframes fly-to-box {
+    0% {
+      transform: scale(0.2) translate(-200px, 200px) rotate(-45deg);
+      opacity: 0;
+    }
+    40% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.1) translate(0px, -150px) rotate(15deg);
+      opacity: 0;
+    }
   }
 
   /* Thành công */
@@ -238,6 +390,7 @@
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
     margin-top: 0.5rem;
+    border-radius: 8px;
   }
 
   @keyframes fadeIn {
@@ -281,11 +434,107 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('namiya-toggle-btn');
+    const collapsedState = document.getElementById('namiya-collapsed-state');
+    const formContainer = document.getElementById('namiya-form-container');
+    
     const form = document.getElementById('namiya-confession-form') as HTMLFormElement;
     const contentInput = document.getElementById('confession-content') as HTMLTextAreaElement;
     const emailInput = document.getElementById('confession-email') as HTMLInputElement;
+    const googleSsoBtn = document.getElementById('namiya-google-sso-btn');
+    const verifiedBadge = document.getElementById('namiya-email-verified-badge');
+    const submitBtn = document.getElementById('namiya-submit-btn') as HTMLButtonElement;
+    const letterAnim = document.getElementById('mailbox-letter-animation');
+    
     const successMsg = document.getElementById('mailbox-success-msg');
     const resetBtn = document.getElementById('reset-mailbox-btn');
+
+    // Mở form trượt
+    toggleBtn?.addEventListener('click', () => {
+      collapsedState?.classList.add('hidden');
+      formContainer?.classList.add('open');
+    });
+
+    // Check saved state to restore open form (after Google login redirection redirect)
+    if (localStorage.getItem('namiya_form_open_on_load') === 'true') {
+      localStorage.removeItem('namiya_form_open_on_load');
+      collapsedState?.classList.add('hidden');
+      formContainer?.classList.add('open');
+    }
+
+    // Email validation helper
+    const validateEmail = (email: string) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    };
+
+    // Live validation
+    const validateForm = () => {
+      if (!contentInput || !emailInput || !submitBtn) return;
+      const content = contentInput.value.trim();
+      const email = emailInput.value.trim();
+      
+      const isContentValid = content.length >= 10;
+      const isEmailValid = validateEmail(email);
+      
+      submitBtn.disabled = !(isContentValid && isEmailValid);
+    };
+
+    contentInput?.addEventListener('input', validateForm);
+    emailInput?.addEventListener('input', validateForm);
+
+    // Google SSO Autofill
+    googleSsoBtn?.addEventListener('click', async () => {
+      const { getSupabase, loginWithGoogle } = await import('../scripts/supabase');
+      const client = getSupabase();
+      if (!client) return;
+
+      const { data: { session } } = await client.auth.getSession();
+      if (session?.user?.email) {
+        emailInput.value = session.user.email;
+        emailInput.readOnly = true;
+        googleSsoBtn.classList.add('hidden');
+        verifiedBadge?.classList.remove('hidden');
+        validateForm();
+      } else {
+        // Redirection flow: Ghi nhớ để mở lại form sau khi đăng nhập thành công
+        localStorage.setItem('namiya_form_open_on_load', 'true');
+        localStorage.setItem('auth_redirect_origin', window.location.origin + '/#namiya-confession-form');
+        await loginWithGoogle();
+      }
+    });
+
+    // Check session on mount to prefill and show verified badge
+    const checkUserSession = async () => {
+      try {
+        const { getSupabase } = await import('../scripts/supabase');
+        const client = getSupabase();
+        if (!client) return;
+
+        const { data: { session } } = await client.auth.getSession();
+        if (session?.user?.email) {
+          emailInput.value = session.user.email;
+          emailInput.readOnly = true;
+          googleSsoBtn?.classList.add('hidden');
+          verifiedBadge?.classList.remove('hidden');
+          validateForm();
+        }
+      } catch (e) {
+        console.warn('Session check failed', e);
+      }
+    };
+    checkUserSession();
+
+    // Play windchime audio from R2
+    const playWindChime = () => {
+      try {
+        const chime = new Audio('https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev/windchime.mp3');
+        chime.volume = 0.45;
+        chime.play().catch(e => console.warn('Windchime audio play blocked or failed', e));
+      } catch (e) {
+        console.warn('Audio play initialization failed', e);
+      }
+    };
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -297,42 +546,44 @@
       const content = contentInput.value.trim();
       const email = emailInput.value.trim();
 
-      if (!content) {
+      if (content.length < 10) {
         if (errorMsg && errorText) {
-          errorText.textContent = "Hình như cô/chú chưa ghi tâm tư vào bức thư kìa... Viết vài dòng gửi tụi con nhé! 🐾";
+          errorText.textContent = "Bức thư quá ngắn cô/chú ơi... Hãy chia sẻ ít nhất 10 ký tự nhé! 🐾";
           errorMsg.classList.remove('hidden');
         }
         return;
       }
 
-      if (!email) {
+      if (!validateEmail(email)) {
         if (errorMsg && errorText) {
-          errorText.textContent = "Hình như cô/chú chưa để lại địa chỉ email kìa... Nhập email để tụi con gửi thư hồi đáp nhé! 🐾";
+          errorText.textContent = "Hình như email của cô/chú bị sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾";
           errorMsg.classList.remove('hidden');
         }
         return;
       }
 
-      // Simple email validation regex
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        if (errorMsg && errorText) {
-          errorText.textContent = "Hình như email của cô/chú bị thiếu ký tự '@' hoặc sai định dạng rồi... Nhập lại giúp tụi con nha! 🐾";
-          errorMsg.classList.remove('hidden');
-        }
-        return;
-      }
+      // Block button
+      submitBtn.disabled = true;
 
       // Đọc khóa API
       const supabaseUrl = (window as any).PUBLIC_SUPABASE_URL || '';
       const supabaseKey = (window as any).PUBLIC_SUPABASE_ANON_KEY || '';
 
+      const finishSubmission = () => {
+        // Run animation
+        letterAnim?.classList.remove('hidden');
+        playWindChime();
+
+        setTimeout(() => {
+          letterAnim?.classList.add('hidden');
+          formContainer?.classList.remove('open');
+          form.style.display = 'none';
+          successMsg?.classList.remove('hidden');
+        }, 1200);
+      };
+
       if (supabaseUrl && supabaseKey) {
         try {
-          // Disable submit button during fetch
-          const submitBtn = form.querySelector('.submit-btn') as HTMLButtonElement;
-          if (submitBtn) submitBtn.disabled = true;
-
           const res = await fetch(`${supabaseUrl}/rest/v1/namiya_letters`, {
             method: 'POST',
             headers: {
@@ -348,15 +599,13 @@
           });
 
           if (res.ok) {
-            // Hiển thị màn hình thành công
-            form.style.display = 'none';
-            successMsg?.classList.remove('hidden');
+            finishSubmission();
           } else {
             if (errorMsg && errorText) {
               errorText.textContent = "Có lỗi xảy ra khi gửi thư, cô/chú vui lòng thử lại nhé! 🐾";
               errorMsg.classList.remove('hidden');
             }
-            if (submitBtn) submitBtn.disabled = false;
+            submitBtn.disabled = false;
           }
         } catch (err) {
           console.error(err);
@@ -364,24 +613,28 @@
             errorText.textContent = "Không thể kết nối máy chủ. Cô/chú hãy kiểm tra mạng internet nhé! 🐾";
             errorMsg.classList.remove('hidden');
           }
-          const submitBtn = form.querySelector('.submit-btn') as HTMLButtonElement;
-          if (submitBtn) submitBtn.disabled = false;
+          submitBtn.disabled = false;
         }
       } else {
-        // Fallback local simulation in case Supabase credentials are not configured yet
+        // Fallback local simulation
         console.warn('Supabase credentials missing. Simulating letter insertion.');
-        form.style.display = 'none';
-        successMsg?.classList.remove('hidden');
+        finishSubmission();
       }
     });
 
     resetBtn?.addEventListener('click', () => {
       const errorMsg = document.getElementById('mailbox-error-msg');
       if (errorMsg) errorMsg.classList.add('hidden');
-      // Reset form và hiển thị lại
+      
       form.reset();
+      
+      // Keep verified state if user is logged in
+      checkUserSession();
+      
       form.style.display = 'flex';
       successMsg?.classList.add('hidden');
+      collapsedState?.classList.remove('hidden');
+      formContainer?.classList.remove('open');
     });
   });
 </script>

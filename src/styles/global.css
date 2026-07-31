@@ -265,21 +265,21 @@ h3, .title-large {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 1px solid var(--cozy-text-obsidian);
-  background-color: var(--cozy-text-obsidian);
-  color: var(--cozy-bg-pure);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: transparent;
+  color: #8E8E93;
   text-decoration: none;
-  font-size: 0.95rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.05rem;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .social-link:hover {
-  color: var(--cozy-bg-pure);
-  background-color: var(--cozy-green-matcha);
-  border-color: var(--cozy-green-matcha);
+  color: var(--cozy-green-matcha-forest);
+  background-color: rgba(118, 193, 35, 0.08);
+  border-color: var(--cozy-green-matcha-forest);
   transform: translateY(-2px);
 }
 

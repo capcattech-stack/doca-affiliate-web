@@ -217,12 +217,11 @@ const getCategoryLabel = (cat: string) => {
           <!-- Desktop navigation links -->
           <div class="nav-links-desktop">
             <a href="/product" class="nav-link-text active">Sản phẩm</a>
+            <a href="/music" class="nav-link-text">Music</a>
             <a href="/family" class="nav-link-text">Gia đình</a>
+            <a href="/blog" class="nav-link-text">Blog</a>
             <a href="/about" class="nav-link-text">About Us</a>
-            <a href="/#blog-section" class="nav-link-text">Blog</a>
           </div>
-
-          <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
 
           <!-- Hamburger toggle -->
           <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
@@ -230,15 +229,18 @@ const getCategoryLabel = (cat: string) => {
             <span></span>
             <span></span>
           </button>
+
+          <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
         </div>
       </div>
       <!-- Mobile navigation menu -->
       <div id="mobile-menu" class="mobile-menu">
         <div class="container mobile-menu-container">
           <a href="/product" class="mobile-menu-link active"><i class="ph-light ph-circles-four"></i> Sản phẩm</a>
+          <a href="/music" class="mobile-menu-link"><i class="ph-light ph-music-notes"></i> Music</a>
           <a href="/family" class="mobile-menu-link"><i class="ph-light ph-users"></i> Gia đình</a>
+          <a href="/blog" class="mobile-menu-link"><i class="ph-light ph-book-open"></i> Blog</a>
           <a href="/about" class="mobile-menu-link"><i class="ph-light ph-info"></i> About Us</a>
-          <a href="/#blog-section" class="mobile-menu-link"><i class="ph-light ph-book-open"></i> Blog</a>
           <div id="nav-auth-container-mobile" class="nav-auth-container-mobile"></div>
         </div>
       </div>

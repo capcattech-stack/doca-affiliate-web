@@ -1,0 +1,1638 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Đọc thông tin kết nối Supabase, Gemini và R2 từ biến môi trường
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
+const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev';
+---
+
+<Layout title="Cozy Music Lounge - DOCA.pet | Góc Nhạc Của Boss" description="Thư viện nhạc chữa lành Iyashikei của nhà DOCA. Tự do lựa chọn playlist và thả hồn theo những giai điệu bình yên.">
+  <!-- Truyền biến môi trường sang client-side -->
+  <script is:inline define:vars={{ supabaseUrl, supabaseAnonKey, geminiApiKey, r2PublicDomain }}>
+    window.PUBLIC_SUPABASE_URL = supabaseUrl;
+    window.PUBLIC_SUPABASE_ANON_KEY = supabaseAnonKey;
+    window.PUBLIC_GEMINI_API_KEY = geminiApiKey;
+    window.PUBLIC_R2_PUBLIC_DOMAIN = r2PublicDomain;
+  </script>
+
+  <main class="music-lounge-view animate-fade-in">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container nav-container">
+        <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <a href="/" class="logo-wrapper">
+          <img src="/images/brand/logo-light.png" alt="doca.pet Logo" class="brand-logo-img" />
+        </a>
+
+        <div class="nav-right">
+          <!-- Desktop navigation links -->
+          <div class="nav-links-desktop">
+            <a href="/product" class="nav-link-text">Sản phẩm</a>
+            <a href="/music" class="nav-link-text active">Music</a>
+            <a href="/family" class="nav-link-text">Gia đình</a>
+            <a href="/blog" class="nav-link-text">Blog</a>
+            <a href="/about" class="nav-link-text">About Us</a>
+          </div>
+
+          <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
+        </div>
+      </div>
+      <!-- Mobile navigation menu -->
+      <div id="mobile-menu" class="mobile-menu">
+        <div class="container mobile-menu-container">
+          <a href="/product" class="mobile-menu-link"><i class="ph-light ph-circles-four"></i> Sản phẩm</a>
+          <a href="/music" class="mobile-menu-link active"><i class="ph-light ph-music-notes"></i> Music</a>
+          <a href="/family" class="mobile-menu-link"><i class="ph-light ph-users"></i> Gia đình</a>
+          <a href="/blog" class="mobile-menu-link"><i class="ph-light ph-book-open"></i> Blog</a>
+          <a href="/about" class="mobile-menu-link"><i class="ph-light ph-info"></i> About Us</a>
+          <div id="nav-auth-container-mobile" class="nav-auth-container-mobile"></div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container content-container">
+      <!-- Header giống trang gia đình -->
+      <div class="music-header animate-fade-in">
+        <span class="music-tag">COZY MUSIC LOUNGE</span>
+        <h1 class="music-title">Góc Nhạc Của Boss</h1>
+        <p class="music-subtitle">
+          nơi cô/chú có thể tự do lựa chọn dải nhạc êm dịu yêu thích của Boss cưng để cùng nằm lười bên hiên nhà yên tĩnh. 🐾
+        </p>
+      </div>
+
+      <!-- Main Layout: Player phía trên, Playlist & Tracklist phía dưới -->
+      <div class="music-main-layout animate-fade-in-delayed">
+        
+        <!-- 1. Trình phát nhạc lớn (Cozy Vinyl Player) -->
+        <div class="cozy-vinyl-card cozy-card">
+          <div class="vinyl-player-grid">
+            
+            <!-- Khu vực Đĩa than (Vinyl Record Animation) -->
+            <div class="vinyl-disc-wrapper">
+              <div class="vinyl-arm" id="vinyl-arm"></div>
+              <div class="vinyl-disc" id="vinyl-disc">
+                <div class="vinyl-grooves"></div>
+                <div class="vinyl-center-label">
+                  <img src="/images/clay-notebook.png" alt="Vinyl Label" class="vinyl-label-img" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Khu vực điều khiển (Player Controls) -->
+            <div class="vinyl-controls-wrapper">
+              <span class="now-playing-label">ĐANG PHÁT</span>
+              <h2 class="track-title" id="player-track-title">Chưa chọn bài hát</h2>
+              <p class="track-artist" id="player-track-artist">Tina's Playlist 🐾</p>
+              
+              <!-- Thanh tiến trình (Seekbar) -->
+              <div class="seekbar-container">
+                <span class="time-display" id="time-current">0:00</span>
+                <div class="progress-bar-wrapper" id="progress-bar-wrapper">
+                  <div class="progress-bar" id="progress-bar"></div>
+                  <div class="progress-handle" id="progress-handle"></div>
+                </div>
+                <span class="time-display" id="time-total">0:00</span>
+              </div>
+
+              <!-- Nút điều khiển -->
+              <div class="controls-row">
+                <button class="control-btn" id="btn-prev" title="Bài trước"><i class="ph-light ph-skip-back"></i></button>
+                <button class="play-btn-large" id="btn-play-pause" title="Phát/Tạm dừng">
+                  <i class="ph-fill ph-play" id="play-icon"></i>
+                  <i class="ph-fill ph-pause hidden" id="pause-icon"></i>
+                </button>
+                <button class="control-btn" id="btn-next" title="Bài tiếp"><i class="ph-light ph-skip-forward"></i></button>
+              </div>
+
+              <!-- Âm lượng -->
+              <div class="volume-container">
+                <i class="ph-light ph-speaker-low volume-icon"></i>
+                <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.05" value="0.8" />
+                <i class="ph-light ph-speaker-high volume-icon"></i>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2. Danh mục Playlist & Lưới Bài Hát -->
+        <div class="playlist-selection-grid">
+          
+          <!-- Cột Playlist (Polaroid Grid) -->
+          <div class="playlists-column">
+            <h3 class="column-title"><i class="ph-light ph-folders"></i> Album & Danh Sách</h3>
+            <div class="playlists-list-container" id="playlists-container">
+              <!-- Render động qua JS -->
+              <div class="playlist-loading-placeholder">
+                <i class="ph-light ph-circle-notch spinner"></i> Đang nạp danh sách đĩa nhạc...
+              </div>
+            </div>
+          </div>
+
+          <!-- Cột Tracklist (Danh sách bài hát) -->
+          <div class="tracks-column">
+            <h3 class="column-title">
+              <i class="ph-light ph-music-notes"></i> Giai điệu trong Album 
+              <span id="active-album-title-badge" class="active-album-title-badge"></span>
+            </h3>
+            <div class="tracks-list-card cozy-card">
+              <div class="tracks-table-header">
+                <span># TIÊU ĐỀ</span>
+                <span class="text-right">THỜI LƯỢNG</span>
+              </div>
+              <div class="tracks-list-container" id="tracks-list-container">
+                <div class="track-loading-placeholder">
+                  Chọn một album bên trái để bắt đầu nghe nhạc.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Audio Element ẩn -->
+  <audio id="lounge-audio-player" preload="auto"></audio>
+</Layout>
+
+<style is:global>
+  /* Base View Background */
+  .music-lounge-view {
+    background-color: var(--cozy-bg-beige);
+    min-height: 100vh;
+    padding-bottom: 6rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .music-lounge-view::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.18;
+    background: 
+      linear-gradient(90deg, rgba(139, 94, 60, 0.22) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139, 94, 60, 0.04) 0%, transparent 15%, transparent 85%, rgba(139, 94, 60, 0.04) 100%),
+      repeating-linear-gradient(90deg, rgba(139, 94, 60, 0.02) 0px, rgba(139, 94, 60, 0.02) 1px, transparent 1px, transparent 8px),
+      repeating-linear-gradient(0deg, rgba(139, 94, 60, 0.015) 0px, rgba(139, 94, 60, 0.015) 1px, transparent 1px, transparent 24px);
+    background-size: 60px 100%, 60px 100%, 60px 100%, 100% 120px;
+  }
+
+  /* Navbar Styles */
+  .navbar {
+    background-color: rgba(251, 250, 246, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cozy-border-light);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0.75rem 0;
+    box-shadow: 0 1px 3px rgba(21, 23, 15, 0.03);
+  }
+
+  .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo-wrapper {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .brand-logo-img {
+    height: 24px;
+    width: auto;
+    display: block;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    text-decoration: none;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
+    padding: 0.25rem 0.5rem;
+    position: relative;
+  }
+
+  .nav-link-text::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background-color: var(--cozy-green-matcha-forest);
+    transition: width 0.25s ease;
+  }
+
+  .nav-link-text:hover::after,
+  .nav-link-text.active::after {
+    width: 80%;
+  }
+
+  .nav-link-text:hover {
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .nav-link-text.active {
+    color: var(--cozy-green-matcha-forest) !important;
+    font-weight: 700 !important;
+  }
+
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 20px;
+    height: 14px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 101;
+  }
+
+  .menu-toggle span {
+    width: 100%;
+    height: 1.7px;
+    background-color: var(--cozy-text-obsidian);
+    transition: all 0.3s ease;
+    transform-origin: left center;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  /* Spacing & Content Header */
+  .content-container {
+    padding-top: 3.5rem;
+    max-width: 1140px;
+  }
+
+  .music-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .music-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--cozy-wood-sugi);
+    background-color: rgba(139, 94, 60, 0.05);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    border: 1px dashed rgba(139, 94, 60, 0.22);
+    display: inline-block;
+    margin-bottom: 0.95rem;
+  }
+
+  .music-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.85rem;
+    letter-spacing: -0.5px;
+  }
+
+  .music-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #6E6E73;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+
+  /* 1. Trình phát nhạc lớn (Cozy Vinyl Player) */
+  .cozy-vinyl-card {
+    background-color: var(--cozy-bg-pure);
+    padding: 2.5rem;
+    border-radius: 28px;
+    margin-bottom: 3.5rem;
+    box-shadow: 0 8px 30px rgba(139, 94, 60, 0.03), 0 1px 3px rgba(0,0,0,0.01);
+    border: 1px solid rgba(139, 94, 60, 0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .vinyl-player-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 768px) {
+    .vinyl-player-grid {
+      grid-template-columns: 300px 1fr;
+      gap: 4rem;
+    }
+  }
+
+  /* Vinyl Record Animation */
+  .vinyl-disc-wrapper {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Sóng rung rinh bao quanh đĩa than khi phát nhạc (Healing Ripples) */
+  .vinyl-disc-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    border: 1px solid var(--cozy-green-matcha-forest);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    transform: scale(0.9);
+  }
+
+  .vinyl-disc-wrapper.playing::after {
+    animation: ripple 2s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.4;
+    }
+    100% {
+      transform: scale(1.15);
+      opacity: 0;
+    }
+  }
+
+  .vinyl-disc {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #333 4%, #1f1f1f 5%, #141414 15%, #050505 32%, #1c1c1c 33%, #0c0c0c 58%, #000 68%);
+    position: relative;
+    box-shadow: 
+      0 12px 35px rgba(0, 0, 0, 0.25), 
+      inset 0 0 15px rgba(255, 255, 255, 0.08),
+      inset 0 0 2px rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    transform: rotate(0deg);
+  }
+
+  .vinyl-disc.playing {
+    animation: spin 10s linear infinite;
+  }
+
+  .vinyl-grooves {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    background-image: 
+      radial-gradient(circle, transparent 28%, rgba(255, 255, 255, 0.015) 30%, transparent 32%),
+      radial-gradient(circle, transparent 48%, rgba(255, 255, 255, 0.02) 50%, transparent 52%),
+      radial-gradient(circle, transparent 68%, rgba(255, 255, 255, 0.015) 70%, transparent 72%),
+      radial-gradient(circle, transparent 84%, rgba(255, 255, 255, 0.01) 86%, transparent 88%);
+  }
+
+  .vinyl-center-label {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--cozy-bg-beige);
+    border: 3px solid #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    overflow: hidden;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+  }
+
+  .vinyl-label-img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    opacity: 0.85;
+  }
+
+  /* Cần gạt kim mechanical cao cấp */
+  .vinyl-arm {
+    position: absolute;
+    top: -5px;
+    right: 25px;
+    width: 76px;
+    height: 130px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 130"><path d="M70,12 L70,30 L32,84 L26,90 L14,84 L18,74 L25,79 L60,28 L60,12 Z" fill="%239da4b0"/><circle cx="70" cy="18" r="9" fill="%23444"/><circle cx="70" cy="18" r="4" fill="%23d4af37"/><rect x="11" y="80" width="8" height="12" rx="1" transform="rotate(35 15 86)" fill="%23d4af37"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    transform-origin: 70px 18px;
+    transform: rotate(-16deg);
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .vinyl-arm.active {
+    transform: rotate(11deg);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Player Controls Styles */
+  .vinyl-controls-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .vinyl-controls-wrapper {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+
+  .now-playing-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--cozy-green-matcha-forest);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .now-playing-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--cozy-green-matcha-forest);
+    display: inline-block;
+  }
+
+  .vinyl-disc-wrapper.playing ~ .vinyl-controls-wrapper .now-playing-label::before {
+    animation: pulse-dot 1.5s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0% { transform: scale(0.9); opacity: 0.5; }
+    50% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.5; }
+  }
+
+  .track-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin: 0 0 0.3rem 0;
+    line-height: 1.25;
+  }
+
+  .track-artist {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    color: #6E6E73;
+    margin: 0 0 1.75rem 0;
+  }
+
+  /* Seekbar */
+  .seekbar-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .time-display {
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: #8E8E93;
+    width: 35px;
+    text-align: center;
+  }
+
+  .progress-bar-wrapper {
+    flex: 1;
+    height: 4px;
+    background-color: var(--cozy-bg-beige);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    transition: height 0.15s ease;
+  }
+
+  .progress-bar-wrapper:hover {
+    height: 6px;
+  }
+
+  .progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: var(--cozy-green-matcha-forest);
+    border-radius: 2px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: width 0.1s linear;
+  }
+
+  .progress-handle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--cozy-green-matcha-forest);
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 0%;
+    box-shadow: 0 2px 6px rgba(74, 138, 46, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease, left 0.1s linear;
+  }
+
+  .progress-bar-wrapper:hover .progress-handle {
+    opacity: 1;
+  }
+
+  /* Controls Buttons */
+  .controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.75rem;
+    margin-bottom: 1.75rem;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .controls-row {
+      justify-content: flex-start;
+      padding-left: 0.1rem;
+    }
+  }
+
+  .control-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--cozy-wood-sugi);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .control-btn:hover {
+    background-color: var(--cozy-bg-oatmeal);
+    color: var(--cozy-text-obsidian);
+  }
+
+  .play-btn-large {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    border: none;
+    font-size: 1.35rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .play-btn-large:hover {
+    background-color: var(--cozy-green-matcha-forest);
+    transform: scale(1.06);
+    box-shadow: 0 6px 15px rgba(74, 138, 46, 0.25);
+  }
+
+  .play-btn-large:active {
+    transform: scale(0.95);
+  }
+
+  /* Volume Styles */
+  .volume-container {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    max-width: 180px;
+  }
+
+  .volume-icon {
+    font-size: 1rem;
+    color: #8E8E93;
+  }
+
+  .volume-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    border-radius: 1.5px;
+    background: var(--cozy-bg-beige);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--cozy-wood-sugi);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: transform 0.15s ease;
+  }
+
+  .volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--cozy-green-matcha-forest);
+  }
+
+  /* 2. Playlist & Tracklist Selection Layout */
+  .playlist-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .playlist-selection-grid {
+      grid-template-columns: 380px 1fr;
+      gap: 3.5rem;
+    }
+  }
+
+  .column-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin: 0 0 1.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    letter-spacing: -0.2px;
+  }
+
+  .column-title i {
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  /* Danh sách Album xếp theo 1 cột */
+  .playlists-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .playlist-polaroid {
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 18px;
+    padding: 0.85rem 1.1rem;
+    box-shadow: 0 3px 12px rgba(139, 94, 60, 0.02);
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: visible;
+  }
+
+  .playlist-polaroid:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 18px rgba(139, 94, 60, 0.04);
+    border-color: rgba(74, 138, 46, 0.25);
+  }
+
+  .playlist-polaroid.active {
+    border-color: var(--cozy-green-matcha-forest);
+    box-shadow: 0 4px 14px rgba(74, 138, 46, 0.06);
+    background-color: #fcfdfa;
+  }
+
+  /* Ảnh bìa đĩa nhạc giả lập */
+  .playlist-polaroid-disc-art {
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--cozy-bg-beige) 0%, var(--cozy-bg-oatmeal) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.03);
+    flex-shrink: 0;
+    overflow: visible; /* Cho phép vinyl ló ra ngoài */
+  }
+
+  /* Vinyl record ló ra sau bìa album khi active */
+  .playlist-polaroid-disc-art::before {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #2c2c2c 4%, #111 25%, #000 70%);
+    box-shadow: inset 0 0 3px rgba(255,255,255,0.15), 0 2px 5px rgba(0,0,0,0.15);
+    right: 0px;
+    top: 4px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
+    z-index: 0;
+    opacity: 0;
+  }
+
+  .playlist-polaroid.active .playlist-polaroid-disc-art::before {
+    transform: translateX(18px) rotate(45deg);
+    opacity: 1;
+    z-index: 1;
+  }
+
+  .disc-art-center {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid #111;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.2);
+  }
+
+  .disc-art-center::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #111;
+  }
+
+  /* Icon phác thảo của album */
+  .playlist-album-illustration-icon {
+    font-size: 1.6rem;
+    color: var(--cozy-wood-sugi);
+    opacity: 0.65;
+    z-index: 2;
+    transition: transform 0.3s ease;
+  }
+
+  .playlist-polaroid:hover .playlist-album-illustration-icon {
+    transform: scale(1.1);
+  }
+
+  .playlist-polaroid-info {
+    flex: 1;
+    min-width: 0; /* Cho phép flexbox thu nhỏ chính xác */
+  }
+
+  .playlist-polaroid-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin: 0 0 0.25rem 0;
+    line-height: 1.35;
+    /* Cắt chữ thành tối đa 2 dòng khi tên album quá dài */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+  }
+
+  .playlist-polaroid-count {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    color: #8E8E93;
+    display: block;
+  }
+
+  /* Chấm xanh lá báo active trên góc card */
+  .playlist-polaroid-active-dot {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--cozy-green-matcha-forest);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 5;
+  }
+
+  .playlist-polaroid.active .playlist-polaroid-active-dot {
+    opacity: 1;
+  }
+
+  /* Tracklist Column */
+  .tracks-list-card {
+    background-color: var(--cozy-bg-pure);
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(139, 94, 60, 0.02);
+    border: 1px solid rgba(139, 94, 60, 0.05);
+  }
+
+  .tracks-table-header {
+    display: grid;
+    grid-template-columns: 1fr 85px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #8E8E93;
+    padding-bottom: 0.95rem;
+    border-bottom: 1px solid var(--cozy-border-light);
+    margin-bottom: 0.75rem;
+  }
+
+  .tracks-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+
+  /* Custom Scrollbar cho Tracklist */
+  .tracks-list-container::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .tracks-list-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .tracks-list-container::-webkit-scrollbar-thumb {
+    background-color: var(--cozy-border-light);
+    border-radius: 2px;
+  }
+
+  /* Hàng bài hát track-item-row */
+  .track-item-row {
+    display: grid;
+    grid-template-columns: 1fr 85px;
+    align-items: center;
+    padding: 0.75rem 0.65rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .track-item-row:hover {
+    background-color: var(--cozy-bg-beige);
+    border-color: rgba(139, 94, 60, 0.04);
+  }
+
+  .track-item-row.active {
+    background-color: #f4f8f0;
+    border-color: rgba(74, 138, 46, 0.08);
+  }
+
+  .track-row-left {
+    display: flex;
+    align-items: center;
+    gap: 0.95rem;
+  }
+
+  /* Nút Play hover */
+  .track-row-icon-indicator {
+    width: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--cozy-wood-sugi);
+    font-size: 0.85rem;
+    position: relative;
+  }
+
+  .track-play-hover-btn {
+    display: none;
+    font-size: 1.1rem;
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .track-item-row:hover .track-play-hover-btn {
+    display: flex !important;
+  }
+
+  .track-item-row:hover .track-index-num,
+  .track-item-row:hover .cozy-wave-indicator {
+    display: none !important;
+  }
+
+  .track-item-row.active .track-row-icon-indicator {
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .track-row-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .track-row-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    transition: color 0.15s ease;
+  }
+
+  .track-item-row.active .track-row-title {
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .track-row-artist {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    color: #8E8E93;
+  }
+
+  .track-row-duration {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #8E8E93;
+    text-align: right;
+  }
+
+  /* Equalizer sóng nhạc chuyển động mượt mà (Matcha Wave) */
+  .cozy-wave-indicator {
+    display: flex;
+    align-items: flex-end;
+    gap: 2.5px;
+    width: 14px;
+    height: 12px;
+  }
+
+  .wave-bar {
+    width: 2.5px;
+    height: 100%;
+    background-color: var(--cozy-green-matcha-forest);
+    border-radius: 1px;
+    transform-origin: bottom;
+    animation: bounce-bar 1.2s ease-in-out infinite alternate;
+  }
+
+  .wave-bar:nth-child(2) {
+    animation-delay: 0.3s;
+    animation-duration: 0.8s;
+  }
+
+  .wave-bar:nth-child(3) {
+    animation-delay: 0.6s;
+    animation-duration: 1.4s;
+  }
+
+  @keyframes bounce-bar {
+    0% { transform: scaleY(0.25); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* Placeholders & Spinners */
+  .playlist-loading-placeholder,
+  .track-loading-placeholder {
+    padding: 2.5rem 0;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    color: #8E8E93;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+    font-size: 1.5rem;
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* Responsive Design Mobile Menu */
+  @media (max-width: 767px) {
+    .menu-toggle {
+      display: flex;
+    }
+
+    .nav-links-desktop {
+      display: none;
+    }
+
+    .mobile-menu {
+      display: block;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: rgba(251, 250, 246, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1.5px solid var(--cozy-border-light);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+      opacity: 0;
+      z-index: 95;
+      box-shadow: 0 10px 20px rgba(21, 23, 15, 0.05);
+      padding: 0;
+    }
+
+    .mobile-menu.active {
+      max-height: 380px;
+      opacity: 1;
+    }
+
+    .mobile-menu-container {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .mobile-menu-link {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--cozy-text-obsidian);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .mobile-menu-link:hover,
+    .mobile-menu-link.active {
+      background-color: var(--cozy-bg-oatmeal);
+      color: var(--cozy-green-matcha-forest);
+    }
+
+    .mobile-menu-link i {
+      font-size: 1.2rem;
+      color: var(--cozy-wood-sugi);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .nav-links-desktop {
+      display: flex;
+    }
+
+    .menu-toggle {
+      display: none;
+    }
+
+    .mobile-menu {
+      display: none !important;
+    }
+  }
+
+  /* Động hiển thị badge tiêu đề */
+  .active-album-title-badge {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--cozy-green-matcha-forest);
+    margin-left: 0.5rem;
+    font-style: italic;
+    opacity: 0.85;
+    display: inline-block;
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+  }
+
+  /* Visual Bridge (Đường nối chỉ hướng) kết nối giữa Album và Danh sách bài hát ở màn hình Desktop */
+  @media (min-width: 1024px) {
+    .playlist-polaroid.active::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: 6px 0 6px 8px;
+      border-style: solid;
+      border-color: transparent transparent transparent var(--cozy-green-matcha-forest);
+      z-index: 10;
+      filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.05));
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. MOBILE MENU TOGGLE ---
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggleBtn?.addEventListener('click', () => {
+      const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
+      menuToggleBtn.setAttribute('aria-expanded', (!isExpanded).toString());
+      menuToggleBtn.classList.toggle('active');
+      mobileMenu?.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!menuToggleBtn?.contains(target) && !mobileMenu?.contains(target)) {
+        menuToggleBtn?.setAttribute('aria-expanded', 'false');
+        menuToggleBtn?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+      }
+    });
+
+    // --- 2. COZY MUSIC PLAYER LOGIC ---
+    const audio = document.getElementById('lounge-audio-player') as HTMLAudioElement;
+    const playPauseBtn = document.getElementById('btn-play-pause');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+    const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+
+    const trackTitleDisplay = document.getElementById('player-track-title');
+    const trackArtistDisplay = document.getElementById('player-track-artist');
+    const timeCurrent = document.getElementById('time-current');
+    const timeTotal = document.getElementById('time-total');
+    const progressBar = document.getElementById('progress-bar');
+    const progressHandle = document.getElementById('progress-handle');
+    const progressBarWrapper = document.getElementById('progress-bar-wrapper');
+
+    const vinylDisc = document.getElementById('vinyl-disc');
+    const vinylArm = document.getElementById('vinyl-arm');
+
+    const playlistsContainer = document.getElementById('playlists-container');
+    const tracksListContainer = document.getElementById('tracks-list-container');
+
+    let allTracks: any[] = [];
+    let groupedPlaylists: Record<string, any> = {};
+    let activePlaylistKey = 'tina_tuyen_chon';
+    let activeTrackIndex = 0;
+    let isPlaying = false;
+
+    // Định dạng giây thành mm:ss
+    function formatTime(seconds: number) {
+      if (isNaN(seconds)) return '0:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // Giao diện tên Playlist đẹp hơn
+    function formatPlaylistName(key: string) {
+      const names: Record<string, string> = {
+        'tina_tuyen_chon': 'Tina Tuyển Chọn 🐾',
+        'morning': 'Nắng Sớm Bên Hiên ☕',
+        'afternoon': 'Góc Chiều Bình Yên 🍃',
+        'evening': 'Đèn Vàng Vĩ Tuyến 🌙',
+        'jazz': 'Cà Phê & Jazz Sớm 🎷',
+        'rainy': 'Bản Nhạc Mưa Đêm ☔'
+      };
+      if (names[key]) return names[key];
+      return key; // Giữ nguyên tên thư mục gốc trên R2 vì nó đã rất đẹp và rõ nghĩa
+    }
+
+    // Tải thông tin playlist từ R2
+    async function loadPlaylistData() {
+      const r2Domain = (window as any).PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev';
+      const playlistUrl = `${r2Domain.replace(/\/$/, '')}/playlist.json`;
+      
+      try {
+        let res = await fetch(playlistUrl);
+        if (!res.ok) throw new Error("Không thể nạp playlist trực tiếp");
+        const data = await res.json();
+        
+        allTracks = data.tracks || [];
+        processGroupedPlaylists();
+        renderPlaylists();
+        
+        // Mặc định chọn playlist đầu tiên có nhạc
+        const keys = Object.keys(groupedPlaylists);
+        if (keys.length > 0) {
+          selectPlaylist(keys[0]);
+        }
+      } catch (err) {
+        console.warn("Lỗi nạp nhạc R2 trực tiếp, thử qua CORS proxy:", err);
+        try {
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(playlistUrl)}`;
+          const proxyRes = await fetch(proxyUrl);
+          if (!proxyRes.ok) throw new Error("Không thể nạp qua CORS proxy");
+          const data = await proxyRes.json();
+          
+          allTracks = data.tracks || [];
+          processGroupedPlaylists();
+          renderPlaylists();
+          
+          const keys = Object.keys(groupedPlaylists);
+          if (keys.length > 0) {
+            selectPlaylist(keys[0]);
+          }
+        } catch (proxyErr) {
+          console.error("Cả fetch trực tiếp và CORS proxy đều lỗi, chuyển sang offline fallback:", proxyErr);
+          // Fallback offline
+          allTracks = [
+            { id: "fallback_01", title: "Airmail Special ✈️", artist: "Tina's Cozy Song", url: "https://upload.wikimedia.org/wikipedia/commons/d/de/Airmail_Special_-_Airmen_of_Note.mp3", duration: 199 },
+            { id: "fallback_02", title: "Stardust 🌟", artist: "Latte's Cozy Song", url: "https://upload.wikimedia.org/wikipedia/commons/2/29/US_Army_Blues_-_05_-_Stardust.ogg", duration: 205 },
+            { id: "fallback_03", title: "Amazing Grace ✨", artist: "Muối's Cozy Song", url: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Amazing_Grace_%28USAFB_jazz_vocal%29.ogg", duration: 385 }
+          ];
+          processGroupedPlaylists();
+          renderPlaylists();
+          selectPlaylist('tina_tuyen_chon');
+        }
+      }
+    }
+
+    // Phân nhóm bài hát theo thư mục
+    function processGroupedPlaylists() {
+      groupedPlaylists = {
+        'tina_tuyen_chon': {
+          name: 'Tina Tuyển Chọn 🐾',
+          icon: 'ph-star-of-life',
+          tracks: []
+        }
+      };
+
+      allTracks.forEach(track => {
+        const urlPath = track.url || "";
+        const match = urlPath.match(/tracks\/([^\/]+)\//);
+        
+        if (match && match[1]) {
+          const folderKey = decodeURIComponent(match[1]);
+          if (!groupedPlaylists[folderKey]) {
+            groupedPlaylists[folderKey] = {
+              name: formatPlaylistName(folderKey),
+              icon: getPlaylistIcon(folderKey),
+              tracks: []
+            };
+          }
+          groupedPlaylists[folderKey].tracks.push(track);
+        } else {
+          groupedPlaylists['tina_tuyen_chon'].tracks.push(track);
+        }
+      });
+
+      // Xóa playlist 'tina_tuyen_chon' nếu rỗng
+      if (groupedPlaylists['tina_tuyen_chon'].tracks.length === 0) {
+        delete groupedPlaylists['tina_tuyen_chon'];
+      }
+    }
+
+    function getPlaylistIcon(key: string) {
+      const lower = key.toLowerCase();
+      if (lower.includes('jazz')) return 'ph-music-notes-simple';
+      if (lower.includes('rain') || lower.includes('mưa')) return 'ph-cloud-rain';
+      if (lower.includes('morning') || lower.includes('sáng')) return 'ph-sun-dim';
+      if (lower.includes('evening') || lower.includes('tối') || lower.includes('night')) return 'ph-moon';
+      if (lower.includes('chill') || lower.includes('healing')) return 'ph-heartbeat';
+      return 'ph-disc';
+    }
+
+    // Render danh sách Playlists
+    function renderPlaylists() {
+      if (!playlistsContainer) return;
+      playlistsContainer.innerHTML = '';
+
+      Object.keys(groupedPlaylists).forEach(key => {
+        const pl = groupedPlaylists[key];
+        const card = document.createElement('div');
+        card.className = `playlist-polaroid ${key === activePlaylistKey ? 'active' : ''}`;
+        card.setAttribute('data-key', key);
+
+        card.innerHTML = `
+          <div class="playlist-polaroid-active-dot"></div>
+          <div class="playlist-polaroid-disc-art">
+            <div class="disc-art-center"></div>
+            <i class="ph-light ${pl.icon || 'ph-disc'} playlist-album-illustration-icon"></i>
+          </div>
+          <div class="playlist-polaroid-info">
+            <h4 class="playlist-polaroid-title">${pl.name}</h4>
+            <span class="playlist-polaroid-count">${pl.tracks.length} bài hát</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          selectPlaylist(key);
+        });
+
+        playlistsContainer.appendChild(card);
+      });
+    }
+
+    // Chọn Playlist
+    function selectPlaylist(key: string) {
+      activePlaylistKey = key;
+      activeTrackIndex = 0;
+      
+      const pl = groupedPlaylists[key];
+      const badge = document.getElementById('active-album-title-badge');
+      if (badge && pl) {
+        badge.textContent = `• ${pl.name}`;
+      }
+      
+      // Cập nhật trạng thái active UI
+      const cards = document.querySelectorAll('.playlist-polaroid');
+      cards.forEach(card => {
+        const cardKey = card.getAttribute('data-key');
+        if (cardKey === key) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+
+      renderTracklist();
+      loadTrack(0, false); // Nạp bài hát đầu tiên nhưng chưa tự động phát
+    }
+
+    // Render danh sách bài hát trong Playlist được chọn
+    function renderTracklist() {
+      if (!tracksListContainer) return;
+      tracksListContainer.innerHTML = '';
+
+      const pl = groupedPlaylists[activePlaylistKey];
+      if (!pl || pl.tracks.length === 0) {
+        tracksListContainer.innerHTML = `<div class="track-loading-placeholder">Album này chưa có giai điệu nào.</div>`;
+        return;
+      }
+
+      pl.tracks.forEach((track: any, index: number) => {
+        const row = document.createElement('div');
+        row.className = `track-item-row ${index === activeTrackIndex ? 'active' : ''}`;
+        row.setAttribute('data-index', index.toString());
+
+        row.innerHTML = `
+          <div class="track-row-left">
+            <div class="track-row-icon-indicator">
+              <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
+              ${index === activeTrackIndex && isPlaying ? `
+                <div class="cozy-wave-indicator">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                </div>
+              ` : `<span class="track-index-num whisper-mono">${index + 1}</span>`}
+            </div>
+            <div class="track-row-details">
+              <span class="track-row-title">${track.title}</span>
+              <span class="track-row-artist">${track.artist || 'Cozy Song 🐾'}</span>
+            </div>
+          </div>
+          <span class="track-row-duration">${formatTime(track.duration)}</span>
+        `;
+
+        row.addEventListener('click', () => {
+          loadTrack(index, true); // Nạp bài và phát ngay
+        });
+
+        tracksListContainer.appendChild(row);
+      });
+    }
+
+    // Nạp bài hát vào player
+    function loadTrack(index: number, autoPlay = true) {
+      const pl = groupedPlaylists[activePlaylistKey];
+      if (!pl || !pl.tracks[index]) return;
+
+      activeTrackIndex = index;
+      const track = pl.tracks[index];
+
+      // Đổi URL công khai nếu cần
+      let audioUrl = track.url || "";
+      if (!audioUrl.startsWith('http') && audioUrl) {
+        const r2Domain = (window as any).PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0da307f5970748e8a0109943d1f10cb0.r2.dev';
+        audioUrl = `${r2Domain.replace(/\/$/, '')}/${audioUrl}`;
+      }
+
+      audio.src = audioUrl;
+      audio.load();
+
+      if (trackTitleDisplay) trackTitleDisplay.textContent = track.title;
+      if (trackArtistDisplay) trackArtistDisplay.textContent = track.artist || 'Cozy Song 🐾';
+
+      // Cập nhật active indicator trên bảng tracklist
+      const rows = document.querySelectorAll('.track-item-row');
+      rows.forEach((row, rIdx) => {
+        const indicator = row.querySelector('.track-row-icon-indicator');
+        if (rIdx === index) {
+          row.classList.add('active');
+          if (indicator) {
+            indicator.innerHTML = `
+              <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
+              ${isPlaying ? `
+                <div class="cozy-wave-indicator">
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                  <span class="wave-bar"></span>
+                </div>
+              ` : `<span class="track-index-num whisper-mono">${index + 1}</span>`}
+            `;
+          }
+        } else {
+          row.classList.remove('active');
+          if (indicator) {
+            indicator.innerHTML = `
+              <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
+              <span class="track-index-num whisper-mono">${rIdx + 1}</span>
+            `;
+          }
+        }
+      });
+
+      if (autoPlay) {
+        playAudio();
+      } else {
+        pauseAudio();
+      }
+    }
+
+    // Điều khiển phát/dừng âm thanh
+    function playAudio() {
+      audio.play().then(() => {
+        isPlaying = true;
+        playIcon?.classList.add('hidden');
+        pauseIcon?.classList.remove('hidden');
+        vinylDisc?.classList.add('playing');
+        vinylArm?.classList.add('active');
+
+        // Cập nhật lại icon waveform trên hàng bài hát đang phát
+        const activeRowIndicator = document.querySelector('.track-item-row.active .track-row-icon-indicator');
+        if (activeRowIndicator) {
+          activeRowIndicator.innerHTML = `
+            <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
+            <div class="cozy-wave-indicator">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+          `;
+        }
+      }).catch(err => {
+        console.warn("Không thể tự động phát nhạc:", err);
+      });
+    }
+
+    function pauseAudio() {
+      audio.pause();
+      isPlaying = false;
+      playIcon?.classList.remove('hidden');
+      pauseIcon?.classList.add('hidden');
+      vinylDisc?.classList.remove('playing');
+      vinylArm?.classList.remove('active');
+
+      // Đổi icon waveform thành số thứ tự
+      const activeRowIndicator = document.querySelector('.track-item-row.active .track-row-icon-indicator');
+      if (activeRowIndicator) {
+        activeRowIndicator.innerHTML = `
+          <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
+          <span class="track-index-num whisper-mono">${activeTrackIndex + 1}</span>
+        `;
+      }
+    }
+
+    playPauseBtn?.addEventListener('click', () => {
+      if (isPlaying) {
+        pauseAudio();
+      } else {
+        playAudio();
+      }
+    });
+
+    btnNext?.addEventListener('click', () => {
+      const pl = groupedPlaylists[activePlaylistKey];
+      if (!pl) return;
+      let nextIndex = activeTrackIndex + 1;
+      if (nextIndex >= pl.tracks.length) nextIndex = 0;
+      loadTrack(nextIndex, true);
+    });
+
+    btnPrev?.addEventListener('click', () => {
+      const pl = groupedPlaylists[activePlaylistKey];
+      if (!pl) return;
+      let prevIndex = activeTrackIndex - 1;
+      if (prevIndex < 0) prevIndex = pl.tracks.length - 1;
+      loadTrack(prevIndex, true);
+    });
+
+    // Cập nhật thanh thời gian và tiến trình
+    audio.addEventListener('timeupdate', () => {
+      if (timeCurrent) timeCurrent.textContent = formatTime(audio.currentTime);
+      if (timeTotal && audio.duration) timeTotal.textContent = formatTime(audio.duration);
+
+      if (audio.duration) {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        if (progressBar) progressBar.style.width = `${percent}%`;
+        if (progressHandle) progressHandle.style.left = `${percent}%`;
+      }
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      if (timeTotal) timeTotal.textContent = formatTime(audio.duration);
+    });
+
+    // Tự động chuyển bài khi hết
+    audio.addEventListener('ended', () => {
+      btnNext?.click();
+    });
+
+    // Kéo thả tua nhạc (Seek)
+    progressBarWrapper?.addEventListener('click', (e) => {
+      const rect = progressBarWrapper.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      const clickPercent = clickX / width;
+      
+      if (audio.duration) {
+        audio.currentTime = clickPercent * audio.duration;
+      }
+    });
+
+    // Điều chỉnh âm lượng
+    volumeSlider?.addEventListener('input', () => {
+      audio.volume = parseFloat(volumeSlider.value);
+    });
+
+    // Khởi tạo
+    loadPlaylistData();
+  });
+</script>

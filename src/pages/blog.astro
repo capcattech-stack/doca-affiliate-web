@@ -1,0 +1,711 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+// Fetch danh sách bài viết từ Content Collection 'blog'
+const blogPosts = await getCollection('blog');
+// Sắp xếp bài viết theo ngày xuất bản giảm dần
+const sortedPosts = blogPosts.sort((a, b) => 
+  new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+);
+
+// Hàm format danh mục sản phẩm của Supabase sang nhãn hiển thị hoặc nhãn Pillar nếu có
+const getCategoryLabel = (cat: string, pil?: string) => {
+  if (pil) {
+    const pillarLabels: Record<string, string> = {
+      'nhip_tho': 'Nhịp Thở Đồng Diệu',
+      'lang_kinh': 'Lăng Kính Của Pet',
+      'hop_ky_uc': 'Hộp Ký Ức Bình Yên'
+    };
+    return pillarLabels[pil] || cat;
+  }
+  const labels: Record<string, string> = {
+    'thuc_an': 'Thức Ăn Mèo',
+    'vat_pham': 'Vật Phẩm Chăm Sóc',
+    'sach': 'Sách Chữa Lành',
+    'phu_kien': 'Phụ Kiện Nhà Ở'
+  };
+  return labels[cat] || cat;
+};
+
+// Đọc thông tin kết nối Supabase và Gemini từ biến môi trường
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
+---
+
+<Layout title="Nhật Ký Lối Sống - DOCA.pet | Góc Trú Ẩn Tâm Hồn" description="Nơi gom góp những mẩu chuyện nhỏ vỗ về tâm hồn cô/chú & các bạn đồng Meo. Tất cả bài viết thuộc 3 Pillar lối sống của nhà DOCA.">
+  <!-- Truyền biến môi trường sang client-side -->
+  <script is:inline define:vars={{ supabaseUrl, supabaseAnonKey, geminiApiKey }}>
+    window.PUBLIC_SUPABASE_URL = supabaseUrl;
+    window.PUBLIC_SUPABASE_ANON_KEY = supabaseAnonKey;
+    window.PUBLIC_GEMINI_API_KEY = geminiApiKey;
+  </script>
+
+  <main class="blog-archive-view animate-fade-in">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container nav-container">
+        <a href="/" class="logo-wrapper">
+          <img src="/images/brand/logo-light.png" alt="doca.pet Logo" class="brand-logo-img" />
+        </a>
+        <div class="nav-right">
+          <!-- Desktop navigation links -->
+          <div class="nav-links-desktop">
+            <a href="/product" class="nav-link-text">Sản phẩm</a>
+            <a href="/music" class="nav-link-text">Music</a>
+            <a href="/family" class="nav-link-text">Gia đình</a>
+            <a href="/blog" class="nav-link-text active">Blog</a>
+            <a href="/about" class="nav-link-text">About Us</a>
+          </div>
+
+          <!-- Hamburger toggle -->
+          <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
+        </div>
+      </div>
+      <!-- Mobile navigation menu -->
+      <div id="mobile-menu" class="mobile-menu">
+        <div class="container mobile-menu-container">
+          <a href="/product" class="mobile-menu-link"><i class="ph-light ph-circles-four"></i> Sản phẩm</a>
+          <a href="/music" class="mobile-menu-link"><i class="ph-light ph-music-notes"></i> Music</a>
+          <a href="/family" class="mobile-menu-link"><i class="ph-light ph-users"></i> Gia đình</a>
+          <a href="/blog" class="mobile-menu-link active"><i class="ph-light ph-book-open"></i> Blog</a>
+          <a href="/about" class="mobile-menu-link"><i class="ph-light ph-info"></i> About Us</a>
+          <div id="nav-auth-container-mobile" class="nav-auth-container-mobile"></div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container content-container">
+      <!-- Header giống trang gia đình -->
+      <div class="blog-archive-header animate-fade-in">
+        <span class="blog-archive-tag">NHẬT KÝ LỐI SỐNG</span>
+        <h1 class="blog-archive-title">Nhật Ký Lối Sống</h1>
+        <p class="blog-archive-subtitle animate-fade-in-delayed">
+          nơi tụi con gom góp những mẩu chuyện nhỏ giúp xoa dịu tâm hồn, thấu hiểu chú thú cưng và cùng cô/chú đắp xây một cuộc sống thật bình yên. 🐾
+        </p>
+      </div>
+
+      <!-- Các tab phân loại theo Pillar (Blog Tabs) -->
+      <div class="category-tabs-container animate-fade-in-delayed">
+        <button class="tab-btn active" data-pillar="all">
+          <i class="ph-light ph-circles-four tab-icon-ph"></i> Tất cả
+        </button>
+        <button class="tab-btn" data-pillar="nhip_tho">
+          <i class="ph-light ph-wind tab-icon-ph"></i> Nhịp Thở Đồng Diệu
+        </button>
+        <button class="tab-btn" data-pillar="lang_kinh">
+          <i class="ph-light ph-eye tab-icon-ph"></i> Lăng Kính Của Pet
+        </button>
+        <button class="tab-btn" data-pillar="hop_ky_uc">
+          <i class="ph-light ph-notebook tab-icon-ph"></i> Hộp Ký Ức Bình Yên
+        </button>
+      </div>
+
+      <div class="archive-blog-list">
+        {sortedPosts.map(post => {
+          // Xác định chú mèo tuyển chọn và avatar trực tiếp từ frontmatter bài viết
+          const curatorName = post.data.curatorName || "Tina";
+          let curatorAvatar = "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=80&h=80&fit=crop&q=80"; // Mèo xám Tina
+
+          if (curatorName === "Latte") {
+            curatorAvatar = "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=80&h=80&fit=crop&q=80"; // Mèo trắng Latte
+          } else if (curatorName === "Muối") {
+            curatorAvatar = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=80&h=80&fit=crop&q=80"; // Mèo trắng mắt vàng Muối
+          }
+
+          // Tính toán thời gian đọc dựa trên độ dài nội dung bài viết (khoảng 500 ký tự tiếng Việt / phút)
+          const charCount = post.body ? post.body.length : 800;
+          const readMinutes = Math.max(2, Math.round(charCount / 500));
+          const readingTime = `${readMinutes} phút`;
+
+          // Tính toán chỉ số xoa dịu động nhất quán dựa trên mã băm tiêu đề bài viết
+          const sumChars = post.data.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const soothePercent = 88 + (sumChars % 11); // Dao động từ 88% đến 98%
+          const healingIndex = `${soothePercent}%`;
+
+          return (
+            <article class="cozy-card archive-blog-item" data-pillar={post.data.pillar}>
+              <div class="blog-item-header">
+                <span class="blog-category">{getCategoryLabel(post.data.category, post.data.pillar)}</span>
+              </div>
+              
+              <h3 class="blog-item-title">
+                <a href={`/blog/${post.slug}`} class="blog-link">
+                  {post.data.title}
+                </a>
+              </h3>
+
+              <div class="blog-curator-badge" title={`${curatorName} đề xuất bài viết này`}>
+                <img src={curatorAvatar} alt={curatorName} class="blog-curator-avatar" />
+                <span class="blog-curator-name">{curatorName} tuyển chọn 🐾</span>
+              </div>
+              
+              <p class="blog-item-desc">{post.data.description}</p>
+              
+              <div class="blog-item-metrics">
+                <span class="metric-tag"><i class="ph-light ph-clock"></i> {readingTime} đọc</span>
+                <span class="metric-tag"><i class="ph-light ph-sparkles"></i> Xoa dịu: {healingIndex}</span>
+              </div>
+
+              <div class="blog-meta">
+                <span class="blog-date">{post.data.publishDate}</span>
+                <a href={`/blog/${post.slug}`} class="cozy-dotted-link read-more">Đọc bài viết <i class="ph-light ph-arrow-right"></i></a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style is:global>
+  .blog-archive-view {
+    min-height: 100vh;
+    background-color: var(--cozy-bg-beige);
+    padding-bottom: 5rem;
+    position: relative;
+    z-index: 0;
+  }
+
+  .blog-archive-view::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.18;
+    background: 
+      linear-gradient(90deg, rgba(139, 94, 60, 0.22) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139, 94, 60, 0.04) 0%, transparent 15%, transparent 85%, rgba(139, 94, 60, 0.04) 100%),
+      repeating-linear-gradient(90deg, rgba(139, 94, 60, 0.02) 0px, rgba(139, 94, 60, 0.02) 1px, transparent 1px, transparent 8px),
+      repeating-linear-gradient(0deg, rgba(139, 94, 60, 0.015) 0px, rgba(139, 94, 60, 0.015) 1px, transparent 1px, transparent 24px);
+    background-size: 60px 100%, 60px 100%, 60px 100%, 100% 120px;
+  }
+
+  /* Navbar Styles */
+  .navbar {
+    background-color: rgba(251, 250, 246, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cozy-border-light);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0.5rem 0;
+    box-shadow: 0 1px 3px rgba(21, 23, 15, 0.04);
+  }
+
+  .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo-wrapper {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .brand-logo-img {
+    height: 24px;
+    width: auto;
+    display: block;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .nav-link-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .nav-link-text:hover {
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .nav-link-text.active {
+    color: var(--cozy-green-matcha-forest) !important;
+    font-weight: 700 !important;
+  }
+
+  .menu-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 22px;
+    height: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 110;
+    transition: transform 0.3s ease;
+  }
+
+  .menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--cozy-text-obsidian);
+    border-radius: 1px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+
+  .menu-toggle.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menu-toggle.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .nav-links-desktop {
+    display: none;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .nav-links-desktop {
+      display: flex;
+    }
+    .menu-toggle {
+      display: none;
+    }
+  }
+
+  .mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: rgba(251, 250, 246, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1.5px solid var(--cozy-border-light);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    opacity: 0;
+    z-index: 95;
+    box-shadow: 0 10px 20px rgba(21, 23, 15, 0.05);
+  }
+
+  .mobile-menu.active {
+    max-height: 380px;
+    opacity: 1;
+  }
+
+  .mobile-menu-container {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mobile-menu-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .mobile-menu-link:hover {
+    background-color: var(--cozy-bg-oatmeal);
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .mobile-menu-link.active {
+    background-color: var(--cozy-bg-oatmeal);
+    color: var(--cozy-green-matcha-forest) !important;
+  }
+
+  .mobile-menu-link i {
+    font-size: 1.2rem;
+    color: var(--cozy-wood-sugi);
+  }
+
+  /* Spacing */
+  .content-container {
+    padding-top: 2.5rem;
+  }
+
+  /* Header góc nhật ký */
+  .blog-archive-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+
+  .blog-archive-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--cozy-wood-sugi);
+    background-color: var(--cozy-bg-oatmeal);
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    border: 1px dashed rgba(139, 94, 60, 0.18);
+    display: inline-block;
+    margin-bottom: 0.75rem;
+  }
+
+  .blog-archive-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+  }
+
+  .blog-archive-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: #6E6E73;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Catalogue Tabs cho Blog */
+  .category-tabs-container {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.25rem 0.1rem;
+    justify-content: center;
+  }
+  
+  .category-tabs-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tab-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #5D5E56;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    padding: 0.45rem 0.95rem;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  
+  .tab-icon-ph {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .tab-btn:hover .tab-icon-ph {
+    transform: scale(1.15);
+  }
+  
+  .tab-btn:hover {
+    background-color: var(--cozy-bg-oatmeal);
+    border-color: var(--cozy-border-light);
+    color: var(--cozy-text-obsidian);
+  }
+  
+  .tab-btn.active {
+    background-color: var(--cozy-green-matcha-forest);
+    border-color: var(--cozy-green-matcha-forest);
+    color: var(--cozy-bg-pure);
+    box-shadow: 0 4px 10px rgba(74, 138, 46, 0.25);
+  }
+
+  @media (max-width: 767px) {
+    .category-tabs-container {
+      justify-content: flex-start;
+      padding-left: 0.25rem;
+    }
+  }
+
+  /* Grid Layout: 3 cột trên desktop, 2 cột trên mobile */
+  .archive-blog-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Mobile: 2 cột */
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .archive-blog-list {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .blog-archive-view .container {
+      max-width: 1280px !important;
+    }
+    .archive-blog-list {
+      grid-template-columns: repeat(3, 1fr) !important; /* Desktop: 3 cột */
+      gap: 1.25rem !important;
+    }
+  }
+
+  /* Card bài viết gọn gàng, giảm padding */
+  .archive-blog-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    border-left: 3.3px solid var(--cozy-border-light);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    background-color: var(--cozy-bg-pure);
+    padding: 1rem; /* Giảm padding giúp thẻ gọn gàng */
+    border-radius: 14px;
+    box-shadow: var(--cozy-shadow-default);
+    justify-content: space-between;
+    min-height: 250px;
+  }
+
+  .archive-blog-item:hover {
+    border-left-color: #76C123;
+    transform: translateY(-3px) rotate(0.5deg);
+    box-shadow: 0 8px 24px rgba(21, 23, 15, 0.04);
+  }
+
+  .blog-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .blog-category {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #76C123;
+    background-color: var(--cozy-success);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .blog-curator-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #F8F9FA;
+    border: 1px solid var(--cozy-border-light);
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-bottom: 0.25rem;
+    width: fit-content;
+  }
+
+  .blog-curator-avatar {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .blog-curator-name {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+  }
+
+  .blog-item-title {
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.35;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .blog-link {
+    color: var(--cozy-text-obsidian);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .blog-link:hover {
+    color: #76C123;
+  }
+
+  .blog-item-desc {
+    font-size: 0.85rem;
+    color: #48484A;
+    line-height: 1.45;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-align: justify;
+  }
+
+  .blog-item-metrics {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .metric-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6E6E73;
+    background-color: #F2F2F7;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .blog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--cozy-border-light);
+    padding-top: 0.5rem;
+    margin-top: auto;
+  }
+
+  .blog-date {
+    font-size: 0.75rem;
+    color: #8E8E93;
+  }
+
+  .read-more {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 1.5px dotted var(--cozy-text-obsidian);
+    padding-bottom: 1px;
+    transition: all 0.2s ease;
+  }
+
+  .read-more:hover {
+    color: #76C123;
+    border-bottom-color: #76C123;
+  }
+
+  /* Mobile: 2 cột - mở thẻ như một quyển sách */
+  @media (max-width: 767px) {
+    .content-container {
+      padding-top: 1.5rem;
+    }
+    
+    .blog-archive-title {
+      font-size: 1.75rem;
+    }
+    
+    .blog-archive-subtitle {
+      font-size: 0.95rem;
+    }
+    
+    .archive-blog-item {
+      padding: 0.75rem;
+      border-radius: 12px;
+      min-height: 200px;
+    }
+    
+    .archive-blog-item .blog-item-desc {
+      display: none; /* Ẩn mô tả trên mobile để giữ thiết kế trang sách gọn gàng */
+    }
+    
+    .blog-item-title {
+      font-size: 0.92rem;
+      line-height: 1.3;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. MOBILE MENU TOGGLE
+    const menuToggleBtn = document.getElementById('menu-toggle-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggleBtn?.addEventListener('click', () => {
+      const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
+      menuToggleBtn.setAttribute('aria-expanded', (!isExpanded).toString());
+      menuToggleBtn.classList.toggle('active');
+      mobileMenu?.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!menuToggleBtn?.contains(target) && !mobileMenu?.contains(target)) {
+        menuToggleBtn?.setAttribute('aria-expanded', 'false');
+        menuToggleBtn?.classList.remove('active');
+        mobileMenu?.classList.remove('active');
+      }
+    });
+
+    // 2. BLOG PILLAR TABS FILTER
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const blogItems = document.querySelectorAll('.archive-blog-item');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Toggle active class
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const selectedPillar = btn.getAttribute('data-pillar');
+
+        blogItems.forEach((item: any) => {
+          const itemPillar = item.getAttribute('data-pillar');
+          if (selectedPillar === 'all' || itemPillar === selectedPillar) {
+            item.style.display = 'flex';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>

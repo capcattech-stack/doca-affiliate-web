@@ -2,10 +2,13 @@
 title: "Bí quyết Setup góc làm việc chuẩn tối giản Iyashikei & MUJI cùng chú mèo"
 description: "Cải tạo góc phòng làm việc ngổn ngang lông mèo thành không gian ấm cúng, tối giản chuẩn Iyashikei & MUJI để làm việc chánh niệm cùng thú cưng."
 publishDate: "2026-06-24"
-coverImage: "/images/blog/setup-ghibli-cat.webp"
+coverImage: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80"
 category: "phu_kien"
 tags: ["Góc bình yên", "Setup phòng", "Tamagotchi"]
 relatedProducts: ["den-totoro-go"]
+pillar: lang_kinh
+curatorName: Muối
+curatorQuote: "Góc làm việc gỗ ấm có thêm vệt nắng và hơi ấm của con sẽ giúp cô/chú nảy ra nhiều ý tưởng tuyệt vời lắm đó!"
 ---
 
 Đối với những người làm việc tự do hoặc làm việc tại nhà (WFH), góc làm việc chính là thế giới thu nhỏ. Thế nhưng, nếu bạn nuôi thú cưng, góc nhỏ này thường xuyên ngập trong lông mèo rụng hoặc sự lộn xộn. 
@@ -32,3 +35,5 @@ Mèo thích nằm cạnh bạn không phải vì chúng muốn phá phím, mà v
 ## 🎁 Vật phẩm gợi ý dành cho góc phòng của bạn
 
 Để giúp bạn nhanh chóng biến đổi không gian, bé cưng đã lựa chọn ra chiếc đèn ngủ gỗ ấm áp nhất phong cách tối giản Iyashikei & MUJI dưới đây. Đừng quên nhấp vào nút **Gom mua chung** để bé cưng đo lường số lượng và tìm sỉ giá cực rẻ cho chúng mình nhé!
+
+<div class="inline-product-card" data-slug="den-totoro-go"></div>

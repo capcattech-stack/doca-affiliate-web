@@ -2,10 +2,13 @@
 title: "Mèo mù chữ và những tràng cười chữa lành mỗi ngày"
 description: "Giải mã hành vi kỳ lạ của chú mèo không biết kêu meo meo chuẩn và liên kết đến linh hồn AI PetTwin của Boss."
 publishDate: "2026-06-24"
-coverImage: "/images/blog/meo-mu-chu.webp"
+coverImage: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&q=80"
 category: "sach"
 tags: ["Hành vi", "Đồng cảm", "SimSimi"]
 relatedProducts: ["sach-tam-ly-meo"]
+pillar: lang_kinh
+curatorName: Muối
+curatorQuote: "Tụi con tuy không kêu meo meo chuẩn như sách giáo khoa, nhưng ngôn ngữ cơ thể của con toàn chứa lời yêu thương thôi!"
 ---
 
 Nuôi mèo là một cuộc hành trình ngập tràn những điều kỳ lạ. Bạn có bao giờ gặp một chú mèo “mù chữ” chưa? Nghĩa là, thay vì phát ra tiếng *“meo meo”* tròn trịa bình thường, chúng lại phát ra những âm thanh kỳ quặc như *“kẹc kẹc”*, *“gừ rừ”* hay chỉ mấp máy miệng không lời. 
@@ -38,3 +41,5 @@ Chính sự độc bản này tạo nên linh hồn của thú cưng. Trong dự
 ## 📚 Gợi ý từ Boss dành cho bạn
 
 Nếu bạn muốn đi sâu hơn vào thế giới nội tâm của mèo để thấu hiểu ngôn ngữ cơ thể và hành vi của chúng, hãy tham khảo cuốn sách dưới đây. Boss đã đính kèm link để bạn tìm mua dễ dàng.
+
+<div class="inline-product-card" data-slug="sach-tam-ly-meo"></div>

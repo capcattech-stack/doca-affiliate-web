@@ -16,27 +16,26 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const { title, description, publishDate, coverImage, category, tags, relatedProducts = [] } = entry.data;
+const { title, description, publishDate, coverImage, category, tags, relatedProducts = [], pillar } = entry.data;
 
-// 2. Fetch dữ liệu sản phẩm từ Supabase tại thời điểm build (SSG)
-let products: any[] = [];
+// 2. Fetch toàn bộ dữ liệu sản phẩm từ Supabase tại thời điểm build (SSG) để liên kết sản phẩm thật
+let allProducts: any[] = [];
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 
-if (supabaseUrl && supabaseKey && relatedProducts.length > 0) {
+if (supabaseUrl && supabaseKey) {
   try {
-    const filterSlugs = relatedProducts.join(',');
-    const res = await fetch(`${supabaseUrl}/rest/v1/products?slug=in.(${filterSlugs})&select=*`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/products?select=*`, {
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`
       }
     });
     if (res.ok) {
-      products = await res.json();
+      allProducts = await res.json();
     }
   } catch (err) {
-    console.warn("Failed to fetch products from Supabase, using local fallback", err);
+    console.warn("Failed to fetch all products from Supabase", err);
   }
 }
 
@@ -200,12 +199,48 @@ const STATIC_PRODUCTS_FALLBACK = [
   }
 ];
 
-if (products.length === 0 && relatedProducts.length > 0) {
-  products = STATIC_PRODUCTS_FALLBACK.filter(p => relatedProducts.includes(p.slug));
+// Lọc các sản phẩm liên quan từ Supabase
+if (allProducts.length === 0) {
+  allProducts = STATIC_PRODUCTS_FALLBACK;
 }
 
-// Chuyển danh mục sang tiếng Việt để hiển thị
-const getCategoryLabel = (cat: string) => {
+let products = allProducts.filter(p => relatedProducts.includes(p.slug));
+
+// Fallback thông minh: nếu không có sản phẩm liên quan chỉ định, tự động lấy sản phẩm cùng loại
+if (products.length === 0) {
+  const categoryMap: Record<string, string> = {
+    'sach': 'sach',
+    'routine': 'thuc_an',
+    'setup': 'phu_kien'
+  };
+  const targetProductCat = categoryMap[category] || 'vat_pham';
+  products = allProducts.filter(p => p.category === targetProductCat).slice(0, 2);
+  if (products.length === 0) {
+    products = allProducts.slice(0, 2);
+  }
+}
+
+// Lấy thông tin chú mèo tuyển chọn trực tiếp từ frontmatter bài viết
+const curatorName = entry.data.curatorName || "Tina";
+const curatorQuote = entry.data.curatorQuote || "Tina hi vọng bài viết này mang lại sự nhẹ nhõm cho cô/chú nha...";
+let curatorAvatar = "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=120&h=120&fit=crop&q=80"; // Tina
+
+if (curatorName === "Latte") {
+  curatorAvatar = "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=120&h=120&fit=crop&q=80"; // Latte
+} else if (curatorName === "Muối") {
+  curatorAvatar = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=120&h=120&fit=crop&q=80"; // Muối
+}
+
+// Chuyển danh mục sang tiếng Việt hoặc nhãn Pillar để hiển thị
+const getCategoryLabel = (cat: string, pil?: string) => {
+  if (pil) {
+    const pillarLabels: Record<string, string> = {
+      'nhip_tho': 'Nhịp Thở Đồng Điệu',
+      'lang_kinh': 'Lăng Kính Của Pet',
+      'hop_ky_uc': 'Hộp Ký Ức Bình Yên'
+    };
+    return pillarLabels[pil] || cat;
+  }
   const labels: Record<string, string> = {
     'sach': 'Sách Chữa Lành',
     'phu_kien': 'Không Gian Chữa Lành',
@@ -217,10 +252,13 @@ const getCategoryLabel = (cat: string) => {
 ---
 
 <Layout title={`${title} | Nhật Ký Lối Sống DOCA`} description={description}>
-  <!-- Truyền biến Supabase toàn cục cho client-side JS trong ProductCard & PolaroidSheet -->
-  <script is:inline define:vars={{ supabaseUrl, supabaseKey }}>
+  <!-- Truyền biến Supabase, Product Database và thông tin ảnh bìa toàn cục cho client-side JS -->
+  <script is:inline define:vars={{ supabaseUrl, supabaseKey, allProducts, coverImage, title }}>
     window.PUBLIC_SUPABASE_URL = supabaseUrl;
     window.PUBLIC_SUPABASE_ANON_KEY = supabaseKey;
+    window.PRODUCTS_DB = allProducts;
+    window.BLOG_COVER_IMAGE = coverImage;
+    window.BLOG_TITLE = title;
   </script>
 
   <main class="blog-detail-view">
@@ -229,20 +267,35 @@ const getCategoryLabel = (cat: string) => {
         <a href="/" class="back-link"><i class="ph-light ph-arrow-left"></i> Trở về trang chủ</a>
         
         <div class="blog-meta-top">
-          <span class="category-badge">{getCategoryLabel(category)}</span>
+          <span class="category-badge">{getCategoryLabel(category, pillar)}</span>
           <span class="publish-date">{publishDate}</span>
         </div>
         
         <h1 class="blog-title">{title}</h1>
         <p class="blog-desc">{description}</p>
+
+        <!-- Chú mèo kể chuyện (Curator Speech Bubble) -->
+        <div class="blog-curator-speech-section">
+          <div class="curator-profile">
+            <div class="curator-speech-avatar-wrapper">
+              <img src={curatorAvatar} alt={curatorName} class="curator-speech-avatar" />
+              <div class="curator-paw-badge"><i class="ph-fill ph-paw"></i></div>
+            </div>
+            <div class="curator-speech-info">
+              <span class="curator-speech-title">{curatorName} khuyên đọc 🐾</span>
+            </div>
+          </div>
+          <div class="curator-bubble">
+            <p class="curator-bubble-text">"{curatorQuote}"</p>
+          </div>
+        </div>
+
+        <!-- Namiya Quick Jump Badge trực tiếp dưới Speech Bubble trong Header -->
+        <div class="namiya-quick-jump header-embedded" id="namiya-quick-jump-trigger" title="Nhấn để gửi gắm tâm sự cho tụi con">
+          <i class="ph-light ph-paper-plane"></i> <span>Gửi tâm sự ẩn danh cho tụi con nhé ✉</span>
+        </div>
       </div>
     </header>
-
-    <div class="blog-cover-container">
-      <div class="container">
-        <img src={coverImage} alt={title} class="blog-cover" />
-      </div>
-    </div>
 
     <article class="blog-body">
       <div class="container">
@@ -287,6 +340,63 @@ const getCategoryLabel = (cat: string) => {
 
   <!-- Polaroid Bottom Sheet mở toàn cục -->
   <PolaroidSheet />
+
+  <!-- Script liên kết sản phẩm thông minh và Namiya Quick Jump -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Quét và chèn Inline Curation Cards
+      // 2. Namiya Quick Jump Scroll
+      const quickJumpBtn = document.getElementById('namiya-quick-jump-trigger');
+      quickJumpBtn?.addEventListener('click', () => {
+        const mailboxSection = document.querySelector('.mailbox-section');
+        if (mailboxSection) {
+          mailboxSection.scrollIntoView({ behavior: 'smooth' });
+          
+          // Trượt mở hòm thư tự động
+          setTimeout(() => {
+            const formContainer = document.getElementById('namiya-form-container');
+            const collapsedState = document.getElementById('namiya-collapsed-state');
+            if (formContainer && collapsedState) {
+              collapsedState.classList.add('hidden');
+              formContainer.classList.add('open');
+            }
+          }, 800);
+        }
+      });
+
+      // 3. Tự động chèn ảnh bìa (coverImage) xen kẽ vào giữa thân bài viết (sau đoạn văn thứ 2)
+      const articleBody = document.querySelector('.markdown-content');
+      const blogCoverUrl = (window as any).BLOG_COVER_IMAGE;
+      const blogTitle = (window as any).BLOG_TITLE;
+
+      if (articleBody && blogCoverUrl) {
+        const paragraphs = articleBody.querySelectorAll('p');
+        if (paragraphs.length >= 2) {
+          // Tạo thẻ figure bọc ảnh bìa
+          const figure = document.createElement('figure');
+          figure.className = 'blog-body-inline-image-wrapper';
+          
+          const img = document.createElement('img');
+          img.src = blogCoverUrl;
+          img.alt = blogTitle || 'Ảnh minh họa';
+          img.className = 'blog-body-inline-image';
+          
+          const caption = document.createElement('figcaption');
+          caption.className = 'blog-body-inline-caption';
+          caption.innerText = blogTitle || '';
+          
+          figure.appendChild(img);
+          if (blogTitle) {
+            figure.appendChild(caption);
+          }
+          
+          // Chèn vào sau đoạn văn thứ 2 (index 1)
+          const insertIndex = Math.min(1, paragraphs.length - 1);
+          paragraphs[insertIndex].after(figure);
+        }
+      }
+    });
+  </script>
 </Layout>
 
 <style>
@@ -359,6 +469,7 @@ const getCategoryLabel = (cat: string) => {
   }
 
   .blog-body {
+    margin-top: 1rem;
     margin-bottom: 3rem;
   }
 
@@ -437,18 +548,381 @@ const getCategoryLabel = (cat: string) => {
 
   .products-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr); /* Mobile: 2 cột */
+    gap: 0.75rem;
   }
 
-  @media (min-width: 480px) {
+  @media (min-width: 768px) {
     .products-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
+      grid-template-columns: repeat(3, 1fr); /* Tablet: 3 cột */
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .products-grid {
+      grid-template-columns: repeat(5, 1fr); /* Desktop: 5 cột */
+      gap: 1.25rem;
     }
   }
 
   .mailbox-section {
     margin-top: 2rem;
+  }
+
+  /* Chú mèo kể chuyện (Curator Speech Bubble) */
+  .blog-curator-speech-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(139, 94, 60, 0.03);
+    text-align: left;
+  }
+
+  @media (min-width: 768px) {
+    .blog-curator-speech-section {
+      flex-direction: row;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.25rem 1.75rem;
+    }
+  }
+
+  .curator-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .curator-speech-avatar-wrapper {
+    position: relative;
+    width: 54px;
+    height: 54px;
+  }
+
+  .curator-speech-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--cozy-wood-sugi);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+
+  .curator-paw-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background-color: #76C123; /* Neon Green */
+    color: #FFFFFF;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    border: 1.5px solid #FFFFFF;
+  }
+
+  .curator-speech-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .curator-speech-title {
+    font-size: 0.85rem;
+    font-weight: 750;
+    color: var(--cozy-wood-kogecha);
+  }
+
+  .curator-bubble {
+    position: relative;
+    background-color: #FAF6F0; /* Kem gỗ ngà ấm áp */
+    border: 1px solid var(--cozy-border-light);
+    padding: 0.85rem 1.1rem;
+    border-radius: 16px;
+    flex-grow: 1;
+  }
+
+  .curator-bubble-text {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--cozy-text-obsidian) !important;
+    margin: 0 !important;
+    font-style: italic;
+  }
+
+  /* Namiya Quick Jump Badge */
+  .relative {
+    position: relative;
+  }
+
+  .namiya-quick-jump {
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 10;
+  }
+
+  .namiya-quick-jump.header-embedded {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin: 1.5rem auto 2.5rem;
+    width: fit-content;
+  }
+
+  .namiya-quick-jump:hover {
+    background-color: #76C123; /* Neon Green */
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(118, 193, 35, 0.3);
+  }
+
+  /* Inline Polaroid Product Card (Ẩn đi theo yêu cầu) */
+  .inline-product-card {
+    display: none !important;
+  }
+
+  .cozy-inline-polaroid {
+    background-color: #FFFFFF;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 16px;
+    padding: 10px;
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(139, 94, 60, 0.04);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    text-align: left;
+  }
+
+  .cozy-inline-polaroid:hover {
+    transform: translateY(-4px) rotate(-1deg);
+    box-shadow: 0 8px 24px rgba(139, 94, 60, 0.08);
+    border-color: #76C123;
+  }
+
+  .inline-polaroid-img-wrapper {
+    width: 90px;
+    height: 90px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--cozy-bg-oatmeal);
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.03);
+  }
+
+  .inline-polaroid-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .inline-savings-tag {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background-color: #EA4335;
+    color: #FFFFFF;
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  .inline-polaroid-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    padding: 2px 0;
+  }
+
+  .inline-polaroid-name {
+    font-size: 0.88rem;
+    font-weight: 750;
+    color: var(--cozy-text-obsidian);
+    line-height: 1.35;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .inline-polaroid-pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .price-wholesale {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--cozy-text-obsidian);
+  }
+
+  .price-original-strike {
+    font-size: 0.72rem;
+    color: #8E8E93;
+    text-decoration: line-through;
+  }
+
+  .inline-polaroid-action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .inline-buy-btn {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    background-color: var(--cozy-text-obsidian);
+    padding: 3px 10px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .cozy-inline-polaroid:hover .inline-buy-btn {
+    background-color: #76C123;
+  }
+  /* Mobile responsive adjustments */
+  @media (max-width: 767px) {
+    .blog-curator-speech-section {
+      padding: 0.85rem;
+      border-radius: 14px;
+      gap: 0.5rem;
+    }
+    
+    .curator-speech-avatar-wrapper {
+      width: 44px;
+      height: 44px;
+    }
+
+    .curator-bubble {
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+    }
+
+    .curator-bubble-text {
+      font-size: 0.84rem;
+    }
+
+    .namiya-quick-jump {
+      position: relative;
+      bottom: auto;
+      right: auto;
+      margin: 1rem auto 0;
+      width: fit-content;
+      font-size: 0.72rem;
+      padding: 0.4rem 0.85rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .inline-product-card {
+      margin: 1.5rem 0;
+    }
+
+    .cozy-inline-polaroid {
+      max-width: 100%;
+      padding: 8px;
+      gap: 0.6rem;
+    }
+
+    .markdown-content :global(.inline-polaroid-img-wrapper) {
+      width: 76px !important;
+      height: 76px !important;
+      flex-shrink: 0 !important;
+    }
+
+    .markdown-content :global(.inline-polaroid-img) {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    .inline-polaroid-name {
+      font-size: 0.82rem;
+    }
+
+    .price-wholesale {
+      font-size: 0.82rem;
+    }
+
+    .inline-buy-btn {
+      padding: 2px 8px;
+      font-size: 0.68rem;
+    }
+  }
+
+  /* Khống chế ảnh nhúng Polaroid trên desktop để không bị ảnh hưởng bởi CSS markdown */
+  .markdown-content :global(.inline-polaroid-img-wrapper) {
+    width: 90px !important;
+    height: 90px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .markdown-content :global(.inline-polaroid-img) {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* CSS cho ảnh bìa inline được tự động chèn vào thân bài viết */
+  .blog-body-inline-image-wrapper {
+    margin: 2.5rem 0;
+    text-align: center;
+    width: 100%;
+  }
+
+  .blog-body-inline-image {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--cozy-border-light);
+    box-shadow: var(--cozy-shadow-default);
+  }
+
+  @media (max-width: 767px) {
+    .blog-body-inline-image-wrapper {
+      margin: 1.5rem 0;
+    }
+    .blog-body-inline-image {
+      max-height: 240px; /* Thu nhỏ chiều cao ảnh bìa trên di động cho cân đối */
+    }
+  }
+
+  .blog-body-inline-caption {
+    font-size: 0.88rem;
+    color: #6E6E73;
+    margin-top: 0.75rem;
+    font-style: italic;
+    text-align: center;
   }
 </style>

@@ -57,15 +57,20 @@ const savingsPercent = wholesalePrice ? Math.round(((price - wholesalePrice) / p
   </div>
   
   <div class="product-meta">
-    <h4 class="product-title">{name}</h4>
-    <span class="platform-badge" data-platform={platform.toLowerCase()}>
-      {platform === 'Shopee' ? (
-        <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" style="display: inline-block; vertical-align: -0.5px; margin-right: 3px;">
-          <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3a1 1 0 1 0-2 0c0 2.76 2.24 5 5 5s5-2.24 5-5a1 1 0 1 0-2 0c0 1.66-1.34 3-3 3z"/>
-        </svg>
-      ) : null}
-      {platform}
-    </span>
+    <div class="product-meta-left">
+      <h4 class="product-title">{name}</h4>
+      <span class="platform-badge" data-platform={platform.toLowerCase()}>
+        {platform === 'Shopee' ? (
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor" style="display: inline-block; vertical-align: -0.5px; margin-right: 3px;">
+            <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3a1 1 0 1 0-2 0c0 2.76 2.24 5 5 5s5-2.24 5-5a1 1 0 1 0-2 0c0 1.66-1.34 3-3 3z"/>
+          </svg>
+        ) : null}
+        {platform}
+      </span>
+    </div>
+    <button class="buy-now-btn" aria-label="Mua sản phẩm trên Shopee" data-url={affiliateUrl}>
+      <i class="ph-light ph-shopping-cart"></i>
+    </button>
   </div>
 </div>
 
@@ -82,6 +87,7 @@ const savingsPercent = wholesalePrice ? Math.round(((price - wholesalePrice) / p
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
     gap: 0.65rem;
     height: 100%;
+    position: relative;
   }
 
   .product-card-v2:hover {
@@ -98,6 +104,7 @@ const savingsPercent = wholesalePrice ? Math.round(((price - wholesalePrice) / p
     overflow: hidden;
     position: relative;
     border: 1px solid rgba(0, 0, 0, 0.02);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
   /* Hiệu ứng Skeleton Loading cho ảnh sản phẩm */
@@ -132,8 +139,8 @@ const savingsPercent = wholesalePrice ? Math.round(((price - wholesalePrice) / p
     opacity: 0.35;
   }
 
-  .product-card-v2:hover .product-image {
-    transform: scale(1.05) rotate(1.2deg);
+  .product-card-v2:hover .product-image-container {
+    transform: rotate(-3deg) scale(1.02);
   }
 
   @keyframes skeleton-pulse {
@@ -150,10 +157,21 @@ const savingsPercent = wholesalePrice ? Math.round(((price - wholesalePrice) / p
 
   .product-meta {
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    gap: 0.35rem;
+    padding: 0.15rem 0.25rem 0.35rem 0.25rem;
+  }
+
+  .product-meta-left {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.35rem;
-    padding: 0.15rem 0.25rem 0.35rem 0.25rem;
+    flex: 1;
+    min-width: 0; /* Cho phép text gãy hàng đúng */
   }
 
   .product-title {
@@ -167,6 +185,36 @@ const savingsPercent = wholesalePrice ? Math.round(((price - wholesalePrice) / p
     -webkit-box-orient: vertical;
     overflow: hidden;
     height: 2.6em; /* Exactly 2 lines height */
+    width: 100%;
+  }
+
+  .product-card-v2:hover .product-title {
+    text-decoration: underline;
+    text-decoration-color: #76C123; /* Neon Green gạch chân */
+    text-decoration-thickness: 2px;
+  }
+
+  .buy-now-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .buy-now-btn:hover {
+    background-color: #76C123; /* Neon Green `#76C123` */
+    transform: scale(1.1);
   }
 
   .platform-badge {
@@ -205,6 +253,19 @@ const savingsPercent = wholesalePrice ? Math.round(((price - wholesalePrice) / p
   document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+      
+      // Nếu click vào nút giỏ hàng mua nhanh
+      const buyBtn = target.closest('.buy-now-btn');
+      if (buyBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        const url = buyBtn.getAttribute('data-url');
+        if (url) {
+          window.open(url, '_blank');
+        }
+        return;
+      }
+      
       const card = target.closest('.product-card-v2');
       if (!card) return;
       

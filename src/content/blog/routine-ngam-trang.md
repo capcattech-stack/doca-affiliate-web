@@ -2,10 +2,13 @@
 title: "Trăng đêm nay thật đẹp: Routine 15 phút chải lông chánh niệm xoa dịu ngày dài"
 description: "Gợi ý routine buổi tối chải lông cho mèo kết hợp nghe nhạc lofi giúp giải tỏa cô đơn đô thị cho người trẻ."
 publishDate: "2026-06-24"
-coverImage: "/images/blog/routine-ngam-trang.webp"
+coverImage: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=800&q=80"
 category: "vat_pham"
 tags: ["Lối sống", "Chánh niệm", "Neko Atsume"]
 relatedProducts: ["luoc-massage-tao-bot"]
+pillar: nhip_tho
+curatorName: Latte
+curatorQuote: "Trăng đêm nay đẹp lắm cô/chú ơi! Chải lông và massage thư thái cùng con trước khi ngủ nào!"
 ---
 
 Trở về căn phòng trọ nhỏ vào lúc 8h tối sau một ngày chen chúc ngoài dòng xe đô thị ngột ngạt, thứ đầu tiên chào đón bạn là gì? Một khoảng không lặng lẽ, hay tiếng kêu meo meo nũng nịu dưới chân?
@@ -35,3 +38,5 @@ Không những thế, bộ nhớ RAG của Boss AI sẽ đọc và ghi nhớ nh�
 ## 🧼 Vật phẩm chải lông chánh niệm cho Boss
 
 Để buổi tối chải chuốt trở thành trải nghiệm spa thư thái nhất cho thú cưng, bạn có thể tham khảo sản phẩm lược massage tạo bọt dưới đây mà Boss khuyên dùng. 
+
+<div class="inline-product-card" data-slug="luoc-massage-tao-bot"></div>

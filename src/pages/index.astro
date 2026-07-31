@@ -197,26 +197,37 @@ if (products.length === 0) {
   products = STATIC_PRODUCTS_FALLBACK;
 }
 
-// 3. Chọn ra đúng 5 sản phẩm nổi bật có ảnh đầy đủ để trưng bày ở trang chủ
+// 3. Chọn ra đúng 8 sản phẩm nổi bật có ảnh đầy đủ để trưng bày ở trang chủ
 const FEATURED_SLUGS = [
   'khan-tam-sieu-hut-nuoc-cho-meo-mastercare',
   'hat-cho-meo-mr-vet-1kg',
   'pate-meo-moi-lua-tuoi-catchy-400g',
   'pate-sua-de-bite-of-wild-bich-70g-cho-meo-tu-2-thang-tuoi',
-  'hat-cho-meo-con-bite-of-wild-1kg'
+  'hat-cho-meo-con-bite-of-wild-1kg',
+  'hat-dinh-duong-huu-co',
+  'luoc-massage-tao-bot',
+  'sach-tam-ly-meo'
 ];
 
 let featuredProducts: any[] = FEATURED_SLUGS.map(slug => {
   return products.find(p => p.slug === slug);
 }).filter(Boolean);
 
-if (featuredProducts.length < 5) {
+if (featuredProducts.length < 8) {
   const remaining = products.filter(p => !featuredProducts.some(fp => fp.slug === p.slug));
-  featuredProducts = [...featuredProducts, ...remaining].slice(0, 5);
+  featuredProducts = [...featuredProducts, ...remaining].slice(0, 8);
 }
 
-// Hàm format danh mục sản phẩm của Supabase sang nhãn hiển thị nếu cần
-const getCategoryLabel = (cat: string) => {
+// Hàm format danh mục sản phẩm của Supabase sang nhãn hiển thị hoặc nhãn Pillar nếu có
+const getCategoryLabel = (cat: string, pil?: string) => {
+  if (pil) {
+    const pillarLabels: Record<string, string> = {
+      'nhip_tho': 'Nhịp Thở Đồng Diệu',
+      'lang_kinh': 'Lăng Kính Của Pet',
+      'hop_ky_uc': 'Hộp Ký Ức Bình Yên'
+    };
+    return pillarLabels[pil] || cat;
+  }
   const labels: Record<string, string> = {
     'thuc_an': 'Thức Ăn Mèo',
     'vat_pham': 'Vật Phẩm Chăm Sóc',
@@ -238,19 +249,26 @@ const getCategoryLabel = (cat: string) => {
     <!-- Navbar -->
     <nav class="navbar">
       <div class="container nav-container">
+        <!-- Hamburger toggle -->
+        <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
         <a href="/" class="logo-wrapper">
           <img src="/images/brand/logo-light.png" alt="doca.pet Logo" class="brand-logo-img" />
         </a>
+
         <div class="nav-right">
           <!-- Desktop navigation links -->
           <div class="nav-links-desktop">
             <a href="/product" class="nav-link-text">Sản phẩm</a>
+            <a href="/music" class="nav-link-text">Music</a>
             <a href="/family" class="nav-link-text">Gia đình</a>
+            <a href="/blog" class="nav-link-text">Blog</a>
             <a href="/about" class="nav-link-text">About Us</a>
-            <a href="/#blog-section" class="nav-link-text">Blog</a>
           </div>
-
-          <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
 
           <!-- Mini Player Capsule (Scrolled header control) -->
           <div id="mini-player-pill" class="mini-player-pill" title="Nhấp để phát/tạm dừng nhạc">
@@ -267,21 +285,17 @@ const getCategoryLabel = (cat: string) => {
             </div>
           </div>
 
-          <!-- Hamburger toggle -->
-          <button id="menu-toggle-btn" class="menu-toggle" aria-label="Menu" aria-expanded="false">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+          <div id="nav-auth-container-desktop" class="nav-auth-container"></div>
         </div>
       </div>
       <!-- Mobile navigation menu -->
       <div id="mobile-menu" class="mobile-menu">
         <div class="container mobile-menu-container">
           <a href="/product" class="mobile-menu-link"><i class="ph-light ph-circles-four"></i> Sản phẩm</a>
+          <a href="/music" class="mobile-menu-link"><i class="ph-light ph-music-notes"></i> Music</a>
           <a href="/family" class="mobile-menu-link"><i class="ph-light ph-users"></i> Gia đình</a>
+          <a href="/blog" class="mobile-menu-link"><i class="ph-light ph-book-open"></i> Blog</a>
           <a href="/about" class="mobile-menu-link"><i class="ph-light ph-info"></i> About Us</a>
-          <a href="/#blog-section" class="mobile-menu-link"><i class="ph-light ph-book-open"></i> Blog</a>
           <div id="nav-auth-container-mobile" class="nav-auth-container-mobile"></div>
         </div>
       </div>
@@ -396,68 +410,85 @@ const getCategoryLabel = (cat: string) => {
       </div>
     </header>
 
-    <!-- Curated Shelf (Kệ sản phẩm Affiliate) -->
-    <section id="shelf-section" class="shelf-section">
-      <!-- Kiosk Banner inside shelf section, above title -->
-      <div class="kiosk-banner-container-wrapper">
-        <div class="container">
-          <div class="kiosk-banner-container">
-            <a href="/profile" class="kiosk-banner-link" id="kiosk-banner-trigger">
-              <picture>
-                <source media="(max-width: 768px)" srcset="/images/kiosk-banner-mobile.png" />
-                <img src="/images/kiosk-banner-desktop.png" alt="Mở Kiot Doca cùng Tina" class="kiosk-banner-img" />
-              </picture>
-            </a>
+    <!-- Blog Posts (Nhật ký lối sống) -->
+    <section id="blog-section" class="blog-section">
+      <div class="container">
+        <div class="blog-header">
+          <div class="blog-header-illustration-wrapper">
+            <img src="/images/clay-notebook.png" alt="Nhật ký lối sống" class="blog-header-illustration" />
+          </div>
+          <div class="blog-header-info">
+            <h3 class="title-large blog-title">Nhật Ký Lối Sống</h3>
+            <span class="blog-subtitle">Nơi gom góp những mẩu chuyện nhỏ vỗ về tâm hồn cô/chú & các bạn đồng Meo 🐾</span>
           </div>
         </div>
-      </div>
 
-      <div class="container">
-        <div class="shelf-header">
-          <div class="shelf-header-info">
-            <h3 class="title-large shelf-title">Kệ quà của mẹ</h3>
-            <span class="shelf-subtitle">Thức quả lành tính mẹ Lin chọn cho tụi con.</span>
-          </div>
+        <div class="blog-list">
+          {sortedPosts.slice(0, 6).map((post) => {
+            // Xác định chú mèo tuyển chọn và avatar trực tiếp từ frontmatter bài viết
+            const curatorName = post.data.curatorName || "Tina";
+            let curatorAvatar = "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=80&h=80&fit=crop&q=80"; // Mèo xám Tina
+
+            if (curatorName === "Latte") {
+              curatorAvatar = "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=80&h=80&fit=crop&q=80"; // Mèo trắng Latte
+            } else if (curatorName === "Muối") {
+              curatorAvatar = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=80&h=80&fit=crop&q=80"; // Mèo trắng mắt vàng Muối
+            }
+
+            // Tính toán thời gian đọc dựa trên độ dài nội dung bài viết (khoảng 500 ký tự tiếng Việt / phút)
+            const charCount = post.body ? post.body.length : 800;
+            const readMinutes = Math.max(2, Math.round(charCount / 500));
+            const readingTime = `${readMinutes} phút`;
+
+            // Tính toán chỉ số xoa dịu động nhất quán dựa trên mã băm tiêu đề bài viết
+            const sumChars = post.data.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const soothePercent = 88 + (sumChars % 11); // Dao động từ 88% đến 98%
+            const healingIndex = `${soothePercent}%`;
+
+            return (
+              <article class="cozy-card blog-item">
+                <div class="blog-item-header">
+                  <span class="blog-category">{getCategoryLabel(post.data.category, post.data.pillar)}</span>
+                </div>
+                
+                <h3 class="blog-item-title">
+                  <a href={`/blog/${post.slug}`} class="blog-link">
+                    {post.data.title}
+                  </a>
+                </h3>
+
+                <div class="blog-curator-badge" title={`${curatorName} đề xuất bài viết này`}>
+                  <img src={curatorAvatar} alt={curatorName} class="blog-curator-avatar" />
+                  <span class="blog-curator-name">{curatorName} tuyển chọn 🐾</span>
+                </div>
+                
+                <p class="blog-item-desc">{post.data.description}</p>
+                
+                <div class="blog-item-metrics">
+                  <span class="metric-tag"><i class="ph-light ph-clock"></i> {readingTime} đọc</span>
+                  <span class="metric-tag"><i class="ph-light ph-sparkles"></i> Xoa dịu: {healingIndex}</span>
+                </div>
+
+                <div class="blog-meta">
+                  <span class="blog-date">{post.data.publishDate}</span>
+                  <a href={`/blog/${post.slug}`} class="cozy-dotted-link read-more">Đọc bài viết <i class="ph-light ph-arrow-right"></i></a>
+                </div>
+              </article>
+            );
+          })}
         </div>
-      </div>
 
-      <!-- Trưng bày sản phẩm cánh quạt (Fanned Products Deck) - Placed outside container for edge-to-edge flow -->
-      <div class="fanned-products-container">
-        <div class="fanned-products-deck" id="fanned-products-deck">
-          {featuredProducts.map((product, index) => (
-            <div class={`fanned-card-wrapper card-index-${index}`}>
-              <ProductCard 
-                id={product.id}
-                slug={product.slug}
-                name={product.name}
-                category={getCategoryLabel(product.category)}
-                categoryRaw={product.category}
-                price={product.price}
-                wholesalePrice={product.wholesale_price}
-                minGroupSize={product.min_group_size}
-                affiliateUrl={product.affiliate_url}
-                imageUrl={product.image_url}
-                quote={product.quote}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div class="container">
-        <!-- Đường dẫn xem tất cả sản phẩm -->
-        <div class="shelf-view-all-wrapper">
-          <a href="/product" class="shelf-view-all-link">
-            ... ghé tiệm xem tất cả quà lành 🐾 &rarr;
+        <div class="blog-view-more-container">
+          <a href="/blog" class="blog-view-more-btn">
+            Xem thêm nhật ký <i class="ph-light ph-book-open"></i>
           </a>
-          <p class="shelf-support-note">
-            Mỗi hộp quà nhỏ gửi trao là một chút tình thương vun vén cho tụi con,<br />
-            cô/chú nếu thấy ưng ý thì ủng hộ nhà con nhé. 🐾
-          </p>
         </div>
+
+        <p class="blog-desc-bottom">
+          Những mẩu chuyện nhỏ giúp xoa dịu tâm hồn, thấu hiểu chú thú cưng và cùng cô/chú đắp xây một cuộc sống thật bình yên. 🐾
+        </p>
       </div>
     </section>
-
 
     <!-- Namiya Mailbox Widget -->
     <section class="mailbox-section">
@@ -485,50 +516,93 @@ const getCategoryLabel = (cat: string) => {
       </div>
     </section>
 
-    <!-- Blog Posts (Nhật ký lối sống) -->
-    <section id="blog-section" class="blog-section">
+    <!-- Kệ quà của mẹ Section -->
+    <section id="curation-section" class="curation-section">
       <div class="container">
-        <div class="blog-header">
-          <div class="blog-header-illustration-wrapper">
-            <img src="/images/clay-notebook.png" alt="Nhật ký lối sống" class="blog-header-illustration" />
-          </div>
-          <div class="blog-header-info">
-            <h3 class="title-large blog-title">Nhật Ký Lối Sống</h3>
-            <span class="blog-subtitle">Nơi gom góp những mẩu chuyện nhỏ vỗ về tâm hồn cô/chú & các bạn đồng Meo 🐾</span>
-          </div>
+        <div class="curation-header text-center">
+          <h3 class="title-large curation-title">Kệ Quà Của Mẹ <i class="ph-duotone ph-gift"></i></h3>
+          <p class="curation-subtitle">Những món quà nhỏ đong đầy yêu thương mẹ dành cho các Boss cưng 🐾</p>
         </div>
         
-        <div class="blog-list">
-          {sortedPosts.map(post => (
-            <article class="cozy-card blog-item">
-              <span class="blog-category">{getCategoryLabel(post.data.category)}</span>
-              <h3 class="blog-item-title">
-                <a href={`/blog/${post.slug}`} class="blog-link">
-                  {post.data.title}
-                </a>
-              </h3>
-              <p class="blog-item-desc">{post.data.description}</p>
-              <div class="blog-meta">
-                <span class="blog-date">{post.data.publishDate}</span>
-                <a href={`/blog/${post.slug}`} class="cozy-dotted-link read-more">Đọc bài viết <i class="ph-light ph-arrow-right"></i></a>
-              </div>
-            </article>
+        <!-- Lưới sản phẩm -->
+        <div class="products-grid" id="products-grid">
+          {products.slice(0, 8).map(product => (
+            <ProductCard
+              id={product.id}
+              slug={product.slug}
+              name={product.name}
+              category={getCategoryLabel(product.category)}
+              categoryRaw={product.category}
+              price={product.price}
+              wholesalePrice={product.wholesale_price}
+              minGroupSize={product.min_group_size}
+              affiliateUrl={product.affiliate_url}
+              imageUrl={product.image_url}
+              quote={product.quote}
+            />
           ))}
         </div>
-        <p class="blog-desc-bottom">
-          Những mẩu chuyện nhỏ giúp xoa dịu tâm hồn, thấu hiểu chú thú cưng và cùng cô/chú đắp xây một cuộc sống thật bình yên. 🐾
-        </p>
+
+        <div class="blog-view-more-container" style="margin-top: 2.5rem; margin-bottom: 0;">
+          <a href="/product" class="blog-view-more-btn">
+            Vào Kệ Quà Của Mẹ <i class="ph-light ph-gift"></i>
+          </a>
+        </div>
       </div>
     </section>
-  </main>
 
-  <!-- Polaroid Bottom Sheet mở toàn cục -->
-  <PolaroidSheet />
+    <!-- Kiosk Banner inside main flow -->
+    <div class="kiosk-banner-container-wrapper">
+      <div class="container">
+        <div class="kiosk-banner-container">
+          <a href="/profile" class="kiosk-banner-link" id="kiosk-banner-trigger">
+            <picture>
+              <source media="(max-width: 768px)" srcset="/images/kiosk-banner-mobile.png" />
+              <img src="/images/kiosk-banner-desktop.png" alt="Mở Kiot Doca cùng Tina" class="kiosk-banner-img" />
+            </picture>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Doca FM Live Sync Info Bottom Sheet -->
+    <div id="fm-info-sheet" class="cozy-bottom-sheet-overlay">
+      <div class="cozy-bottom-sheet">
+        <div class="cozy-sheet-handle"></div>
+        <div class="cozy-sheet-content">
+          <div class="cozy-sheet-illustration">
+            <div class="cozy-vinyl-mini-art">
+              <div class="disc-art-center"></div>
+              <i class="ph-light ph-radio cozy-sheet-icon"></i>
+            </div>
+            <div class="cozy-sheet-ripples">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <h4 class="cozy-sheet-title">Doca Live FM 📻</h4>
+          <p class="cozy-sheet-desc">
+            Đây là tính năng phát nhạc đồng bộ trong thời gian thực. Giai điệu này đang được phát chung cho tất cả các cô chú và bạn mèo cùng nghe lúc này. Hãy cùng nhau tận hưởng phút giây thư thái và kết nối này nhé! 🐾
+          </p>
+          <div class="cozy-sheet-actions">
+            <button id="fm-sheet-close" class="cozy-btn cozy-btn-secondary">Tiếp tục nghe Live FM</button>
+            <a href="/music" class="cozy-btn cozy-btn-primary">Khám phá Góc Nhạc Riêng <i class="ph-light ph-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </Layout>
 
 <style>
   .home-view {
-    padding-bottom: 5rem;
+    padding-bottom: 3rem;
+  }
+  @media (max-width: 768px) {
+    .home-view {
+      padding-bottom: 2rem;
+    }
   }
 
   /* Kiosk Banner */
@@ -752,7 +826,7 @@ const getCategoryLabel = (cat: string) => {
   }
 
   .menu-toggle {
-    display: flex;
+    display: none; /* Mặc định ẩn trên Desktop */
     flex-direction: column;
     justify-content: space-between;
     width: 22px;
@@ -799,6 +873,30 @@ const getCategoryLabel = (cat: string) => {
     }
     .menu-toggle {
       display: none; /* Hidden on desktop */
+    }
+  }
+
+  /* Mobile symmetric Grid navbar layout */
+  @media (max-width: 767px) {
+    .nav-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      width: 100%;
+    }
+    .menu-toggle {
+      display: flex; /* Show on mobile */
+      justify-self: start;
+    }
+    .logo-wrapper {
+      justify-self: center;
+      margin: 0;
+    }
+    .nav-right {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
   }
 
@@ -1317,18 +1415,10 @@ const getCategoryLabel = (cat: string) => {
 
   /* Section Styles */
   .hero-section,
-  .shelf-section,
   .mailbox-section,
   .blog-section {
     scroll-snap-align: start;
     scroll-margin-top: 4.5rem; /* Match sticky navbar height to prevent title overlap */
-  }
-
-  .shelf-section {
-    background-color: var(--cozy-bg-beige);
-    border-top: 1px solid var(--cozy-border-light);
-    border-bottom: 1px solid var(--cozy-border-light);
-    padding: 1.5rem 0 2.5rem 0; /* Reduced top padding to pull title higher */
   }
 
   .blog-section {
@@ -1450,346 +1540,227 @@ const getCategoryLabel = (cat: string) => {
     letter-spacing: 1px;
   }
 
-  .shelf-header {
+  /* Kệ quà của mẹ - Mô-đun Neo Góc Màn Hình (Docked Bottom Shelf) */
+  .docked-shelf {
+    position: relative;
+    z-index: 999;
+  }
+
+  .docked-shelf-expanded {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    right: auto;
+    width: 300px;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    box-shadow: 0 8px 30px rgba(21, 23, 15, 0.12);
+    padding: 0.75rem 1rem;
+    z-index: 999;
+    border-radius: 18px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: bottom left;
+    pointer-events: auto;
+    
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     gap: 0.75rem;
-    position: relative;
-    z-index: 1;
-    border-bottom: none; /* Bỏ gạch đứt ngăn cách */
-    padding-bottom: 0;
-    margin-bottom: 0.5rem;
-    text-align: center;
   }
 
-  .shelf-header-illustration-wrapper {
-    width: 80px;
-    height: 80px;
-    background-color: #FFFFFF;
-    border: 2px solid var(--cozy-wood-sugi);
-    border-radius: 12px;
-    padding: 4px;
+  /* Blog List & Layout */
+  .blog-list {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(139, 94, 60, 0.06);
-    flex-shrink: 0;
-    transform: rotate(-3deg); /* Cute organic tilt matching Mailbox header */
-  }
-
-  .shelf-header-illustration {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-  }
-
-  .shelf-header-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    text-align: center;
-  }
-
-  .shelf-title {
-    font-size: 1.45rem;
-    font-weight: 750;
-    color: var(--cozy-wood-kogecha); /* Warm dark wood */
-    margin: 0;
-  }
-
-  .shelf-subtitle {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--cozy-green-matcha-forest);
-    letter-spacing: 0.2px;
-  }
-
-  .shelf-desc-bottom {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.88rem;
-    color: #555558;
-    text-align: center; /* Center-aligned closing footnote */
-    line-height: 1.55;
-    margin-top: 2rem; /* Spacing below pagination */
-    border-top: 1px dashed var(--cozy-border-light); /* Sand divider line */
-    padding-top: 1.25rem;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .blog-header {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    position: relative;
-    z-index: 1;
-    border-bottom: 1px dashed var(--cozy-border-light);
-    padding-bottom: 1.25rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .blog-header-illustration-wrapper {
-    width: 80px;
-    height: 80px;
-    background-color: #FFFFFF;
-    border: 2px solid var(--cozy-wood-sugi);
-    border-radius: 12px;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(139, 94, 60, 0.06);
-    flex-shrink: 0;
-    transform: rotate(3deg); /* Tilting opposite way from shelf header for rhythm */
-  }
-
-  .blog-header-illustration {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-  }
-
-  .blog-header-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .blog-title {
-    font-size: 1.45rem;
-    font-weight: 750;
-    color: var(--cozy-wood-kogecha);
-    margin: 0;
-  }
-
-  .blog-subtitle {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--cozy-green-matcha-forest);
-    letter-spacing: 0.2px;
-  }
-
-  .blog-desc-bottom {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.88rem;
-    color: #555558;
-    text-align: center; /* Center-aligned footnote */
-    line-height: 1.55;
-    margin-top: 2.25rem;
-    border-top: 1px dashed var(--cozy-border-light);
-    padding-top: 1.25rem;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .shelf-title-row {
-    display: flex;
-    justify-content: flex-start;
-    align-items: baseline;
-    gap: 0.5rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .section-title-cozy {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: var(--cozy-text-obsidian);
-  }
-
-  .tuyển-chọn {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.8rem;
-    font-style: italic;
-    color: #8E8E93;
-    font-weight: 400;
-  }
-
-  .section-desc-cozy {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.88rem; /* Slightly larger and more readable */
-    color: #555558; /* Softer obsidian tint */
-    text-align: left;
-    line-height: 1.55;
-  }
-
-  /* Trưng bày sản phẩm cánh quạt (Fanned Products Showcase) */
-  .fanned-products-container {
-    width: 100%;
-    overflow: visible;
-    padding: 0.75rem 0 1.25rem 0; /* Shortened spacing */
-    display: flex;
-    justify-content: center;
-    position: relative;
-  }
-
-  .fanned-products-deck {
-    display: flex;
-    justify-content: flex-start; /* flex-start allows snapping from first item on mobile */
-    align-items: center;
-    gap: 0.5rem; /* Narrower gap between cards */
-    width: 100%;
-    max-width: 1200px;
-    padding: 2rem 15vw; /* 2rem vertical padding prevents clipping on zoom-in */
+    flex-direction: row;
+    gap: 0.75rem; /* Giảm khoảng cách từ 1.25rem để khít sát gọn gàng */
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    scrollbar-width: none;
+    padding-bottom: 1.25rem;
+    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
 
-  .fanned-products-deck::-webkit-scrollbar {
-    display: none;
-  }
-
-  .fanned-card-wrapper {
-    flex-shrink: 0;
-    width: 70vw; /* 70% of screen width on mobile */
-    scroll-snap-align: center; /* Native center snap */
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
-    transform-origin: center center;
-  }
-
-  /* Active card centering scaling on mobile with springy bounce */
-  @media (max-width: 1023px) {
-    .fanned-card-wrapper {
-      transform: scale(0.9);
-      opacity: 0.65;
-    }
-    .fanned-card-wrapper.active-card {
-      transform: scale(1.05);
-      opacity: 1;
-    }
-  }
-
-  /* Curved overlapping fanned deck on desktop */
-  @media (min-width: 1024px) {
-    .fanned-products-deck {
-      justify-content: center; /* Center deck content on desktop */
-      gap: -2.2rem; /* Noticeable card overlap */
-      padding: 0 1rem;
-      scroll-snap-type: none; /* Disable scroll snapping on desktop */
-      overflow: visible;
-    }
-
-    .fanned-card-wrapper {
-      width: 215px;
-      scroll-snap-align: none;
-      transform-origin: bottom center;
-    }
-
-    /* Sagging/drooping curve: middle drops, ends tilt and rise */
-    .fanned-card-wrapper.card-index-0 {
-      transform: rotate(-6deg) translateY(-8px);
-    }
-    .fanned-card-wrapper.card-index-1 {
-      transform: rotate(-3deg) translateY(-2px);
-    }
-    .fanned-card-wrapper.card-index-2 {
-      transform: rotate(0deg) translateY(4px);
-      z-index: 10; /* Center card stands on top */
-    }
-    .fanned-card-wrapper.card-index-3 {
-      transform: rotate(3deg) translateY(-2px);
-    }
-    .fanned-card-wrapper.card-index-4 {
-      transform: rotate(6deg) translateY(-8px);
-    }
-
-    /* Hover: nhấc thẳng lên, phóng to, đổ bóng nổi bật */
-    .fanned-card-wrapper:hover {
-      transform: scale(1.08) rotate(0deg) translateY(-16px) !important;
-      z-index: 25 !important;
-      filter: drop-shadow(0 15px 30px rgba(139, 94, 60, 0.18));
-    }
-  }
-
-  /* View All Link Wrapper */
-  .shelf-view-all-wrapper {
-    text-align: center;
-    margin-top: 2rem;
-  }
-
-  .shelf-view-all-link {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--cozy-green-matcha-forest);
-    text-decoration: none;
-    letter-spacing: 0.2px;
-    display: inline-block;
-    padding: 0.55rem 1.4rem;
-    border-radius: 20px;
-    background-color: var(--cozy-bg-pure);
-    border: 1px solid var(--cozy-border-light);
-    box-shadow: 0 4px 8px rgba(139, 94, 60, 0.04);
-    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .shelf-view-all-link:hover {
-    background-color: var(--cozy-green-matcha-forest);
-    color: var(--cozy-bg-pure);
-    border-color: var(--cozy-green-matcha-forest);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(74, 138, 46, 0.2);
-  }
-
-  .shelf-support-note {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.88rem;
-    line-height: 1.65;
-    color: #555558;
-    opacity: 0.85;
-    margin-top: 1.75rem;
-    padding-top: 1.5rem;
-    border-top: 1px dashed var(--cozy-border-light); /* Dashed line exactly like illustration */
-    text-align: center;
-    max-width: 550px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  /* Blog List */
-  .blog-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-
   .blog-item {
+    flex: 0 0 85%; /* 85% width để hiển thị peek 15% của card tiếp theo trên di động */
+    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    border-left: 3px solid var(--cozy-border-light);
-    transition: all 0.3s ease;
+    border-left: 3.3px solid var(--cozy-border-light);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    background-color: var(--cozy-bg-pure);
+    padding: 1.1rem; /* Giảm padding giúp card gọn gàng */
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+  }
+
+  .blog-item.hidden-blog-item {
+    display: none !important;
+  }
+
+  /* Làm đẹp blog header và title */
+  .blog-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .blog-header-illustration-wrapper {
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .blog-header-illustration {
+    width: 54px;
+    height: auto;
+  }
+
+  .blog-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .blog-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: #6E6E73;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  .blog-item-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.12rem;
+    font-weight: 750;
+    line-height: 1.35;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .blog-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.95rem; /* Thu hẹp từ 1.5rem */
+      overflow-x: visible;
+      scroll-snap-type: none;
+      padding-bottom: 0;
+    }
+    .blog-item {
+      flex: none;
+      border-radius: 18px;
+    }
+    .blog-item:hover {
+      transform: translateY(-4px) rotate(0.5deg);
+      box-shadow: 0 8px 24px rgba(21, 23, 15, 0.04);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .blog-section .container {
+      max-width: 1280px !important;
+    }
+    .blog-list {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.1rem; /* Thu hẹp từ 2rem */
+      max-width: 100% !important;
+      margin: 0 auto;
+    }
+  }
+
+  .blog-view-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .blog-view-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    padding: 0.65rem 1.75rem;
+    border-radius: 24px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(21, 23, 15, 0.08);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .blog-view-more-btn:hover {
+    background-color: #76C123; /* Neon Green */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(118, 193, 35, 0.25);
   }
 
   .blog-item:hover {
-    border-left-color: var(--cozy-green-matcha);
+    border-left-color: #76C123; /* Neon Green */
+  }
+
+  .blog-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 0.5rem;
   }
 
   .blog-category {
-    align-self: flex-start;
     font-size: 0.65rem;
     font-weight: 700;
-    color: var(--cozy-green-matcha);
+    color: #76C123;
     background-color: var(--cozy-success);
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
     letter-spacing: 0.5px;
   }
 
+  .blog-curator-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #F8F9FA;
+    border: 1px solid var(--cozy-border-light);
+    padding: 2px 8px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    margin-bottom: 0.5rem;
+    width: fit-content;
+  }
+
+  .blog-curator-avatar {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .blog-curator-name {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+  }
+
   .blog-item-title {
     font-family: 'Inter', sans-serif;
-    font-size: 1.15rem;
-    font-weight: 600;
+    font-size: 1.12rem;
+    font-weight: 750;
     line-height: 1.4;
+    color: var(--cozy-text-obsidian);
   }
 
   .blog-link {
@@ -1799,21 +1770,53 @@ const getCategoryLabel = (cat: string) => {
   }
 
   .blog-link:hover {
-    color: var(--cozy-green-matcha);
+    color: #76C123;
   }
 
   .blog-item-desc {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     color: #6E6E73;
     line-height: 1.5;
+    /* Giới hạn dòng desc để giao diện đồng đều */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+  }
+
+  .blog-item-metrics {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+  }
+
+  .metric-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--cozy-text-charcoal);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #F8F9FA;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.02);
+  }
+
+  .metric-tag i {
+    font-size: 0.78rem;
+    color: #76C123;
   }
 
   .blog-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 0.5rem;
-    font-size: 0.85rem;
+    margin-top: auto; /* Push to bottom */
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--cozy-border-light);
+    font-size: 0.82rem;
   }
 
   .blog-date {
@@ -1821,7 +1824,127 @@ const getCategoryLabel = (cat: string) => {
   }
 
   .read-more {
+    font-size: 0.82rem;
+  }
+
+  /* Kệ quà của mẹ (Curation Section) */
+  .curation-section {
+    padding: 3.5rem 0;
+    background-color: var(--cozy-bg-beige); /* Màu giấy mộc mạc giống section Nhật ký */
+    border-top: 1px solid var(--cozy-border-light);
+    border-bottom: 1px solid var(--cozy-border-light);
+  }
+
+  .curation-header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .curation-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .curation-title i {
+    color: #76C123;
+    font-size: 2rem;
+  }
+
+  .curation-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: #6E6E73;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .tabs-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.75rem;
+    margin-bottom: 2rem;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  @media (min-width: 768px) {
+    .tabs-container {
+      justify-content: center;
+      overflow-x: visible;
+      padding-bottom: 0;
+    }
+  }
+
+  .tab-btn {
+    font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    scroll-snap-align: start;
+    outline: none;
+  }
+
+  .tab-btn:hover {
+    border-color: rgba(0, 0, 0, 0.15);
+    background-color: var(--cozy-bg-oatmeal);
+  }
+
+  .tab-btn.active {
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    border-color: var(--cozy-text-obsidian);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .tab-btn.active i {
+    color: #76C123;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem; /* Thu hẹp từ 0.75rem */
+    width: 100%;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .products-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.95rem; /* Thu hẹp từ 1.25rem */
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .products-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.1rem; /* Thu hẹp từ 1.5rem */
+    }
   }
 
   @keyframes fadeIn {
@@ -1833,10 +1956,234 @@ const getCategoryLabel = (cat: string) => {
     from { transform: translateY(0); }
     to { transform: translateY(-6px); }
   }
+
+  /* Cozy Bottom Sheet CSS */
+  .cozy-bottom-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(28, 28, 30, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .cozy-bottom-sheet-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .cozy-bottom-sheet {
+    background-color: var(--cozy-bg-pure, #FFFFFF);
+    border-top: 1px solid var(--cozy-border-light, rgba(0,0,0,0.06));
+    border-radius: 28px 28px 0 0;
+    width: 100%;
+    max-width: 520px;
+    padding: 1.5rem 1.5rem 2.5rem 1.5rem;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .cozy-bottom-sheet-overlay.active .cozy-bottom-sheet {
+    transform: translateY(0);
+  }
+
+  .cozy-sheet-handle {
+    width: 40px;
+    height: 4.5px;
+    background-color: var(--cozy-border-light, #E5E5EA);
+    border-radius: 3px;
+    margin-bottom: 1.5rem;
+  }
+
+  .cozy-sheet-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .cozy-sheet-illustration {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cozy-vinyl-mini-art {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: #1c1c1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    animation: spin 8s linear infinite;
+  }
+
+  .cozy-sheet-icon {
+    font-size: 1.5rem;
+    color: var(--cozy-green-matcha-forest, #76C123);
+  }
+
+  .cozy-sheet-ripples {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .cozy-sheet-ripples span {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    border: 1px solid var(--cozy-green-matcha-forest, #76C123);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: cozy-sheet-ripple 2.5s ease-out infinite;
+  }
+
+  .cozy-sheet-ripples span:nth-child(2) {
+    animation-delay: 0.8s;
+  }
+
+  .cozy-sheet-ripples span:nth-child(3) {
+    animation-delay: 1.6s;
+  }
+
+  @keyframes cozy-sheet-ripple {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  .cozy-sheet-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian, #1C1C1E);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .cozy-sheet-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #6a6a66;
+    margin: 0 0 1.75rem 0;
+    max-width: 380px;
+  }
+
+  .cozy-sheet-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  @media (min-width: 480px) {
+    .cozy-sheet-actions {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+
+  .cozy-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+  }
+
+  .cozy-btn-primary {
+    background-color: var(--cozy-text-obsidian, #1C1C1E);
+    color: #FFFFFF;
+  }
+
+  .cozy-btn-primary:hover {
+    background-color: var(--cozy-green-matcha-forest, #76C123);
+  }
+
+  .cozy-btn-secondary {
+    background-color: var(--cozy-bg-oatmeal, #F8F9FA);
+    color: var(--cozy-text-obsidian, #1C1C1E);
+    border: 1px solid var(--cozy-border-light, #E5E5EA);
+  }
+
+  .cozy-btn-secondary:hover {
+    background-color: var(--cozy-bg-beige, #F1EFE9);
+  }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // --- 0. HOMEPAGE BLOG PILLAR TABS FILTER ---
+    const blogTabButtons = document.querySelectorAll('.blog-section .tab-btn');
+    const blogListItems = document.querySelectorAll('.blog-section .blog-item');
+
+    blogTabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Toggle active class
+        blogTabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const selectedPillar = btn.getAttribute('data-pillar');
+        let visibleCount = 0;
+
+        blogListItems.forEach((item: any) => {
+          const itemPillar = item.getAttribute('data-pillar');
+          if (selectedPillar === 'all' || itemPillar === selectedPillar) {
+            if (visibleCount < 6) {
+              item.style.display = 'flex';
+              visibleCount++;
+            } else {
+              item.style.display = 'none';
+            }
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    });
+
     // --- HAMBURGER MENU TOGGLE ---
     const menuToggleBtn = document.getElementById('menu-toggle-btn');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -2100,7 +2447,7 @@ const getCategoryLabel = (cat: string) => {
           const durationStr = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
           const numStr = (idx + 1) < 10 ? `0${idx + 1}` : `${idx + 1}`;
           return `
-            <li class="track-item" style="cursor: default; pointer-events: none;">
+            <li class="track-item" style="cursor: pointer;">
               <span class="track-num">${numStr}</span>
               <span class="track-name-text">${track.title} - <span class="track-artist" style="opacity: 0.7; font-size: 0.9em;">${track.artist}</span></span>
               <div class="mini-wave">
@@ -2114,6 +2461,18 @@ const getCategoryLabel = (cat: string) => {
             </li>
           `;
         }).join('');
+
+        // Thêm sự kiện click mở Bottom Sheet giải thích tính năng Live FM
+        setTimeout(() => {
+          const trackItems = playlistUl.querySelectorAll('.track-item');
+          const fmInfoSheet = document.getElementById('fm-info-sheet');
+          trackItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+              e.stopPropagation();
+              fmInfoSheet?.classList.add('active');
+            });
+          });
+        }, 100);
       }
     }
 
@@ -2472,79 +2831,7 @@ const getCategoryLabel = (cat: string) => {
       }, { passive: true });
     }
 
-    // --- MOBILE INFINITE CAROUSEL ---
-    const fannedDeck = document.getElementById('fanned-products-deck') as HTMLElement;
-    if (fannedDeck && window.innerWidth < 1024) {
-      const originalCards = Array.from(fannedDeck.children);
-      if (originalCards.length > 0) {
-        // Clone original cards to prepend and append for infinite wrapping
-        originalCards.forEach(card => {
-          fannedDeck.appendChild(card.cloneNode(true));
-        });
-        originalCards.slice().reverse().forEach(card => {
-          fannedDeck.insertBefore(card.cloneNode(true), fannedDeck.firstChild);
-        });
-
-        setTimeout(() => {
-          const cardEl = fannedDeck.children[0] as HTMLElement;
-          const cardWidth = cardEl.getBoundingClientRect().width || 200;
-          const gap = parseInt(window.getComputedStyle(fannedDeck).gap) || 16;
-          const stepWidth = cardWidth + gap;
-
-          // Start scrolled exactly to the first real card (index 5)
-          const middleIndex = 5;
-          fannedDeck.scrollLeft = stepWidth * middleIndex;
-
-          let scrollTimeout: any = null;
-
-          const updateActiveCard = () => {
-            const deckCenter = fannedDeck.scrollLeft + fannedDeck.clientWidth / 2;
-            let closestCard: HTMLElement | null = null;
-            let minDistance = Infinity;
-
-            Array.from(fannedDeck.children).forEach(child => {
-              const card = child as HTMLElement;
-              const cardCenter = card.offsetLeft + card.clientWidth / 2;
-              const distance = Math.abs(deckCenter - cardCenter);
-              if (distance < minDistance) {
-                minDistance = distance;
-                closestCard = card;
-              }
-            });
-
-            Array.from(fannedDeck.children).forEach(child => {
-              const card = child as HTMLElement;
-              if (card === closestCard) {
-                card.classList.add('active-card');
-              } else {
-                card.classList.remove('active-card');
-              }
-            });
-          };
-
-          fannedDeck.addEventListener('scroll', () => {
-            // Update center card scaling in real-time as user scrolls
-            updateActiveCard();
-
-            // Seamless wrap jump ONLY after scrolling finishes (idle for 100ms)
-            // This prevents touch-drag conflicts and allows native momentum & bounce physics
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-              const currentScroll = fannedDeck.scrollLeft;
-              
-              if (currentScroll >= stepWidth * 10) {
-                fannedDeck.scrollLeft = currentScroll - (stepWidth * 5);
-              } else if (currentScroll <= stepWidth * 0.5) {
-                fannedDeck.scrollLeft = currentScroll + (stepWidth * 5);
-              }
-            }, 100);
-          }, { passive: true });
-
-          // Initialize active card state
-          updateActiveCard();
-        }, 120);
-      }
-    }
+    // Kệ quà của mẹ không còn tab lọc ở trang chủ nữa, hiển thị mặc định toàn bộ 8 sản phẩm tinh tuyển.
 
     // --- KIOSK BANNER CLICK HANDLER ---
     const kioskBannerTrigger = document.getElementById('kiosk-banner-trigger');
@@ -2567,5 +2854,17 @@ const getCategoryLabel = (cat: string) => {
         }
       });
     }
+
+    // --- BOTTOM SHEET EVENT HANDLERS ---
+    const fmInfoSheet = document.getElementById('fm-info-sheet');
+    const fmSheetClose = document.getElementById('fm-sheet-close');
+    fmSheetClose?.addEventListener('click', () => {
+      fmInfoSheet?.classList.remove('active');
+    });
+    fmInfoSheet?.addEventListener('click', (e) => {
+      if (e.target === fmInfoSheet) {
+        fmInfoSheet.classList.remove('active');
+      }
+    });
   });
 </script>

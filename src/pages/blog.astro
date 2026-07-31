@@ -197,12 +197,15 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
   .navbar {
     background-color: rgba(251, 250, 246, 0.85);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--cozy-border-light);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
     padding: 0.5rem 0;
     box-shadow: 0 1px 3px rgba(21, 23, 15, 0.04);
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
 
   .nav-container {
@@ -310,7 +313,7 @@ const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
     overflow: hidden;
     transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     opacity: 0;
-    z-index: 95;
+    z-index: 999;
     box-shadow: 0 10px 20px rgba(21, 23, 15, 0.05);
   }
 

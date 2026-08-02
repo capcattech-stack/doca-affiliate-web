@@ -1064,18 +1064,18 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
   @media (min-width: 1024px) {
     .tracks-list-card {
-      height: 560px; /* Chiều cao cố định cân đối với kệ 6 album bên tay trái */
+      height: 600px; /* Tăng chiều cao để chứa thoải mái ít nhất 8 bài hát khi chưa cuộn */
     }
   }
 
   @media (max-width: 1023px) {
     .tracks-list-card {
-      max-height: 480px; /* Tăng chiều cao để chứa ít nhất 8 bài hát */
+      max-height: 520px; /* Tăng chiều cao chứa đủ 8 bài hát trên di động */
       padding: 1rem;
     }
     
     .tracks-list-container {
-      max-height: 410px !important; /* Đủ hiển thị trên 8 bài hát không cần cuộn */
+      max-height: 450px !important; /* Đủ hiển thị chính xác 8 bài hát không cần cuộn */
     }
 
     .track-item-row {

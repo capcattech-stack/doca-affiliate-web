@@ -32,27 +32,51 @@ import Layout from '../../layouts/Layout.astro';
         </div>
 
         <!-- Trình chọn cổng thanh toán -->
-        <div class="payment-method-box hidden" id="payment-method-box">
-          <h3 class="method-title">Chọn phương thức thanh toán</h3>
-          <div class="methods-list">
-            <label class="method-item active">
-              <input type="radio" name="payment-provider" value="ZALOPAY" checked />
-              <div class="method-details">
-                <i class="ph-light ph-credit-card" style="font-size: 1.25rem; color: #008FE5;"></i>
-                <span>Ví điện tử ZaloPay (Quét mã / App-to-App)</span>
+        <!-- Bottom Sheet Chọn phương thức thanh toán -->
+        <div class="cozy-bottom-sheet-overlay hidden" id="payment-sheet-overlay">
+          <div class="cozy-bottom-sheet" id="payment-sheet">
+            <div class="sheet-header">
+              <div class="sheet-handle"></div>
+              <h3 class="sheet-title">Xác nhận nạp xu</h3>
+              <button class="sheet-close-btn" id="sheet-close-btn" aria-label="Đóng"><i class="ph-light ph-x"></i></button>
+            </div>
+            
+            <div class="sheet-body">
+              <!-- Thông tin gói đã chọn -->
+              <div class="selected-package-summary">
+                <div class="summary-left">
+                  <div class="summary-name" id="selected-pkg-name">Gói Xu...</div>
+                  <div class="summary-desc" id="selected-pkg-desc">Mô tả gói...</div>
+                </div>
+                <div class="summary-right">
+                  <div class="summary-coin" id="selected-pkg-coin">0 Xu</div>
+                  <div class="summary-price" id="selected-pkg-price">0đ</div>
+                </div>
               </div>
-            </label>
-            <label class="method-item">
-              <input type="radio" name="payment-provider" value="MOMO" />
-              <div class="method-details">
-                <i class="ph-light ph-wallet" style="font-size: 1.25rem; color: #A50064;"></i>
-                <span>Ví điện tử MoMo (Web to App)</span>
+
+              <h3 class="method-title">Chọn phương thức thanh toán</h3>
+              <div class="methods-list">
+                <label class="method-item active">
+                  <input type="radio" name="payment-provider" value="ZALOPAY" checked />
+                  <div class="method-details">
+                    <i class="ph-light ph-credit-card" style="font-size: 1.25rem; color: #008FE5;"></i>
+                    <span>Ví điện tử ZaloPay (Quét mã / App)</span>
+                  </div>
+                </label>
+                <label class="method-item">
+                  <input type="radio" name="payment-provider" value="MOMO" />
+                  <div class="method-details">
+                    <i class="ph-light ph-wallet" style="font-size: 1.25rem; color: #A50064;"></i>
+                    <span>Ví điện tử MoMo (Web to App)</span>
+                  </div>
+                </label>
               </div>
-            </label>
+              
+              <button class="cozy-btn pay-btn" id="confirm-pay-btn" disabled>
+                Tiến hành thanh toán <i class="ph-light ph-arrow-right"></i>
+              </button>
+            </div>
           </div>
-          <button class="cozy-btn pay-btn" id="confirm-pay-btn" disabled>
-            Tiến hành thanh toán <i class="ph-light ph-arrow-right"></i>
-          </button>
         </div>
       </div>
 
@@ -100,8 +124,16 @@ import Layout from '../../layouts/Layout.astro';
   document.addEventListener('DOMContentLoaded', () => {
     const balanceEl = document.getElementById('current-balance');
     const packagesContainer = document.getElementById('packages-container');
-    const paymentMethodBox = document.getElementById('payment-method-box');
     const confirmPayBtn = document.getElementById('confirm-pay-btn') as HTMLButtonElement;
+    
+    // Bottom Sheet elements
+    const paymentSheetOverlay = document.getElementById('payment-sheet-overlay');
+    const paymentSheet = document.getElementById('payment-sheet');
+    const sheetCloseBtn = document.getElementById('sheet-close-btn');
+    const selectedPkgName = document.getElementById('selected-pkg-name');
+    const selectedPkgDesc = document.getElementById('selected-pkg-desc');
+    const selectedPkgCoin = document.getElementById('selected-pkg-coin');
+    const selectedPkgPrice = document.getElementById('selected-pkg-price');
     
     // Tab buttons and sections
     const tabRechargeBtn = document.getElementById('tab-recharge-btn');
@@ -203,8 +235,19 @@ import Layout from '../../layouts/Layout.astro';
             card.classList.add('active');
             selectedPackageId = pkg.id;
             
-            // Kích hoạt nút thanh toán
-            if (paymentMethodBox) paymentMethodBox.classList.remove('hidden');
+            // Cập nhật thông tin gói trên Bottom Sheet
+            if (selectedPkgName) selectedPkgName.textContent = pkg.name;
+            if (selectedPkgDesc) selectedPkgDesc.textContent = pkg.description;
+            if (selectedPkgCoin) selectedPkgCoin.textContent = `${pkg.coin_amount} Xu`;
+            if (selectedPkgPrice) selectedPkgPrice.textContent = `${pkg.amount_vnd.toLocaleString('vi-VN')}đ`;
+
+            // Mở Bottom Sheet
+            if (paymentSheetOverlay) paymentSheetOverlay.classList.remove('hidden');
+            if (paymentSheet) {
+              setTimeout(() => paymentSheet.classList.add('open'), 10);
+            }
+            document.body.classList.add('overflow-hidden'); // Lock background scroll
+
             if (confirmPayBtn) {
               confirmPayBtn.removeAttribute('disabled');
             }
@@ -217,7 +260,7 @@ import Layout from '../../layouts/Layout.astro';
       }
     }
 
-    // 4. Lắng nghe thay đổi phương thức thanh toán
+    // 4. Lắng nghe thay đổi phương thức thanh toán và Đóng Bottom Sheet
     const methodItems = document.querySelectorAll('.method-item');
     methodItems.forEach(item => {
       item.addEventListener('click', () => {
@@ -226,6 +269,21 @@ import Layout from '../../layouts/Layout.astro';
         const input = item.querySelector('input[type="radio"]') as HTMLInputElement;
         if (input) input.checked = true;
       });
+    });
+
+    function closePaymentSheet() {
+      if (paymentSheet) paymentSheet.classList.remove('open');
+      setTimeout(() => {
+        if (paymentSheetOverlay) paymentSheetOverlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }, 300); // Khớp thời gian animation transition 0.3s
+    }
+
+    sheetCloseBtn?.addEventListener('click', closePaymentSheet);
+    paymentSheetOverlay?.addEventListener('click', (e) => {
+      if (e.target === paymentSheetOverlay) {
+        closePaymentSheet();
+      }
     });
 
     // 5. Nút bấm tiến hành thanh toán
@@ -253,6 +311,9 @@ import Layout from '../../layouts/Layout.astro';
 
         // Mở cổng thanh toán trong tab mới
         window.open(data.paymentUrl, '_blank');
+
+        // Đóng Bottom Sheet nạp tiền
+        closePaymentSheet();
 
         // Hiển thị modal chờ thanh toán
         if (paymentModal) paymentModal.classList.remove('hidden');
@@ -555,21 +616,131 @@ import Layout from '../../layouts/Layout.astro';
     opacity: 0.8;
   }
 
-  /* --- PAYMENT METHODS --- */
-  .payment-method-box {
+  /* --- COZY BOTTOM SHEET --- */
+  .cozy-bottom-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(21, 23, 15, 0.4);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 999;
+    transition: all 0.3s ease;
+  }
+  .cozy-bottom-sheet {
     background-color: var(--cozy-bg-pure);
     border: 1px solid var(--cozy-border-light);
-    border-radius: 16px;
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 -8px 32px rgba(21, 23, 15, 0.08);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cozy-bottom-sheet.open {
+    transform: translateY(0);
+  }
+  .sheet-header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px dashed var(--cozy-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  .sheet-handle {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background-color: var(--cozy-border-light);
+    border-radius: 2px;
+  }
+  .sheet-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+  }
+  .sheet-close-btn {
+    border: none;
+    background: none;
+    font-size: 1.2rem;
+    color: var(--cozy-text-charcoal);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+  .sheet-close-btn:hover {
+    color: var(--cozy-text-obsidian);
+  }
+  .sheet-body {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 1.25rem;
   }
-  .method-title {
+
+  /* --- SELECTED PACKAGE SUMMARY --- */
+  .selected-package-summary {
+    background-color: var(--cozy-bg-oatmeal);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .summary-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .summary-name {
     font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+  }
+  .summary-desc {
+    font-size: 0.75rem;
+    color: var(--cozy-text-charcoal);
+    opacity: 0.8;
+  }
+  .summary-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .summary-coin {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--cozy-green-matcha-forest);
+  }
+  .summary-price {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cozy-text-charcoal);
+  }
+
+  /* --- PAYMENT METHODS --- */
+  .method-title {
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--cozy-text-obsidian);
+    margin-bottom: 0.25rem;
   }
   .methods-list {
     display: flex;
@@ -585,6 +756,7 @@ import Layout from '../../layouts/Layout.astro';
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
+    background-color: var(--cozy-bg-pure);
   }
   .method-item:hover {
     background-color: var(--cozy-bg-oatmeal);
@@ -605,6 +777,29 @@ import Layout from '../../layouts/Layout.astro';
     width: 100%;
     margin-top: 0.5rem;
     padding: 0.75rem;
+  }
+
+  /* --- BODY SCROLL LOCK --- */
+  body.overflow-hidden {
+    overflow: hidden;
+  }
+
+  /* --- DESKTOP SCALE --- */
+  @media (min-width: 600px) {
+    .cozy-bottom-sheet-overlay {
+      align-items: center;
+    }
+    .cozy-bottom-sheet {
+      border-radius: 20px;
+      width: 90%;
+      transform: scale(0.9) translateY(20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cozy-bottom-sheet-overlay:not(.hidden) .cozy-bottom-sheet {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
   }
 
   /* --- HISTORY LIST --- */

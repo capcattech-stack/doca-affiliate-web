@@ -403,6 +403,7 @@ import Layout from '../../layouts/Layout.astro';
       if (kioskDashboard) kioskDashboard.classList.add('hidden');
 
       client.from('creator_kiosks').select('*').eq('user_id', user.id).maybeSingle().then(({ data: kiosk, error }: any) => {
+        console.log('[Kiosk Debug] user.id:', user ? user.id : 'null', 'kiosk:', kiosk, 'error:', error);
         if (kioskLoading) kioskLoading.classList.add('hidden');
         if (error) {
           console.error('Lỗi khi tải Kiosk:', error.message);

@@ -14,6 +14,7 @@ const {
 } = Astro.props;
 
 const googleAnalyticsId = import.meta.env.PUBLIC_GA_ID || 'G-0RCGZRPEGR';
+const canonicalUrl = new URL(Astro.url.pathname, 'https://doca.capcat.vn').toString();
 ---
 
 <!doctype html>
@@ -27,6 +28,7 @@ const googleAnalyticsId = import.meta.env.PUBLIC_GA_ID || 'G-0RCGZRPEGR';
 		<!-- SEO Meta Tags -->
 		<title>{title}</title>
 		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalUrl} />
 		
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />

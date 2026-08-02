@@ -249,9 +249,40 @@ const getCategoryLabel = (cat: string, pil?: string) => {
   };
   return labels[cat] || cat;
 };
+
+// 3. Khởi tạo cấu trúc Schema BlogPosting phục vụ SEO bài viết chi tiết
+const canonicalUrl = new URL(Astro.url.pathname, 'https://doca.capcat.vn').toString();
+const schemaMarkup = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "image": coverImage ? new URL(coverImage, 'https://doca.capcat.vn').toString() : 'https://doca.capcat.vn/images/brand/symbol-green.png',
+  "datePublished": publishDate,
+  "dateModified": publishDate,
+  "author": {
+    "@type": "Person",
+    "name": `${curatorName} từ Doca Pet`
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Doca Pet",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://doca.capcat.vn/images/brand/symbol-green.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": canonicalUrl
+  }
+};
 ---
 
 <Layout title={`${title} | Nhật Ký Lối Sống DOCA`} description={description}>
+  <!-- JSON-LD Structured Data Schema cho Googlebot -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schemaMarkup)} />
+
   <!-- Truyền biến Supabase, Product Database và thông tin ảnh bìa toàn cục cho client-side JS -->
   <script is:inline define:vars={{ supabaseUrl, supabaseKey, allProducts, coverImage, title }}>
     window.PUBLIC_SUPABASE_URL = supabaseUrl;

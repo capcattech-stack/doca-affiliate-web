@@ -104,26 +104,26 @@ import Layout from '../../layouts/Layout.astro';
           </div>
 
           <!-- Kiosk Analytics Dashboard (MVP 3 chỉ số) -->
-          <div class="kiosk-analytics-section" style="background-color: var(--cozy-bg-oatmeal); border: 1.5px solid var(--cozy-border-light); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; box-shadow: var(--cozy-shadow-default);">
-            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 8px; padding: 1rem; text-align: center;">
-              <span style="font-size: 0.78rem; color: var(--cozy-text-charcoal); font-weight: 500; display: block; margin-bottom: 0.35rem;">
-                <i class="ph-light ph-eye" style="color: var(--cozy-accent-identity); font-size: 1rem; vertical-align: -1px; margin-right: 3px;"></i> Lượt xem Kiosk
+          <div class="kiosk-analytics-section" style="background-color: var(--cozy-bg-oatmeal); border: 1.5px solid var(--cozy-border-light); border-radius: 12px; padding: 0.75rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; box-shadow: var(--cozy-shadow-default);">
+            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid rgba(95, 141, 78, 0.25); border-radius: 8px; padding: 0.75rem 0.35rem; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.25rem;">
+              <span class="analytics-label" style="font-size: 0.68rem; color: var(--cozy-text-charcoal); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 2px;">
+                <i class="ph-light ph-eye" style="color: var(--cozy-green-matcha-forest); font-size: 0.9rem;"></i> Lượt xem
               </span>
-              <strong id="analytics-views" style="font-size: 1.5rem; font-weight: 800; color: var(--cozy-text-obsidian);">0</strong>
+              <strong id="analytics-views" style="font-size: 1.25rem; font-weight: 800; color: var(--cozy-text-obsidian);">0</strong>
             </div>
             
-            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 8px; padding: 1rem; text-align: center;">
-              <span style="font-size: 0.78rem; color: var(--cozy-text-charcoal); font-weight: 500; display: block; margin-bottom: 0.35rem;">
-                <i class="ph-light ph-hand-pointing" style="color: var(--cozy-green-matcha-forest); font-size: 1rem; vertical-align: -1px; margin-right: 3px;"></i> Lượt nhấp sản phẩm
+            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid rgba(232, 167, 161, 0.4); border-radius: 8px; padding: 0.75rem 0.35rem; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.25rem;">
+              <span class="analytics-label" style="font-size: 0.68rem; color: var(--cozy-text-charcoal); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 2px;">
+                <i class="ph-light ph-hand-pointing" style="color: #E8A7A1; font-size: 0.9rem;"></i> Lượt nhấp
               </span>
-              <strong id="analytics-clicks" style="font-size: 1.5rem; font-weight: 800; color: var(--cozy-text-obsidian);">0</strong>
+              <strong id="analytics-clicks" style="font-size: 1.25rem; font-weight: 800; color: var(--cozy-text-obsidian);">0</strong>
             </div>
 
-            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 8px; padding: 1rem; text-align: center;">
-              <span style="font-size: 0.78rem; color: var(--cozy-text-charcoal); font-weight: 500; display: block; margin-bottom: 0.35rem;">
-                <i class="ph-light ph-chart-line" style="color: #FF9500; font-size: 1rem; vertical-align: -1px; margin-right: 3px;"></i> CTR trung bình
+            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid rgba(66, 133, 244, 0.25); border-radius: 8px; padding: 0.75rem 0.35rem; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.25rem;">
+              <span class="analytics-label" style="font-size: 0.68rem; color: var(--cozy-text-charcoal); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 2px;">
+                <i class="ph-light ph-chart-line" style="color: #4285F4; font-size: 0.9rem;"></i> Tỷ lệ CTR
               </span>
-              <strong id="analytics-ctr" style="font-size: 1.5rem; font-weight: 800; color: var(--cozy-text-obsidian);">0%</strong>
+              <strong id="analytics-ctr" style="font-size: 1.25rem; font-weight: 800; color: var(--cozy-text-obsidian);">0%</strong>
             </div>
           </div>
 

@@ -103,6 +103,30 @@ import Layout from '../../layouts/Layout.astro';
             </div>
           </div>
 
+          <!-- Kiosk Analytics Dashboard (MVP 3 chỉ số) -->
+          <div class="kiosk-analytics-section" style="background-color: var(--cozy-bg-oatmeal); border: 1.5px solid var(--cozy-border-light); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; box-shadow: var(--cozy-shadow-default);">
+            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 8px; padding: 1rem; text-align: center;">
+              <span style="font-size: 0.78rem; color: var(--cozy-text-charcoal); font-weight: 500; display: block; margin-bottom: 0.35rem;">
+                <i class="ph-light ph-eye" style="color: var(--cozy-accent-identity); font-size: 1rem; vertical-align: -1px; margin-right: 3px;"></i> Lượt xem Kiosk
+              </span>
+              <strong id="analytics-views" style="font-size: 1.5rem; font-weight: 800; color: var(--cozy-text-obsidian);">0</strong>
+            </div>
+            
+            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 8px; padding: 1rem; text-align: center;">
+              <span style="font-size: 0.78rem; color: var(--cozy-text-charcoal); font-weight: 500; display: block; margin-bottom: 0.35rem;">
+                <i class="ph-light ph-hand-pointing" style="color: var(--cozy-green-matcha-forest); font-size: 1rem; vertical-align: -1px; margin-right: 3px;"></i> Lượt nhấp sản phẩm
+              </span>
+              <strong id="analytics-clicks" style="font-size: 1.5rem; font-weight: 800; color: var(--cozy-text-obsidian);">0</strong>
+            </div>
+
+            <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid var(--cozy-border-light); border-radius: 8px; padding: 1rem; text-align: center;">
+              <span style="font-size: 0.78rem; color: var(--cozy-text-charcoal); font-weight: 500; display: block; margin-bottom: 0.35rem;">
+                <i class="ph-light ph-chart-line" style="color: #FF9500; font-size: 1rem; vertical-align: -1px; margin-right: 3px;"></i> CTR trung bình
+              </span>
+              <strong id="analytics-ctr" style="font-size: 1.5rem; font-weight: 800; color: var(--cozy-text-obsidian);">0%</strong>
+            </div>
+          </div>
+
           <!-- Cấu hình thông tin Kiosk (Settings) -->
           <div class="kiosk-settings-section">
             <div class="kiosk-settings-header">
@@ -1193,6 +1217,19 @@ import Layout from '../../layouts/Layout.astro';
             console.error('Lỗi tải liên kết Kiosk:', error.message);
             return;
           }
+
+          // Cập nhật số liệu thống kê cho Dashboard đo lường
+          const totalClicks = links ? links.reduce((sum: number, l: any) => sum + (l.clicks_count || 0), 0) : 0;
+          const totalViews = kiosk.views_count || 0;
+          const ctrVal = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0';
+
+          const viewsEl = document.getElementById('analytics-views');
+          const clicksEl = document.getElementById('analytics-clicks');
+          const ctrEl = document.getElementById('analytics-ctr');
+
+          if (viewsEl) viewsEl.textContent = totalViews.toLocaleString('vi-VN');
+          if (clicksEl) clicksEl.textContent = totalClicks.toLocaleString('vi-VN');
+          if (ctrEl) ctrEl.textContent = `${ctrVal}%`;
 
           if (!links || links.length === 0) {
             if (emptyEl) emptyEl.classList.remove('hidden');

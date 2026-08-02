@@ -12,7 +12,7 @@ import Layout from '../../layouts/Layout.astro';
 
       <!-- Tab điều hướng -->
       <div class="wallet-tabs">
-        <button class="wallet-tab-btn active" id="tab-recharge-btn">Nạp Cá <i class="ph-light ph-plus-circle"></i></button>
+        <button class="wallet-tab-btn active" id="tab-recharge-btn">Nạp <i class="ph-light ph-plus-circle"></i></button>
         <button class="wallet-tab-btn" id="tab-history-btn">Lịch Sử Giao Dịch <i class="ph-light ph-clock-counter-clockwise"></i></button>
       </div>
 
@@ -20,10 +20,10 @@ import Layout from '../../layouts/Layout.astro';
       <div class="wallet-content-section" id="section-recharge">
         <div class="wallet-balance-card">
           <div class="balance-title">Số dư hiện tại của bạn</div>
-          <div class="balance-value" id="current-balance">... Cá</div>
+          <div class="balance-value" id="current-balance" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem;">... <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></div>
         </div>
 
-        <h2 class="section-title">Chọn gói nạp cá</h2>
+        <h2 class="section-title">Chọn gói nạp</h2>
         <div class="packages-grid" id="packages-container">
           <div class="loading-placeholder text-center">
             <i class="ph-light ph-spinner-gap spin" style="font-size: 1.5rem; color: var(--cozy-green-matcha-forest);"></i>
@@ -37,7 +37,7 @@ import Layout from '../../layouts/Layout.astro';
           <div class="cozy-bottom-sheet" id="payment-sheet">
             <div class="sheet-header">
               <div class="sheet-handle"></div>
-              <h3 class="sheet-title">Xác nhận nạp cá</h3>
+              <h3 class="sheet-title" style="display: inline-flex; align-items: center; gap: 0.25rem;">Xác nhận nạp <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></h3>
               <button class="sheet-close-btn" id="sheet-close-btn" aria-label="Đóng"><i class="ph-light ph-x"></i></button>
             </div>
             
@@ -45,11 +45,11 @@ import Layout from '../../layouts/Layout.astro';
               <!-- Thông tin gói đã chọn -->
               <div class="selected-package-summary">
                 <div class="summary-left">
-                  <div class="summary-name" id="selected-pkg-name">Gói Cá...</div>
+                  <div class="summary-name" id="selected-pkg-name">Gói...</div>
                   <div class="summary-desc" id="selected-pkg-desc">Mô tả gói...</div>
                 </div>
                 <div class="summary-right">
-                  <div class="summary-coin" id="selected-pkg-coin">0 Cá</div>
+                  <div class="summary-coin" id="selected-pkg-coin" style="display: inline-flex; align-items: center; gap: 0.2rem;">0 <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></div>
                   <div class="summary-price" id="selected-pkg-price">0đ</div>
                 </div>
               </div>
@@ -216,7 +216,7 @@ import Layout from '../../layouts/Layout.astro';
           card.dataset.id = pkg.id;
           
           const bonusBadge = pkg.bonus_coin > 0 
-            ? `<div class="bonus-badge">+${pkg.bonus_coin} Cá Tặng</div>` 
+            ? `<div class="bonus-badge" style="display: inline-flex; align-items: center; gap: 0.15rem;">+${pkg.bonus_coin} <i class="ph-fill ph-fish" style="font-size: 0.75rem;"></i></div>` 
             : '';
 
           card.innerHTML = `
@@ -224,7 +224,7 @@ import Layout from '../../layouts/Layout.astro';
             <div class="package-name">${pkg.name}</div>
             <div class="package-coin">
               <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>
-              <span>${pkg.coin_amount} Cá</span>
+              <span>${pkg.coin_amount} <i class="ph-fill ph-fish" style="font-size: 0.85rem; color: var(--cozy-green-matcha-forest);"></i></span>
             </div>
             <div class="package-price">${pkg.amount_vnd.toLocaleString('vi-VN')} đ</div>
             <div class="package-desc">${pkg.description}</div>
@@ -238,7 +238,7 @@ import Layout from '../../layouts/Layout.astro';
             // Cập nhật thông tin gói trên Bottom Sheet
             if (selectedPkgName) selectedPkgName.textContent = pkg.name;
             if (selectedPkgDesc) selectedPkgDesc.textContent = pkg.description;
-            if (selectedPkgCoin) selectedPkgCoin.textContent = `${pkg.coin_amount} Cá`;
+            if (selectedPkgCoin) selectedPkgCoin.innerHTML = `${pkg.coin_amount} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest); font-size: 1.15rem;"></i>`;
             if (selectedPkgPrice) selectedPkgPrice.textContent = `${pkg.amount_vnd.toLocaleString('vi-VN')}đ`;
 
             // Mở Bottom Sheet
@@ -351,10 +351,10 @@ import Layout from '../../layouts/Layout.astro';
               
               // Cập nhật số dư hiển thị mới
               currentBalance = Number(data.balance);
-              if (balanceEl) balanceEl.textContent = `${currentBalance} Cá`;
+              if (balanceEl) balanceEl.innerHTML = `${currentBalance} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
 
               // Bắn hoạt ảnh ăn mừng hoặc thông báo
-              alert('🎉 Nạp cá thành công! Số dư của bạn đã được cập nhật.');
+              alert('🎉 Nạp thành công! Số dư của bạn đã được cập nhật.');
               window.location.href = '/profile';
             }
           });
@@ -374,7 +374,7 @@ import Layout from '../../layouts/Layout.astro';
         .then(res => res.json())
         .then((data: any) => {
           currentBalance = data.balance !== undefined ? Number(data.balance) : 0;
-          if (balanceEl) balanceEl.textContent = `${currentBalance} Cá`;
+          if (balanceEl) balanceEl.innerHTML = `${currentBalance} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
         })
         .catch(err => {
           console.error('Error loading balance:', err);
@@ -415,10 +415,10 @@ import Layout from '../../layouts/Layout.astro';
           item.className = 'history-item';
           item.innerHTML = `
             <div class="tx-left">
-              <div class="tx-type">${tx.description || (isPlus ? 'Nạp cá' : 'Tiêu dùng')}</div>
+              <div class="tx-type">${tx.description || (isPlus ? 'Nạp' : 'Tiêu dùng')}</div>
               <div class="tx-date">${date}</div>
             </div>
-            <div class="${classAmount}">${symbol}${tx.amount} Cá</div>
+            <div class="${classAmount}" style="display: inline-flex; align-items: center; gap: 0.15rem;">${symbol}${tx.amount} <i class="ph-fill ph-fish" style="font-size: 0.82rem;"></i></div>
           `;
           historyContainer.appendChild(item);
         });

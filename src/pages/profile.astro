@@ -45,13 +45,13 @@ import Layout from '../layouts/Layout.astro';
             <div class="wallet-balance-row">
               <div class="wallet-title">
                 <i class="ph-light ph-fish" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
-                <span>Ví Cá Của Bạn</span>
+                <span>Ví của bạn</span>
               </div>
-              <span class="wallet-balance-value" id="wallet-balance">... Cá</span>
+              <span class="wallet-balance-value" id="wallet-balance" style="display: inline-flex; align-items: center; gap: 0.25rem;">... <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></span>
             </div>
             <div class="wallet-actions-row">
               <a href="/profile/wallet" class="cozy-btn wallet-btn">
-                Nạp thêm cá <i class="ph-light ph-plus-circle"></i>
+                Nạp thêm <i class="ph-light ph-plus-circle"></i>
               </a>
               <a href="/profile/wallet?tab=history" class="history-btn" id="wallet-history-btn">
                 Lịch sử <i class="ph-light ph-clock-counter-clockwise"></i>
@@ -191,7 +191,7 @@ import Layout from '../layouts/Layout.astro';
         .then((data: any) => {
           const walletBalanceEl = document.getElementById('wallet-balance');
           if (walletBalanceEl) {
-            walletBalanceEl.textContent = `${data.balance !== undefined ? data.balance : 0} Cá`;
+            walletBalanceEl.innerHTML = `${data.balance !== undefined ? data.balance : 0} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
           }
         })
         .catch(err => {

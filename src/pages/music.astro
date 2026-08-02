@@ -166,31 +166,52 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
   <!-- Mini Player Float Widget neo dưới bottom -->
   <div id="cozy-mini-player" class="cozy-mini-player-float">
-    <div class="mini-player-left">
-      <div class="mini-player-vinyl">
-        <div class="mini-vinyl-center"></div>
-      </div>
-      <div class="mini-player-info">
-        <span class="mini-track-title" id="mini-track-title">Đang tải...</span>
-        <span class="mini-track-artist" id="mini-track-artist">Cozy Song 🐾</span>
-      </div>
+    <!-- Cột 1: Đĩa than mini -->
+    <div class="mini-player-vinyl">
+      <div class="mini-vinyl-center"></div>
     </div>
+    
+    <!-- Cột 2: Thông tin bài hát căn trái và Sóng nhạc -->
+    <div class="mini-player-info">
+      <div class="mini-track-title-wrapper">
+        <span class="mini-track-title" id="mini-track-title">Đang tải...</span>
+        <!-- Sóng nhạc Matcha Wave Indicator của Mini Player -->
+        <div class="mini-wave-indicator hidden" id="mini-player-wave">
+          <span class="mini-wave-bar"></span>
+          <span class="mini-wave-bar"></span>
+          <span class="mini-wave-bar"></span>
+        </div>
+      </div>
+      <span class="mini-track-artist" id="mini-track-artist">Cozy Song 🐾</span>
+    </div>
+    
+    <!-- Cột 3: Nút Play/Pause Matcha tròn -->
     <div class="mini-player-controls">
       <button class="mini-control-btn" id="mini-btn-prev" aria-label="Bài trước">
-        <i class="ph-bold ph-caret-left"></i>
+        <i class="ph-light ph-caret-left"></i>
       </button>
       <button class="mini-control-btn mini-play-btn" id="mini-btn-play-pause" aria-label="Phát/Tạm dừng">
         <i class="ph-fill ph-play" id="mini-play-icon"></i>
-        <i class="ph-bold ph-pause hidden" id="mini-pause-icon"></i>
+        <i class="ph-fill ph-pause hidden" id="mini-pause-icon"></i>
       </button>
       <button class="mini-control-btn" id="mini-btn-next" aria-label="Bài tiếp theo">
-        <i class="ph-bold ph-caret-right"></i>
+        <i class="ph-light ph-caret-right"></i>
       </button>
+    </div>
+
+    <!-- Thanh tiến trình ở trên cùng (đặt ở cuối HTML và absolute để không ảnh hưởng Flexbox) -->
+    <div class="mini-player-progress-container">
+      <div id="mini-player-progress-bar" class="mini-player-progress-bar"></div>
     </div>
   </div>
 </Layout>
 
 <style is:global>
+  html, body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
   /* Base View Background */
   .music-lounge-view {
     background-color: var(--cozy-bg-beige);
@@ -198,6 +219,9 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     padding-bottom: 6rem;
     position: relative;
     z-index: 1;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
   }
 
   .music-lounge-view::before {
@@ -1046,11 +1070,16 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
   @media (max-width: 1023px) {
     .tracks-list-card {
-      max-height: 250px; /* Giới hạn để album + bài hát cùng nằm trên 1 màn hình */
+      max-height: 480px; /* Tăng chiều cao để chứa ít nhất 8 bài hát */
+      padding: 1rem;
     }
     
     .tracks-list-container {
-      max-height: 180px !important;
+      max-height: 410px !important; /* Đủ hiển thị trên 8 bài hát không cần cuộn */
+    }
+
+    .track-item-row {
+      padding: 0.35rem 0.5rem !important; /* Giảm padding tối đa trên mobile để tiết kiệm diện tích */
     }
   }
 
@@ -1094,6 +1123,7 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     display: flex;
     align-items: center;
     gap: 0.95rem;
+    min-width: 0;
   }
 
   /* Nút Play hover */
@@ -1130,6 +1160,7 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
+    min-width: 0;
   }
 
   .track-row-title {
@@ -1138,6 +1169,9 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     font-weight: 600;
     color: var(--cozy-text-obsidian);
     transition: color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .track-item-row.active .track-row-title {
@@ -1148,6 +1182,9 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     font-family: 'Inter', sans-serif;
     font-size: 0.72rem;
     color: #8E8E93;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .track-row-duration {
@@ -1347,15 +1384,27 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
   }
 
   @media (max-width: 1023px) {
+    /* Làm phẳng thành flexbox dọc để loại bỏ hoàn toàn lỗi tràn ngang của CSS Grid */
     .playlist-selection-grid {
-      gap: 0.75rem !important;
-      overflow: hidden;
-      max-width: 100%;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1rem !important;
+      overflow: visible !important; /* Đổi thành visible để cho phép Carousel tràn lề 2 bên màn hình */
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
     }
 
-    /* Hiển thị cột bài hát ngay dưới album */
+    /* Đảm bảo các cột con không bị phình rộng và cho phép tràn băng chuyền album */
+    .playlist-selection-grid .playlists-column,
     .playlist-selection-grid .tracks-column {
       display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding: 0 1rem !important; /* Căn lề an toàn cách mép 16px */
+      box-sizing: border-box !important;
+      overflow: visible !important; /* Cho phép tràn đĩa và album lấp ló cực đẹp */
     }
 
     /* Ẩn tiêu đề cột bài hát trên mobile để bớt chiếm chỗ */
@@ -1363,14 +1412,46 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       display: none !important;
     }
 
-    /* Giới hạn Carousel cuộn ngang ko tràn màn hình gây kéo bg */
+    /* Băng chuyền Album thu nhỏ lại để hiển thị chính xác khoảng 2.2 bìa album trên di động */
+    .playlist-vinyl-item {
+      width: 170px !important; /* Đặt 170px để Album 3 chỉ nhô ra một mép cực nhỏ (~10-20%, tức là 2.2 đĩa) */
+    }
+
+    .vinyl-jacket-container {
+      width: 120px !important; /* Tăng 15% kích thước bao đĩa cho cân đối */
+      height: 120px !important;
+    }
+
+    .vinyl-disc-media {
+      width: 114px !important; /* Đĩa than luôn nhỏ hơn bao đĩa 6px để tránh bị lồi ra ngoài viền */
+      height: 114px !important;
+      left: 3px !important;
+      top: 3px !important;
+    }
+
+    .playlist-vinyl-item.active .vinyl-disc-media {
+      transform: translateX(30px) !important;
+    }
+
+    .playlist-vinyl-title {
+      font-size: 0.82rem !important;
+      text-align: center;
+    }
+
+    .playlist-vinyl-count {
+      font-size: 0.65rem !important;
+    }
+
+    /* Băng chuyền tràn lề full-bleed lướt mượt mà ra sát mép di động */
     .playlists-list-container {
-      max-width: 100% !important;
-      width: 100vw !important;
       box-sizing: border-box;
       overscroll-behavior-x: contain; /* Chặn kéo lan ra background toàn trang */
-      padding: 0.75rem 1rem 1.25rem 1rem !important;
-      gap: 1.5rem !important;
+      width: calc(100% + 72px) !important;
+      max-width: none !important;
+      margin-left: -36px !important;
+      margin-right: -36px !important;
+      padding: 0.5rem 36px 1rem 36px !important; /* Lề trái/phải 36px để bù lại margin âm, đảm bảo căn tăm tắp với tiêu đề */
+      gap: 1rem !important; /* Khoảng cách giữa các album */
     }
   }
 
@@ -1381,36 +1462,29 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     left: 50%;
     transform: translateX(-50%) translateY(120px); /* Ẩn mặc định bên dưới */
     width: calc(100% - 32px);
-    max-width: 460px;
-    height: 64px;
+    max-width: 440px;
+    height: 60px;
     background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--cozy-border-light);
-    border-radius: 32px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.25rem;
+    border-radius: 30px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0 16px !important; /* Lề trái và phải bằng 16px để căn đĩa than cách đều mép cong an toàn */
     z-index: 999;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.3s ease;
     opacity: 0;
     pointer-events: none;
+    overflow: hidden; /* Cần thiết để bo tròn thanh progress bar ở dưới cùng */
   }
 
   .cozy-mini-player-float.visible {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
     pointer-events: auto;
-  }
-
-  .mini-player-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-    flex: 1;
   }
 
   .mini-player-vinyl {
@@ -1421,12 +1495,22 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     position: relative;
     flex-shrink: 0;
-    animation: spinVinyl 8s linear infinite;
+    margin-left: 0px !important; /* Dời đĩa than sát lề trái để padding bằng đúng lề top/bottom (8px) */
+    animation: spinMiniVinyl 8s linear infinite;
     animation-play-state: paused;
   }
 
   .cozy-mini-player-float.playing .mini-player-vinyl {
     animation-play-state: running;
+  }
+
+  @keyframes spinMiniVinyl {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .mini-vinyl-center {
@@ -1441,15 +1525,31 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     transform: translate(-50%, -50%);
   }
 
+  /* Căn lề trái thông tin bài hát */
   .mini-player-info {
     display: flex;
     flex-direction: column;
+    align-items: flex-start !important; /* Căn lề trái */
+    justify-content: center;
+    text-align: left !important; /* Căn lề trái */
+    min-width: 0;
+    padding: 0 0.5rem;
+    margin-left: 14px !important; /* Khoảng cách an toàn ngăn đè chữ lên đĩa than */
+    flex: 1; /* Tự động dãn chiếm hết khoảng giữa */
+  }
+
+  .mini-track-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start !important; /* Căn lề trái */
+    gap: 0.35rem;
+    max-width: 100%;
     min-width: 0;
   }
 
   .mini-track-title {
     font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 750;
     color: var(--cozy-text-obsidian);
     white-space: nowrap;
@@ -1458,43 +1558,92 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     line-height: 1.2;
   }
 
+  /* Sóng nhạc mini (Equalizer mini) cho Float Mini Player */
+  .mini-wave-indicator {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 12px;
+    height: 10px;
+    flex-shrink: 0;
+  }
+
+  .mini-wave-bar {
+    width: 2.2px;
+    height: 100%;
+    background-color: var(--cozy-green-matcha-forest);
+    border-radius: 1px;
+    animation: miniWaveAnimate 1.2s ease-in-out infinite alternate;
+    transform-origin: bottom;
+  }
+
+  .mini-wave-bar:nth-child(1) { animation-delay: 0.15s; }
+  .mini-wave-bar:nth-child(2) { animation-delay: 0.35s; }
+  .mini-wave-bar:nth-child(3) { animation-delay: 0.55s; }
+
+  @keyframes miniWaveAnimate {
+    0% { transform: scaleY(0.25); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* Thanh tiến trình mini ở trên cùng */
+  .mini-player-progress-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: rgba(139, 94, 60, 0.08);
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  .mini-player-progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: var(--cozy-green-matcha-forest);
+    transition: width 0.1s linear;
+  }
+
   .mini-track-artist {
     font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: #8E8E93;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
+    text-align: left !important; /* Căn lề trái */
   }
 
+  /* Ẩn các nút phụ, chỉ giữ nút Play/Pause tròn Matcha ở cột 3 */
   .mini-player-controls {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    margin-right: 0px !important; /* Lề phải bằng đúng lề trái (8px) */
   }
 
-  .mini-control-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: var(--cozy-text-obsidian);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    transition: all 0.2s ease;
-  }
-
-  .mini-control-btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+  #mini-btn-prev, #mini-btn-next {
+    display: none !important;
   }
 
   .mini-play-btn {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    border: none !important;
     background-color: var(--cozy-green-matcha-forest) !important;
     color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1rem !important;
+    box-shadow: 0 2px 6px rgba(74, 138, 46, 0.15) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
 
   .mini-play-btn:hover {
@@ -1502,8 +1651,8 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     transform: scale(1.05);
   }
 
-  .mini-control-btn.hidden {
-    display: none;
+  .mini-play-btn.hidden {
+    display: none !important;
   }
 </style>
 
@@ -1579,6 +1728,8 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     const miniBtnPlayPause = document.getElementById('mini-btn-play-pause');
     const miniBtnNext = document.getElementById('mini-btn-next');
     const miniBtnPrev = document.getElementById('mini-btn-prev');
+    const miniPlayerWave = document.getElementById('mini-player-wave');
+    const miniProgressBar = document.getElementById('mini-player-progress-bar');
 
     let allTracks: any[] = [];
     let groupedPlaylists: Record<string, any> = {};
@@ -1994,6 +2145,8 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
         }
         if (miniPlayIcon) miniPlayIcon.classList.add('hidden');
         if (miniPauseIcon) miniPauseIcon.classList.remove('hidden');
+        const miniPlayerWave = document.getElementById('mini-player-wave');
+        if (miniPlayerWave) miniPlayerWave.classList.remove('hidden');
 
         // Cập nhật lại icon waveform trên hàng bài hát đang phát
         const activeRowIndicator = document.querySelector('.track-item-row.active .track-row-icon-indicator');
@@ -2032,6 +2185,8 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       }
       if (miniPlayIcon) miniPlayIcon.classList.remove('hidden');
       if (miniPauseIcon) miniPauseIcon.classList.add('hidden');
+      const miniPlayerWave = document.getElementById('mini-player-wave');
+      if (miniPlayerWave) miniPlayerWave.classList.add('hidden');
 
       // Đổi icon waveform thành số thứ tự
       const activeRowIndicator = document.querySelector('.track-item-row.active .track-row-icon-indicator');
@@ -2076,6 +2231,7 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
         const percent = (audio.currentTime / audio.duration) * 100;
         if (progressBar) progressBar.style.width = `${percent}%`;
         if (progressHandle) progressHandle.style.left = `${percent}%`;
+        if (miniProgressBar) miniProgressBar.style.width = `${percent}%`;
       }
     });
 

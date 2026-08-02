@@ -4,9 +4,9 @@ import { createZaloPayOrder } from '../../../billing/zalopay';
 import { createMoMoOrder } from '../../../billing/providers/momo';
 
 const PACKAGES = {
-  coin_10k: { amount_vnd: 10000, total_coin: 100 },
-  coin_50k: { amount_vnd: 50000, total_coin: 550 }, // 500 + 50 bonus
-  coin_100k: { amount_vnd: 100000, total_coin: 1150 } // 1000 + 150 bonus
+  coin_10k: { amount_vnd: 10000, total_coin: 10 },
+  coin_50k: { amount_vnd: 50000, total_coin: 55 }, // 50 + 5 bonus
+  coin_100k: { amount_vnd: 100000, total_coin: 115 } // 100 + 15 bonus
 };
 
 export const POST: APIRoute = async ({ request }) => {

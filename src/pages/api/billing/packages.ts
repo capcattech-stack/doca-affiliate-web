@@ -4,27 +4,27 @@ export const GET: APIRoute = async () => {
   const packages = [
     {
       id: "coin_10k",
-      name: "Gói Xu Tina",
+      name: "Gói Cá Tina",
       amount_vnd: 10000,
-      coin_amount: 100,
+      coin_amount: 10,
       bonus_coin: 0,
       description: "Thích hợp nghe thử nhạc premium"
     },
     {
       id: "coin_50k",
-      name: "Gói Xu Latte",
+      name: "Gói Cá Latte",
       amount_vnd: 50000,
-      coin_amount: 500,
-      bonus_coin: 50,
-      description: "Đề xuất: Nhận thêm 50 xu thưởng"
+      coin_amount: 50,
+      bonus_coin: 5,
+      description: "Đề xuất: Nhận thêm 5 cá thưởng"
     },
     {
       id: "coin_100k",
-      name: "Gói Xu Muối",
+      name: "Gói Cá Muối",
       amount_vnd: 100000,
-      coin_amount: 1000,
-      bonus_coin: 150,
-      description: "Tiết kiệm nhất: Nhận thêm 150 xu thưởng"
+      coin_amount: 100,
+      bonus_coin: 15,
+      description: "Tiết kiệm nhất: Nhận thêm 15 cá thưởng"
     }
   ];
 

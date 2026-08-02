@@ -40,18 +40,18 @@ import Layout from '../layouts/Layout.astro';
             <i class="ph-fill ph-check-circle" style="color: var(--cozy-green-matcha-forest);"></i> Đã kết nối Google
           </div>
 
-          <!-- PHẦN THÔNG TIN VÍ XU (TẢI TỪ DATABASE) -->
+          <!-- PHẦN THÔNG TIN VÍ CÁ (TẢI TỪ DATABASE) -->
           <div class="wallet-cta-box">
             <div class="wallet-balance-row">
               <div class="wallet-title">
-                <i class="ph-light ph-coins" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
-                <span>Ví Xu Của Bạn</span>
+                <i class="ph-light ph-fish" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
+                <span>Ví Cá Của Bạn</span>
               </div>
-              <span class="wallet-balance-value" id="wallet-balance">... Xu</span>
+              <span class="wallet-balance-value" id="wallet-balance">... Cá</span>
             </div>
             <div class="wallet-actions-row">
               <a href="/profile/wallet" class="cozy-btn wallet-btn">
-                Nạp thêm xu <i class="ph-light ph-plus-circle"></i>
+                Nạp thêm cá <i class="ph-light ph-plus-circle"></i>
               </a>
               <a href="/profile/wallet?tab=history" class="history-btn" id="wallet-history-btn">
                 Lịch sử <i class="ph-light ph-clock-counter-clockwise"></i>
@@ -191,7 +191,7 @@ import Layout from '../layouts/Layout.astro';
         .then((data: any) => {
           const walletBalanceEl = document.getElementById('wallet-balance');
           if (walletBalanceEl) {
-            walletBalanceEl.textContent = `${data.balance !== undefined ? data.balance : 0} Xu`;
+            walletBalanceEl.textContent = `${data.balance !== undefined ? data.balance : 0} Cá`;
           }
         })
         .catch(err => {

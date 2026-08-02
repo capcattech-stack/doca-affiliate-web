@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 
-<Layout title="Ví Xu & Nạp Tiền | DOCA" description="Quản lý số dư xu và nạp xu trực tuyến qua ZaloPay/MoMo.">
+<Layout title="Ví Cá & Nạp Tiền | DOCA" description="Quản lý số dư cá và nạp cá trực tuyến qua ZaloPay/MoMo.">
   <main class="wallet-view">
     <div class="wallet-page-container">
       <!-- Nút quay lại Profile -->
@@ -12,18 +12,18 @@ import Layout from '../../layouts/Layout.astro';
 
       <!-- Tab điều hướng -->
       <div class="wallet-tabs">
-        <button class="wallet-tab-btn active" id="tab-recharge-btn">Nạp Xu <i class="ph-light ph-plus-circle"></i></button>
+        <button class="wallet-tab-btn active" id="tab-recharge-btn">Nạp Cá <i class="ph-light ph-plus-circle"></i></button>
         <button class="wallet-tab-btn" id="tab-history-btn">Lịch Sử Giao Dịch <i class="ph-light ph-clock-counter-clockwise"></i></button>
       </div>
 
-      <!-- VÙNG 1: NẠP XU -->
+      <!-- VÙNG 1: NẠP CÁ -->
       <div class="wallet-content-section" id="section-recharge">
         <div class="wallet-balance-card">
           <div class="balance-title">Số dư hiện tại của bạn</div>
-          <div class="balance-value" id="current-balance">... Xu</div>
+          <div class="balance-value" id="current-balance">... Cá</div>
         </div>
 
-        <h2 class="section-title">Chọn gói nạp xu</h2>
+        <h2 class="section-title">Chọn gói nạp cá</h2>
         <div class="packages-grid" id="packages-container">
           <div class="loading-placeholder text-center">
             <i class="ph-light ph-spinner-gap spin" style="font-size: 1.5rem; color: var(--cozy-green-matcha-forest);"></i>
@@ -37,7 +37,7 @@ import Layout from '../../layouts/Layout.astro';
           <div class="cozy-bottom-sheet" id="payment-sheet">
             <div class="sheet-header">
               <div class="sheet-handle"></div>
-              <h3 class="sheet-title">Xác nhận nạp xu</h3>
+              <h3 class="sheet-title">Xác nhận nạp cá</h3>
               <button class="sheet-close-btn" id="sheet-close-btn" aria-label="Đóng"><i class="ph-light ph-x"></i></button>
             </div>
             
@@ -45,11 +45,11 @@ import Layout from '../../layouts/Layout.astro';
               <!-- Thông tin gói đã chọn -->
               <div class="selected-package-summary">
                 <div class="summary-left">
-                  <div class="summary-name" id="selected-pkg-name">Gói Xu...</div>
+                  <div class="summary-name" id="selected-pkg-name">Gói Cá...</div>
                   <div class="summary-desc" id="selected-pkg-desc">Mô tả gói...</div>
                 </div>
                 <div class="summary-right">
-                  <div class="summary-coin" id="selected-pkg-coin">0 Xu</div>
+                  <div class="summary-coin" id="selected-pkg-coin">0 Cá</div>
                   <div class="summary-price" id="selected-pkg-price">0đ</div>
                 </div>
               </div>
@@ -216,15 +216,15 @@ import Layout from '../../layouts/Layout.astro';
           card.dataset.id = pkg.id;
           
           const bonusBadge = pkg.bonus_coin > 0 
-            ? `<div class="bonus-badge">+${pkg.bonus_coin} Xu Tặng</div>` 
+            ? `<div class="bonus-badge">+${pkg.bonus_coin} Cá Tặng</div>` 
             : '';
 
           card.innerHTML = `
             ${bonusBadge}
             <div class="package-name">${pkg.name}</div>
             <div class="package-coin">
-              <i class="ph-fill ph-coins" style="color: var(--cozy-green-matcha-forest);"></i>
-              <span>${pkg.coin_amount} Xu</span>
+              <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>
+              <span>${pkg.coin_amount} Cá</span>
             </div>
             <div class="package-price">${pkg.amount_vnd.toLocaleString('vi-VN')} đ</div>
             <div class="package-desc">${pkg.description}</div>
@@ -238,7 +238,7 @@ import Layout from '../../layouts/Layout.astro';
             // Cập nhật thông tin gói trên Bottom Sheet
             if (selectedPkgName) selectedPkgName.textContent = pkg.name;
             if (selectedPkgDesc) selectedPkgDesc.textContent = pkg.description;
-            if (selectedPkgCoin) selectedPkgCoin.textContent = `${pkg.coin_amount} Xu`;
+            if (selectedPkgCoin) selectedPkgCoin.textContent = `${pkg.coin_amount} Cá`;
             if (selectedPkgPrice) selectedPkgPrice.textContent = `${pkg.amount_vnd.toLocaleString('vi-VN')}đ`;
 
             // Mở Bottom Sheet
@@ -319,7 +319,7 @@ import Layout from '../../layouts/Layout.astro';
         if (paymentModal) paymentModal.classList.remove('hidden');
         if (modalPaymentLink) modalPaymentLink.href = data.paymentUrl;
 
-        // Bắt đầu vòng lặp đối soát (auto-polling) kiểm tra số dư xu tăng
+        // Bắt đầu vòng lặp đối soát (auto-polling) kiểm tra số dư cá tăng
         startPolling(activeSessionUser.id);
 
       } catch (err: any) {
@@ -351,10 +351,10 @@ import Layout from '../../layouts/Layout.astro';
               
               // Cập nhật số dư hiển thị mới
               currentBalance = Number(data.balance);
-              if (balanceEl) balanceEl.textContent = `${currentBalance} Xu`;
+              if (balanceEl) balanceEl.textContent = `${currentBalance} Cá`;
 
               // Bắn hoạt ảnh ăn mừng hoặc thông báo
-              alert('🎉 Nạp xu thành công! Số dư của bạn đã được cập nhật.');
+              alert('🎉 Nạp cá thành công! Số dư của bạn đã được cập nhật.');
               window.location.href = '/profile';
             }
           });
@@ -368,13 +368,13 @@ import Layout from '../../layouts/Layout.astro';
       }
     }
 
-    // 7. Hàm tải số dư xu
+    // 7. Hàm tải số dư cá
     function refreshBalance(userId: string) {
       fetch(`/api/billing/balance?userId=${userId}`)
         .then(res => res.json())
         .then((data: any) => {
           currentBalance = data.balance !== undefined ? Number(data.balance) : 0;
-          if (balanceEl) balanceEl.textContent = `${currentBalance} Xu`;
+          if (balanceEl) balanceEl.textContent = `${currentBalance} Cá`;
         })
         .catch(err => {
           console.error('Error loading balance:', err);
@@ -415,10 +415,10 @@ import Layout from '../../layouts/Layout.astro';
           item.className = 'history-item';
           item.innerHTML = `
             <div class="tx-left">
-              <div class="tx-type">${tx.description || (isPlus ? 'Nạp xu' : 'Tiêu dùng')}</div>
+              <div class="tx-type">${tx.description || (isPlus ? 'Nạp cá' : 'Tiêu dùng')}</div>
               <div class="tx-date">${date}</div>
             </div>
-            <div class="${classAmount}">${symbol}${tx.amount} Xu</div>
+            <div class="${classAmount}">${symbol}${tx.amount} Cá</div>
           `;
           historyContainer.appendChild(item);
         });

@@ -1247,47 +1247,31 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     }
   }
 
-  /* Accordion Layout cho Mobile & Tablet */
-  .playlist-polaroid-item {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .mobile-tracklist-wrapper {
-    display: none;
-    width: 100%;
-    margin-top: 0.75rem;
-    padding: 0.5rem;
-    background-color: rgba(244, 248, 240, 0.4);
-    border: 1px solid var(--cozy-border-light);
-    border-radius: 14px;
-    box-sizing: border-box;
-  }
-
   @media (max-width: 1023px) {
+    .playlist-selection-grid {
+      gap: 0.75rem !important;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    /* Hiển thị cột bài hát ngay dưới album */
     .playlist-selection-grid .tracks-column {
+      display: block !important;
+    }
+
+    /* Ẩn tiêu đề cột bài hát trên mobile để bớt chiếm chỗ */
+    .playlist-selection-grid .tracks-column .column-title {
       display: none !important;
     }
 
-    .mobile-tracklist-wrapper.active {
-      display: block !important;
-      animation: cozySlideDown 0.25s ease-out;
-    }
-
+    /* Giới hạn Carousel cuộn ngang ko tràn màn hình gây kéo bg */
     .playlists-list-container {
-      gap: 1rem !important;
-    }
-  }
-
-  @keyframes cozySlideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+      max-width: 100% !important;
+      width: 100vw !important;
+      box-sizing: border-box;
+      overscroll-behavior-x: contain; /* Chặn kéo lan ra background toàn trang */
+      padding: 0.75rem 1rem 1.25rem 1rem !important;
+      gap: 1.5rem !important;
     }
   }
 </style>

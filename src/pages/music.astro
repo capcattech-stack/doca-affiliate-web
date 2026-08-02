@@ -744,155 +744,200 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     color: var(--cozy-green-matcha-forest);
   }
 
-  /* Danh sách Album xếp theo 1 cột */
+  /* Danh sách Album xếp theo hàng ngang Carousel */
   .playlists-list-container {
     display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 2.25rem;
+    padding: 1.25rem 0.5rem 1.75rem 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .playlists-list-container::-webkit-scrollbar {
+    display: none; /* Safari & Chrome */
   }
 
-  .playlist-polaroid {
+  /* Cấu trúc phần tử chứa bao đĩa & đĩa than */
+  .playlist-vinyl-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    scroll-snap-align: center;
+    flex-shrink: 0;
+    width: 190px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  /* Container cho Jacket và Vinyl */
+  .vinyl-jacket-container {
+    width: 130px;
+    height: 130px;
+    position: relative;
+    margin-bottom: 0.85rem;
+    perspective: 800px;
+  }
+
+  /* Bao đĩa than (Vinyl Jacket) */
+  .vinyl-jacket {
+    width: 100%;
+    height: 100%;
     background-color: var(--cozy-bg-pure);
     border: 1px solid var(--cozy-border-light);
-    border-radius: 18px;
-    padding: 0.85rem 1.1rem;
-    box-shadow: 0 3px 12px rgba(139, 94, 60, 0.02);
-    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(139, 94, 60, 0.05);
     display: flex;
-    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    text-align: left;
-    gap: 1.25rem;
+    position: relative;
+    z-index: 10;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
-    overflow: visible;
   }
 
-  .playlist-polaroid:hover {
-    transform: translateX(4px);
-    box-shadow: 0 6px 18px rgba(139, 94, 60, 0.04);
-    border-color: rgba(74, 138, 46, 0.25);
+  .playlist-vinyl-item:hover .vinyl-jacket {
+    transform: translateY(-4px) rotate(-1deg);
+    box-shadow: 0 8px 18px rgba(139, 94, 60, 0.1);
   }
 
-  .playlist-polaroid.active {
+  .playlist-vinyl-item.active .vinyl-jacket {
     border-color: var(--cozy-green-matcha-forest);
-    box-shadow: 0 4px 14px rgba(74, 138, 46, 0.06);
-    background-color: #fcfdfa;
+    box-shadow: 0 4px 12px rgba(74, 138, 46, 0.15);
   }
 
-  /* Ảnh bìa đĩa nhạc giả lập */
-  .playlist-polaroid-disc-art {
-    width: 58px;
-    height: 58px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--cozy-bg-beige) 0%, var(--cozy-bg-oatmeal) 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.03);
-    flex-shrink: 0;
-    overflow: visible; /* Cho phép vinyl ló ra ngoài */
-  }
-
-  /* Vinyl record ló ra sau bìa album khi active */
-  .playlist-polaroid-disc-art::before {
-    content: '';
+  /* Vòng tròn nhãn giữa của bìa */
+  .jacket-art-center {
     position: absolute;
-    width: 50px;
-    height: 50px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: radial-gradient(circle, #2c2c2c 4%, #111 25%, #000 70%);
-    box-shadow: inset 0 0 3px rgba(255,255,255,0.15), 0 2px 5px rgba(0,0,0,0.15);
-    right: 0px;
-    top: 4px;
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
-    z-index: 0;
-    opacity: 0;
-  }
-
-  .playlist-polaroid.active .playlist-polaroid-disc-art::before {
-    transform: translateX(18px) rotate(45deg);
-    opacity: 1;
-    z-index: 1;
-  }
-
-  .disc-art-center {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: var(--cozy-bg-pure);
-    border: 1px solid #111;
-    z-index: 2;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1.5px dashed rgba(28, 28, 30, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: inset 0 0 3px rgba(0,0,0,0.2);
   }
 
-  .disc-art-center::after {
-    content: '';
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background-color: #111;
-  }
-
-  /* Icon phác thảo của album */
-  .playlist-album-illustration-icon {
+  .jacket-icon {
     font-size: 1.6rem;
     color: var(--cozy-wood-sugi);
     opacity: 0.65;
+    z-index: 11;
+  }
+
+  /* Đĩa than đen (Vinyl Disc Media) */
+  .vinyl-disc-media {
+    width: 124px;
+    height: 124px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #2d2d2d 3%, #1a1a1a 8%, #0d0d0d 22%, #1a1a1a 32%, #0d0d0d 45%, #1f1f1f 60%, #000 78%);
+    box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.2), 0 3px 8px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    left: 3px;
+    top: 3px;
     z-index: 2;
-    transition: transform 0.3s ease;
+    transform: translateX(0);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  .playlist-polaroid:hover .playlist-album-illustration-icon {
-    transform: scale(1.1);
+  /* Rãnh đĩa đồng tâm */
+  .vinyl-grooves {
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    left: 5%;
+    top: 5%;
+    border-radius: 50%;
+    border: 1px double rgba(255, 255, 255, 0.04);
   }
 
-  .playlist-polaroid-info {
-    flex: 1;
-    min-width: 0; /* Cho phép flexbox thu nhỏ chính xác */
+  /* Nhãn đĩa ở giữa */
+  .vinyl-center-label {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: var(--cozy-bg-oatmeal);
+    border: 1.5px solid #111;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .playlist-polaroid-title {
+  .vinyl-label-hole {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #000;
+  }
+
+  /* KHI ACTIVE: Rút đĩa than ra bên phải */
+  .playlist-vinyl-item.active .vinyl-disc-media {
+    transform: translateX(45px);
+  }
+
+  /* KHI ĐANG PHÁT NHẠC: Xoay tròn đĩa than */
+  .playlist-vinyl-item.active.playing .vinyl-disc-media {
+    animation: spinVinyl 8s linear infinite;
+  }
+
+  @keyframes spinVinyl {
+    from {
+      transform: translateX(45px) rotate(0deg);
+    }
+    to {
+      transform: translateX(45px) rotate(360deg);
+    }
+  }
+
+  /* Nhãn thông tin Album */
+  .playlist-vinyl-info {
+    text-align: center;
+    width: 100%;
+    padding: 0 0.5rem;
+    z-index: 12;
+  }
+
+  .playlist-vinyl-title {
     font-family: 'Inter', sans-serif;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 750;
     color: var(--cozy-text-obsidian);
-    margin: 0 0 0.25rem 0;
-    line-height: 1.35;
-    /* Cắt chữ thành tối đa 2 dòng khi tên album quá dài */
+    margin: 0 0 0.2rem 0;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    white-space: normal;
   }
 
-  .playlist-polaroid-count {
+  .playlist-vinyl-count {
     font-family: 'Inter', sans-serif;
     font-size: 0.72rem;
     color: #8E8E93;
     display: block;
   }
 
-  /* Chấm xanh lá báo active trên góc card */
-  .playlist-polaroid-active-dot {
+  /* Chấm báo active nhỏ xinh phía trên đĩa active */
+  .playlist-vinyl-active-dot {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 8px;
-    height: 8px;
+    top: -5px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background-color: var(--cozy-green-matcha-forest);
     opacity: 0;
     transition: opacity 0.25s ease;
-    z-index: 5;
   }
 
-  .playlist-polaroid.active .playlist-polaroid-active-dot {
+  .playlist-vinyl-item.active .playlist-vinyl-active-dot {
     opacity: 1;
   }
 

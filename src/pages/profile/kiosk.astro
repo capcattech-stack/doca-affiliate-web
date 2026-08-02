@@ -104,6 +104,15 @@ import Layout from '../../layouts/Layout.astro';
           </div>
 
           <!-- Kiosk Analytics Dashboard (MVP 3 chỉ số) -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0 4px;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--cozy-text-charcoal); display: flex; align-items: center; gap: 4px;">
+              <i class="ph-light ph-chart-bar" style="color: var(--cozy-green-matcha-forest); font-size: 1.05rem;"></i> Thống kê đo lường Kiosk
+            </span>
+            <button id="refresh-analytics-btn" style="background: none; border: none; font-size: 0.95rem; color: var(--cozy-text-charcoal); cursor: pointer; display: flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; outline: none;" title="Làm mới số liệu">
+              <i class="ph-light ph-arrows-clockwise" id="refresh-analytics-icon"></i>
+              <span style="font-size: 0.72rem; font-weight: 700;">Làm mới</span>
+            </button>
+          </div>
           <div class="kiosk-analytics-section" style="background-color: var(--cozy-bg-oatmeal); border: 1.5px solid var(--cozy-border-light); border-radius: 12px; padding: 0.75rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; box-shadow: var(--cozy-shadow-default);">
             <div class="analytics-card" style="background-color: var(--cozy-bg-pure); border: 1px solid rgba(95, 141, 78, 0.25); border-radius: 8px; padding: 0.75rem 0.35rem; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.25rem;">
               <span class="analytics-label" style="font-size: 0.68rem; color: var(--cozy-text-charcoal); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 2px;">
@@ -1193,6 +1202,29 @@ import Layout from '../../layouts/Layout.astro';
           closeAddProductSheet(); // Đóng Bottom Sheet sau khi thêm sản phẩm thành công
           loadKioskLinks(kiosk.id);
         }
+      });
+
+      // --- LOGIC LÀM MỚI SỐ LIỆU THỐNG KÊ ANALYTICS ---
+      const refreshBtn = document.getElementById('refresh-analytics-btn');
+      const refreshIcon = document.getElementById('refresh-analytics-icon');
+
+      refreshBtn?.addEventListener('click', () => {
+        if (refreshIcon) refreshIcon.classList.add('spin');
+        
+        // Fetch lại thông tin creator_kiosks để lấy views_count mới nhất
+        client.from('creator_kiosks')
+          .select('*')
+          .eq('id', kiosk.id)
+          .maybeSingle()
+          .then(({ data: updatedKiosk, error }: any) => {
+            if (!error && updatedKiosk) {
+              kiosk.views_count = updatedKiosk.views_count;
+            }
+            loadKioskLinks(kiosk.id);
+            setTimeout(() => {
+              if (refreshIcon) refreshIcon.classList.remove('spin');
+            }, 600);
+          });
       });
 
       // Tải các link ban đầu

@@ -941,6 +941,44 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     opacity: 1;
   }
 
+  /* Phân trang Album trên Desktop */
+  .playlists-pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    width: 100%;
+  }
+
+  .album-page-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--cozy-border-light);
+    background-color: var(--cozy-bg-pure);
+    color: var(--cozy-text-obsidian);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .album-page-btn:hover {
+    border-color: var(--cozy-green-matcha-forest);
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .album-page-btn.active {
+    background-color: var(--cozy-green-matcha-forest);
+    border-color: var(--cozy-green-matcha-forest);
+    color: #fff;
+  }
+
   /* Tracklist Column */
   .tracks-list-card {
     background-color: var(--cozy-bg-pure);
@@ -1231,19 +1269,36 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     vertical-align: bottom;
   }
 
-  /* Visual Bridge (Đường nối chỉ hướng) kết nối giữa Album và Danh sách bài hát ở màn hình Desktop */
+  /* Bố cục lưới 2 cột 3 hàng trên Desktop */
   @media (min-width: 1024px) {
-    .playlist-polaroid.active::after {
-      content: '';
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-width: 6px 0 6px 8px;
-      border-style: solid;
-      border-color: transparent transparent transparent var(--cozy-green-matcha-forest);
-      z-index: 10;
-      filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.05));
+    .playlists-list-container {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      grid-template-rows: repeat(3, auto) !important;
+      gap: 1.5rem 1rem !important;
+      overflow-x: visible !important;
+      overflow-y: visible !important;
+      padding: 0.5rem 0 !important;
+      width: 100% !important;
+    }
+
+    .playlist-vinyl-item {
+      width: 100% !important;
+      max-width: 175px !important;
+    }
+
+    /* Trên desktop, đĩa active chỉ cần nhô ra 35px để tránh bị lấn sang cột bên cạnh */
+    .playlist-vinyl-item.active .vinyl-disc-media {
+      transform: translateX(35px) !important;
+    }
+
+    @keyframes spinVinyl {
+      from {
+        transform: translateX(35px) rotate(0deg);
+      }
+      to {
+        transform: translateX(35px) rotate(360deg);
+      }
     }
   }
 
@@ -1479,12 +1534,28 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       return 'ph-disc';
     }
 
+    let currentAlbumPage = 1;
+    const albumsPerPage = 6;
+
     // Render danh sách Playlists (Album đĩa than)
     function renderPlaylists() {
       if (!playlistsContainer) return;
       playlistsContainer.innerHTML = '';
 
-      Object.keys(groupedPlaylists).forEach(key => {
+      const keys = Object.keys(groupedPlaylists);
+      const totalAlbums = keys.length;
+      
+      // Trên desktop, áp dụng phân trang nếu có nhiều hơn 6 album
+      const isDesktop = window.innerWidth >= 1024;
+      let keysToShow = keys;
+
+      if (isDesktop && totalAlbums > albumsPerPage) {
+        const start = (currentAlbumPage - 1) * albumsPerPage;
+        const end = start + albumsPerPage;
+        keysToShow = keys.slice(start, end);
+      }
+
+      keysToShow.forEach(key => {
         const pl = groupedPlaylists[key];
         
         // Tạo container cho mỗi Album đĩa than
@@ -1520,6 +1591,48 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
         playlistsContainer.appendChild(card);
       });
+
+      // Tạo thanh phân trang album
+      renderAlbumPagination(totalAlbums);
+    }
+
+    // Tạo thanh phân trang Album trên Desktop
+    function renderAlbumPagination(totalAlbums: number) {
+      let paginationContainer = document.getElementById('playlists-pagination');
+      const isDesktop = window.innerWidth >= 1024;
+
+      if (!isDesktop || totalAlbums <= albumsPerPage) {
+        if (paginationContainer) paginationContainer.style.display = 'none';
+        return;
+      }
+
+      if (!paginationContainer) {
+        paginationContainer = document.createElement('div');
+        paginationContainer.id = 'playlists-pagination';
+        paginationContainer.className = 'playlists-pagination-container';
+        playlistsContainer.parentNode?.insertBefore(paginationContainer, playlistsContainer.nextSibling);
+      }
+
+      paginationContainer.style.display = 'flex';
+      paginationContainer.innerHTML = '';
+
+      const totalPages = Math.ceil(totalAlbums / albumsPerPage);
+
+      // Đảm bảo trang hiện tại không vượt quá tổng số trang mới
+      if (currentAlbumPage > totalPages) {
+        currentAlbumPage = totalPages;
+      }
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = `album-page-btn ${i === currentAlbumPage ? 'active' : ''}`;
+        btn.textContent = i.toString();
+        btn.addEventListener('click', () => {
+          currentAlbumPage = i;
+          renderPlaylists();
+        });
+        paginationContainer.appendChild(btn);
+      }
     }
 
     // Chọn Playlist
@@ -1603,6 +1716,7 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
+        renderPlaylists(); // Cập nhật lại phân trang album responsive khi đổi cỡ màn hình
         renderTracklist();
         // Giữ trạng thái hiển thị track đang phát
         const activeRow = document.querySelector(`.track-item-row[data-index="${activeTrackIndex}"]`);

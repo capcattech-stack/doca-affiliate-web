@@ -40,24 +40,25 @@ import Layout from '../layouts/Layout.astro';
             <i class="ph-fill ph-check-circle" style="color: var(--cozy-green-matcha-forest);"></i> Đã kết nối Google
           </div>
 
-          <!-- PHẦN THÔNG TIN VÍ CÁ (TẢI TỪ DATABASE) -->
-          <div class="wallet-cta-box">
-            <div class="wallet-balance-row">
-              <div class="wallet-title">
-                <i class="ph-light ph-fish" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
-                <span>Ví của bạn</span>
+          {import.meta.env.DEV && (
+            <div class="wallet-cta-box">
+              <div class="wallet-balance-row">
+                <div class="wallet-title">
+                  <i class="ph-light ph-fish" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
+                  <span>Ví của bạn</span>
+                </div>
+                <span class="wallet-balance-value" id="wallet-balance" style="display: inline-flex; align-items: center; gap: 0.25rem;">... <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></span>
               </div>
-              <span class="wallet-balance-value" id="wallet-balance" style="display: inline-flex; align-items: center; gap: 0.25rem;">... <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></span>
+              <div class="wallet-actions-row">
+                <a href="/profile/wallet" class="cozy-btn wallet-btn">
+                  Nạp thêm <i class="ph-light ph-plus-circle"></i>
+                </a>
+                <a href="/profile/wallet?tab=history" class="history-btn" id="wallet-history-btn">
+                  Lịch sử <i class="ph-light ph-clock-counter-clockwise"></i>
+                </a>
+              </div>
             </div>
-            <div class="wallet-actions-row">
-              <a href="/profile/wallet" class="cozy-btn wallet-btn">
-                Nạp thêm <i class="ph-light ph-plus-circle"></i>
-              </a>
-              <a href="/profile/wallet?tab=history" class="history-btn" id="wallet-history-btn">
-                Lịch sử <i class="ph-light ph-clock-counter-clockwise"></i>
-              </a>
-            </div>
-          </div>
+          )}
 
           <!-- PHẦN THÔNG TIN KIOSK (DỰA VÀO TRẠNG THÁI DATABASE) -->
           <div class="kiosk-cta-box">
@@ -186,13 +187,13 @@ import Layout from '../layouts/Layout.astro';
 
     // --- HÀM TẢI THÔNG TIN VÍ XU ---
     function loadWalletInfo(userId: string) {
+      const walletBalanceEl = document.getElementById('wallet-balance');
+      if (!walletBalanceEl) return;
+      
       fetch(`/api/billing/balance?userId=${userId}`)
         .then(res => res.json())
         .then((data: any) => {
-          const walletBalanceEl = document.getElementById('wallet-balance');
-          if (walletBalanceEl) {
-            walletBalanceEl.innerHTML = `${data.balance !== undefined ? data.balance : 0} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
-          }
+          walletBalanceEl.innerHTML = `${data.balance !== undefined ? data.balance : 0} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
         })
         .catch(err => {
           console.error('Error loading wallet info:', err);

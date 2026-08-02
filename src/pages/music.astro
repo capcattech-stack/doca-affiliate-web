@@ -163,6 +163,31 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
   <!-- Audio Element ẩn -->
   <audio id="lounge-audio-player" preload="auto"></audio>
+
+  <!-- Mini Player Float Widget neo dưới bottom -->
+  <div id="cozy-mini-player" class="cozy-mini-player-float">
+    <div class="mini-player-left">
+      <div class="mini-player-vinyl">
+        <div class="mini-vinyl-center"></div>
+      </div>
+      <div class="mini-player-info">
+        <span class="mini-track-title" id="mini-track-title">Đang tải...</span>
+        <span class="mini-track-artist" id="mini-track-artist">Cozy Song 🐾</span>
+      </div>
+    </div>
+    <div class="mini-player-controls">
+      <button class="mini-control-btn" id="mini-btn-prev" aria-label="Bài trước">
+        <i class="ph-bold ph-caret-left"></i>
+      </button>
+      <button class="mini-control-btn mini-play-btn" id="mini-btn-play-pause" aria-label="Phát/Tạm dừng">
+        <i class="ph-fill ph-play" id="mini-play-icon"></i>
+        <i class="ph-bold ph-pause hidden" id="mini-pause-icon"></i>
+      </button>
+      <button class="mini-control-btn" id="mini-btn-next" aria-label="Bài tiếp theo">
+        <i class="ph-bold ph-caret-right"></i>
+      </button>
+    </div>
+  </div>
 </Layout>
 
 <style is:global>
@@ -986,6 +1011,8 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     padding: 1.5rem;
     box-shadow: 0 4px 15px rgba(139, 94, 60, 0.02);
     border: 1px solid rgba(139, 94, 60, 0.05);
+    display: flex;
+    flex-direction: column;
   }
 
   .tracks-table-header {
@@ -999,15 +1026,32 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     padding-bottom: 0.95rem;
     border-bottom: 1px solid var(--cozy-border-light);
     margin-bottom: 0.75rem;
+    flex-shrink: 0;
   }
 
   .tracks-list-container {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    max-height: 480px;
+    flex: 1;
     overflow-y: auto;
     padding-right: 0.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    .tracks-list-card {
+      height: 560px; /* Chiều cao cố định cân đối với kệ 6 album bên tay trái */
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .tracks-list-card {
+      max-height: 250px; /* Giới hạn để album + bài hát cùng nằm trên 1 màn hình */
+    }
+    
+    .tracks-list-container {
+      max-height: 180px !important;
+    }
   }
 
   /* Custom Scrollbar cho Tracklist */
@@ -1329,6 +1373,138 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       gap: 1.5rem !important;
     }
   }
+
+  /* Cozy Mini Player Float Widget neo dưới bottom */
+  .cozy-mini-player-float {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120px); /* Ẩn mặc định bên dưới */
+    width: calc(100% - 32px);
+    max-width: 460px;
+    height: 64px;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 32px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    z-index: 999;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cozy-mini-player-float.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mini-player-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .mini-player-vinyl {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #2d2d2d 3%, #1a1a1a 12%, #000 70%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    flex-shrink: 0;
+    animation: spinVinyl 8s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .cozy-mini-player-float.playing .mini-player-vinyl {
+    animation-play-state: running;
+  }
+
+  .mini-vinyl-center {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--cozy-bg-oatmeal);
+    border: 1px solid #111;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .mini-player-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .mini-track-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 750;
+    color: var(--cozy-text-obsidian);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+
+  .mini-track-artist {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    color: #8E8E93;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mini-player-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mini-control-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--cozy-text-obsidian);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+  }
+
+  .mini-control-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .mini-play-btn {
+    background-color: var(--cozy-green-matcha-forest) !important;
+    color: #fff !important;
+  }
+
+  .mini-play-btn:hover {
+    background-color: var(--cozy-wood-sugi) !important;
+    transform: scale(1.05);
+  }
+
+  .mini-control-btn.hidden {
+    display: none;
+  }
 </style>
 
 <script>
@@ -1393,6 +1569,16 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
     const playlistsContainer = document.getElementById('playlists-container');
     const tracksListContainer = document.getElementById('tracks-list-container');
+
+    // Float Mini Player DOM elements
+    const miniPlayer = document.getElementById('cozy-mini-player');
+    const miniPlayIcon = document.getElementById('mini-play-icon');
+    const miniPauseIcon = document.getElementById('mini-pause-icon');
+    const miniTrackTitle = document.getElementById('mini-track-title');
+    const miniTrackArtist = document.getElementById('mini-track-artist');
+    const miniBtnPlayPause = document.getElementById('mini-btn-play-pause');
+    const miniBtnNext = document.getElementById('mini-btn-next');
+    const miniBtnPrev = document.getElementById('mini-btn-prev');
 
     let allTracks: any[] = [];
     let groupedPlaylists: Record<string, any> = {};
@@ -1747,6 +1933,10 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       if (trackTitleDisplay) trackTitleDisplay.textContent = track.title;
       if (trackArtistDisplay) trackArtistDisplay.textContent = track.artist || 'Cozy Song 🐾';
 
+      // Cập nhật Float Mini Player
+      if (miniTrackTitle) miniTrackTitle.textContent = track.title;
+      if (miniTrackArtist) miniTrackArtist.textContent = track.artist || 'Cozy Song 🐾';
+
       // Cập nhật active indicator trên bảng tracklist
       const rows = document.querySelectorAll('.track-item-row');
       rows.forEach((row, rIdx) => {
@@ -1792,6 +1982,19 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
         vinylDisc?.classList.add('playing');
         vinylArm?.classList.add('active');
 
+        // Bật xoay đĩa than trên Album active
+        const activeAlbum = document.querySelector('.playlist-vinyl-item.active');
+        if (activeAlbum) {
+          activeAlbum.classList.add('playing');
+        }
+
+        // Bật xoay đĩa và đổi icon trên Float Mini Player
+        if (miniPlayer) {
+          miniPlayer.classList.add('playing');
+        }
+        if (miniPlayIcon) miniPlayIcon.classList.add('hidden');
+        if (miniPauseIcon) miniPauseIcon.classList.remove('hidden');
+
         // Cập nhật lại icon waveform trên hàng bài hát đang phát
         const activeRowIndicator = document.querySelector('.track-item-row.active .track-row-icon-indicator');
         if (activeRowIndicator) {
@@ -1816,6 +2019,19 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       pauseIcon?.classList.add('hidden');
       vinylDisc?.classList.remove('playing');
       vinylArm?.classList.remove('active');
+
+      // Tắt xoay đĩa than trên Album active
+      const activeAlbum = document.querySelector('.playlist-vinyl-item.active');
+      if (activeAlbum) {
+        activeAlbum.classList.remove('playing');
+      }
+
+      // Tắt xoay đĩa và đổi icon trên Float Mini Player
+      if (miniPlayer) {
+        miniPlayer.classList.remove('playing');
+      }
+      if (miniPlayIcon) miniPlayIcon.classList.remove('hidden');
+      if (miniPauseIcon) miniPauseIcon.classList.add('hidden');
 
       // Đổi icon waveform thành số thứ tự
       const activeRowIndicator = document.querySelector('.track-item-row.active .track-row-icon-indicator');
@@ -1888,6 +2104,41 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
     volumeSlider?.addEventListener('input', () => {
       audio.volume = parseFloat(volumeSlider.value);
     });
+
+    // --- 3. FLOAT MINI PLAYER LOGIC ---
+    // Điều khiển phát/dừng trên Mini Player
+    miniBtnPlayPause?.addEventListener('click', () => {
+      if (isPlaying) {
+        pauseAudio();
+      } else {
+        playAudio();
+      }
+    });
+
+    miniBtnNext?.addEventListener('click', () => {
+      btnNext?.click();
+    });
+
+    miniBtnPrev?.addEventListener('click', () => {
+      btnPrev?.click();
+    });
+
+    // Theo dõi cuộn trang hiển thị Float Mini Player (vượt quá 70% widget chính)
+    window.addEventListener('scroll', () => {
+      const mainPlayerCard = document.querySelector('.cozy-vinyl-card');
+      if (!mainPlayerCard || !miniPlayer) return;
+
+      const rect = mainPlayerCard.getBoundingClientRect();
+      const playerHeight = rect.height;
+      const playerTop = rect.top + window.scrollY;
+      const triggerPoint = playerTop + playerHeight * 0.7;
+
+      if (window.scrollY > triggerPoint) {
+        miniPlayer.classList.add('visible');
+      } else {
+        miniPlayer.classList.remove('visible');
+      }
+    }, { passive: true });
 
     // Khởi tạo
     loadPlaylistData();

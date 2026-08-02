@@ -1,3 +1,4 @@
+export const prerender = false;
 import type { APIRoute } from 'astro';
 import { verifyMoMoCallback } from '../../../../billing/providers/momo';
 import { completePaymentOrder } from '../../../../billing/wallet-service';

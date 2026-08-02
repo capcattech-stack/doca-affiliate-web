@@ -1201,6 +1201,50 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
       filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.05));
     }
   }
+
+  /* Accordion Layout cho Mobile & Tablet */
+  .playlist-polaroid-item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .mobile-tracklist-wrapper {
+    display: none;
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background-color: rgba(244, 248, 240, 0.4);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 14px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 1023px) {
+    .playlist-selection-grid .tracks-column {
+      display: none !important;
+    }
+
+    .mobile-tracklist-wrapper.active {
+      display: block !important;
+      animation: cozySlideDown 0.25s ease-out;
+    }
+
+    .playlists-list-container {
+      gap: 1rem !important;
+    }
+  }
+
+  @keyframes cozySlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <script>
@@ -1413,6 +1457,11 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
       Object.keys(groupedPlaylists).forEach(key => {
         const pl = groupedPlaylists[key];
+        
+        // Tạo container bọc ngoài cho mỗi Polaroid Album
+        const itemContainer = document.createElement('div');
+        itemContainer.className = 'playlist-polaroid-item';
+
         const card = document.createElement('div');
         card.className = `playlist-polaroid ${key === activePlaylistKey ? 'active' : ''}`;
         card.setAttribute('data-key', key);
@@ -1433,7 +1482,15 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
           selectPlaylist(key);
         });
 
-        playlistsContainer.appendChild(card);
+        itemContainer.appendChild(card);
+
+        // Tạo wrapper chứa danh sách bài hát trên Mobile
+        const mobileWrapper = document.createElement('div');
+        mobileWrapper.className = `mobile-tracklist-wrapper ${key === activePlaylistKey ? 'active' : ''}`;
+        mobileWrapper.id = `mobile-tracklist-wrapper-${key}`;
+        itemContainer.appendChild(mobileWrapper);
+
+        playlistsContainer.appendChild(itemContainer);
       });
     }
 
@@ -1465,47 +1522,120 @@ const r2PublicDomain = import.meta.env.PUBLIC_R2_PUBLIC_DOMAIN || 'https://pub-0
 
     // Render danh sách bài hát trong Playlist được chọn
     function renderTracklist() {
-      if (!tracksListContainer) return;
-      tracksListContainer.innerHTML = '';
-
+      const isMobile = window.innerWidth < 1024;
       const pl = groupedPlaylists[activePlaylistKey];
-      if (!pl || pl.tracks.length === 0) {
-        tracksListContainer.innerHTML = `<div class="track-loading-placeholder">Album này chưa có giai điệu nào.</div>`;
-        return;
-      }
 
-      pl.tracks.forEach((track: any, index: number) => {
-        const row = document.createElement('div');
-        row.className = `track-item-row ${index === activeTrackIndex ? 'active' : ''}`;
-        row.setAttribute('data-index', index.toString());
-
-        row.innerHTML = `
-          <div class="track-row-left">
-            <div class="track-row-icon-indicator">
-              <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
-              ${index === activeTrackIndex && isPlaying ? `
-                <div class="cozy-wave-indicator">
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
-                  <span class="wave-bar"></span>
-                </div>
-              ` : `<span class="track-index-num whisper-mono">${index + 1}</span>`}
-            </div>
-            <div class="track-row-details">
-              <span class="track-row-title">${track.title}</span>
-              <span class="track-row-artist">${track.artist || 'Cozy Song 🐾'}</span>
-            </div>
-          </div>
-          <span class="track-row-duration">${formatTime(track.duration)}</span>
-        `;
-
-        row.addEventListener('click', () => {
-          loadTrack(index, true); // Nạp bài và phát ngay
-        });
-
-        tracksListContainer.appendChild(row);
+      // Làm sạch toàn bộ các mobile wrappers trước
+      const allWrappers = document.querySelectorAll('.mobile-tracklist-wrapper');
+      allWrappers.forEach(w => {
+        w.innerHTML = '';
+        w.classList.remove('active');
       });
+
+      if (isMobile) {
+        // Giao diện Mobile: Render vào mobile wrapper tương ứng của Album active
+        const activeWrapper = document.getElementById(`mobile-tracklist-wrapper-${activePlaylistKey}`);
+        if (activeWrapper && pl && pl.tracks.length > 0) {
+          activeWrapper.classList.add('active');
+          
+          const listContainer = document.createElement('div');
+          listContainer.className = 'tracks-list-container';
+          
+          pl.tracks.forEach((track: any, index: number) => {
+            const row = document.createElement('div');
+            row.className = `track-item-row ${index === activeTrackIndex ? 'active' : ''}`;
+            row.setAttribute('data-index', index.toString());
+
+            row.innerHTML = `
+              <div class="track-row-left">
+                <div class="track-row-icon-indicator">
+                  <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
+                  ${index === activeTrackIndex && isPlaying ? `
+                    <div class="cozy-wave-indicator">
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                      <span class="wave-bar"></span>
+                    </div>
+                  ` : `<span class="track-index-num whisper-mono">${index + 1}</span>`}
+                </div>
+                <div class="track-row-details">
+                  <span class="track-row-title">${track.title}</span>
+                  <span class="track-row-artist">${track.artist || 'Cozy Song 🐾'}</span>
+                </div>
+              </div>
+              <span class="track-row-duration">${formatTime(track.duration)}</span>
+            `;
+
+            row.addEventListener('click', () => {
+              loadTrack(index, true); // Nạp bài và phát ngay
+            });
+
+            listContainer.appendChild(row);
+          });
+          activeWrapper.appendChild(listContainer);
+        }
+        
+        // Làm trống container trên desktop để đồng bộ danh sách track DOM duy nhất
+        if (tracksListContainer) {
+          tracksListContainer.innerHTML = '';
+        }
+      } else {
+        // Giao diện Desktop: Render vào cột bên phải như cũ
+        if (!tracksListContainer) return;
+        tracksListContainer.innerHTML = '';
+
+        if (!pl || pl.tracks.length === 0) {
+          tracksListContainer.innerHTML = `<div class="track-loading-placeholder">Album này chưa có giai điệu nào.</div>`;
+          return;
+        }
+
+        pl.tracks.forEach((track: any, index: number) => {
+          const row = document.createElement('div');
+          row.className = `track-item-row ${index === activeTrackIndex ? 'active' : ''}`;
+          row.setAttribute('data-index', index.toString());
+
+          row.innerHTML = `
+            <div class="track-row-left">
+              <div class="track-row-icon-indicator">
+                <span class="track-play-hover-btn"><i class="ph-fill ph-play-circle"></i></span>
+                ${index === activeTrackIndex && isPlaying ? `
+                  <div class="cozy-wave-indicator">
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                    <span class="wave-bar"></span>
+                  </div>
+                ` : `<span class="track-index-num whisper-mono">${index + 1}</span>`}
+              </div>
+              <div class="track-row-details">
+                <span class="track-row-title">${track.title}</span>
+                <span class="track-row-artist">${track.artist || 'Cozy Song 🐾'}</span>
+              </div>
+            </div>
+            <span class="track-row-duration">${formatTime(track.duration)}</span>
+          `;
+
+          row.addEventListener('click', () => {
+            loadTrack(index, true); // Nạp bài và phát ngay
+          });
+
+          tracksListContainer.appendChild(row);
+        });
+      }
     }
+
+    // Tự động lắng nghe thay đổi kích thước cửa sổ để xoay giao diện động
+    let resizeTimer: any;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        renderTracklist();
+        // Giữ trạng thái hiển thị track đang phát
+        const activeRow = document.querySelector(`.track-item-row[data-index="${activeTrackIndex}"]`);
+        if (activeRow) {
+          activeRow.classList.add('active');
+        }
+      }, 100);
+    });
 
     // Nạp bài hát vào player
     function loadTrack(index: number, autoPlay = true) {

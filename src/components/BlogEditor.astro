@@ -1,0 +1,1522 @@
+---
+// Component soạn thảo bài viết Blog phong cách Notion tối giản tích hợp AI Hiệu Đính
+// Thiết kế và tinh chỉnh bởi Maya (UI/UX Designer) theo đúng tinh thần Muji Minimalism & Iyashikei
+// Hỗ trợ Thanh bên (Left Sidebar) quản lý bài viết động từ Supabase
+---
+
+<div class="notion-editor-container" id="editor-container">
+  
+  <!-- Left Sidebar: Quản lý danh sách bài viết -->
+  <aside class="editor-sidebar" id="editor-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title"><i class="ph-light ph-notebook"></i> Bản thảo của tôi</span>
+      <button type="button" class="btn-new-post" id="btn-new-post-sidebar" title="Tạo bài viết mới">
+        <i class="ph-light ph-plus"></i> Bài mới
+      </button>
+    </div>
+    
+    <!-- Danh sách bài viết sẽ được render động ở đây -->
+    <div class="sidebar-list" id="sidebar-blog-list">
+      <div class="sidebar-loading"><i class="ph-light ph-spinner-gap spin"></i> Đang tải...</div>
+    </div>
+
+    <!-- Góc tài khoản người dùng dưới chân sidebar -->
+    <div class="sidebar-footer">
+      <div class="user-capsule">
+        <i class="ph-light ph-user-circle"></i>
+        <span class="user-email-text" id="sidebar-user-email">Đang kết nối...</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Vùng làm việc chính bên phải -->
+  <div class="editor-workspace-wrapper">
+    <!-- Header Bar: Nắp gập thông minh chứa nút Toggle Sidebar, Toolbar và các nút hành động chính -->
+    <header class="editor-header-bar">
+      <div class="header-left-group">
+        <!-- Nút Toggle đóng mở Sidebar kiểu Notion -->
+        <button type="button" class="toolbar-btn sidebar-toggle-btn active" id="btn-toggle-sidebar" title="Đóng/Mở thanh bên">
+          <i class="ph-light ph-sidebar-simple"></i>
+        </button>
+
+        <a href="/blog" class="editor-back-link" title="Quay lại trang Blog">
+          <i class="ph-light ph-caret-left"></i> Trang Blog
+        </a>
+        
+        <span class="header-divider-vertical"></span>
+
+        <!-- Toolbar Định dạng Tối Giản -->
+        <div class="editor-toolbar" id="editor-toolbar">
+          <button type="button" class="toolbar-btn" data-action="bold" title="In đậm (Ctrl+B)"><i class="ph-light ph-text-bolder"></i></button>
+          <button type="button" class="toolbar-btn" data-action="italic" title="In nghiêng (Ctrl+I)"><i class="ph-light ph-text-italic"></i></button>
+          <button type="button" class="toolbar-btn" data-action="h2" title="Tiêu đề lớn H2"><i class="ph-light ph-text-h-two"></i></button>
+          <button type="button" class="toolbar-btn" data-action="h3" title="Tiêu đề phụ H3"><i class="ph-light ph-text-h-three"></i></button>
+          <button type="button" class="toolbar-btn" data-action="blockquote" title="Trích dẫn chữ"><i class="ph-light ph-quotes"></i></button>
+          <button type="button" class="toolbar-btn" data-action="bulletList" title="Danh sách liệt kê"><i class="ph-light ph-list-bullets"></i></button>
+          <span class="toolbar-divider"></span>
+          <button type="button" class="toolbar-btn" id="insert-image-btn" title="Chèn ảnh minh họa"><i class="ph-light ph-image"></i></button>
+          <button type="button" class="toolbar-btn" id="insert-product-btn" title="Nhúng Card sản phẩm Kiosk"><i class="ph-light ph-gift"></i></button>
+        </div>
+      </div>
+
+      <!-- Nhóm nút hành động bên phải -->
+      <div class="editor-action-buttons">
+        <!-- Nút hiệu đính AI nổi bật với hiệu ứng phát sáng nhẹ -->
+        <button type="button" class="btn-ai-trigger" id="btn-open-ai-sheet">
+          <i class="ph-fill ph-sparkle"></i> Hiệu đính AI
+        </button>
+        
+        <!-- Nút thiết lập mở Drawer -->
+        <button type="button" class="btn-settings-toggle" id="btn-toggle-settings" title="Thiết lập thuộc tính bài viết">
+          <i class="ph-light ph-sliders"></i> Cấu hình
+        </button>
+        
+        <button type="button" class="btn-publish-action" id="btn-publish-main">
+          <i class="ph-light ph-paper-plane-launch"></i> Đăng bài
+        </button>
+      </div>
+    </header>
+
+    <!-- Panel Thiết lập bài viết (Trượt ẩn/hiện) -->
+    <div class="editor-settings-drawer hidden" id="editor-settings-drawer">
+      <div class="drawer-header">
+        <h4><i class="ph-light ph-gear"></i> Thuộc tính bài viết</h4>
+        <button type="button" id="btn-close-settings" class="btn-close-drawer">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="form-group">
+          <label for="blog-desc">Mô tả ngắn gọn (SEO)</label>
+          <textarea id="blog-desc" rows="3" placeholder="Ví dụ: Lời khuyên chân thành giúp giải tỏa áp lực cho Sen khi Boss biếng ăn..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="blog-category">Danh mục bài đăng</label>
+          <select id="blog-category">
+            <option value="vat_pham">Chăm Sóc Thú Cưng 🐾</option>
+            <option value="thuc_an">Dinh Dưỡng Cho Boss 🐟</option>
+            <option value="sach">Sách & Kiến Thức 📚</option>
+            <option value="phu_kien">Không Gian Sống Xanh 🌿</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="blog-pillar">Trụ cột lối sống (Pillar)</label>
+          <select id="blog-pillar">
+            <option value="nhip_tho">Nhịp Thở Đồng Diệu</option>
+            <option value="lang_kinh">Lăng Kính Của Pet</option>
+            <option value="hop_ky_uc">Hộp Ký Ức Bình Yên</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="blog-cover">Đường dẫn ảnh bìa bài viết</label>
+          <input type="text" id="blog-cover" placeholder="Dán link ảnh Unsplash..." />
+        </div>
+        
+        <div class="drawer-footer-actions">
+          <button type="button" class="btn-save-draft-secondary" id="btn-save-draft"><i class="ph-light ph-floppy-disk"></i> Lưu bản nháp</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vùng soạn thảo chính (Notion-style) -->
+    <main class="notion-workspace">
+      <div class="notion-sheet-page">
+        <!-- Input tiêu đề bài viết lớn, tinh tế và borderless -->
+        <input type="text" id="blog-title" class="notion-title-input" placeholder="Tiêu đề bài viết..." autofocus />
+        
+        <!-- Canvas Editor Tiptap -->
+        <div class="tiptap-editor-container">
+          <div id="editor-canvas"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Bottom Sheet Hiệu Đính AI (Slide up mượt mà) -->
+  <div id="ai-bottom-sheet" class="cozy-bottom-sheet">
+    <div class="cozy-sheet-backdrop" id="ai-sheet-backdrop"></div>
+    <div class="cozy-sheet-content">
+      <div class="cozy-sheet-drag-handle"></div>
+      
+      <div class="cozy-sheet-header">
+        <div class="ai-badge-capsule">
+          <i class="ph-fill ph-sparkle"></i> Trợ Lý Hiệu Đính AI
+        </div>
+        <button type="button" id="ai-sheet-close-btn" class="sheet-close-btn">
+          <i class="ph-light ph-x"></i>
+        </button>
+      </div>
+
+      <div class="cozy-sheet-body">
+        <div class="ai-layout-grid">
+          <!-- Cột tùy chỉnh chế độ AI -->
+          <div class="ai-options-panel">
+            <div class="ai-tabs">
+              <button type="button" class="ai-tab-btn active" data-tab="tab-draft">Chấp bút</button>
+              <button type="button" class="ai-tab-btn" data-tab="tab-format">Giàn trang</button>
+            </div>
+
+            <!-- Tab 1: Chấp bút -->
+            <div class="ai-tab-content active" id="tab-draft">
+              <p class="ai-instructions">Hãy phác thảo một vài ý tưởng chính hoặc từ khóa thô của bạn dưới đây. AI sẽ giúp bạn dệt nên bài viết hoàn hảo.</p>
+              <div class="form-group-ai">
+                <label for="ai-draft-outline">Dàn ý thô</label>
+                <textarea id="ai-draft-outline" rows="4" placeholder="Ví dụ:&#10;- Nuôi mèo giúp giảm stress.&#10;- Nghe tiếng gừ gừ (purr) của mèo Muối vào mỗi tối.&#10;- Cảm thấy được ôm ấp vỗ về sau một ngày mệt mỏi ở cơ quan."></textarea>
+              </div>
+            </div>
+
+            <!-- Tab 2: Biên tập giàn trang -->
+            <div class="ai-tab-content" id="tab-format">
+              <p class="ai-instructions">AI sẽ tự động đọc bài viết nháp hiện tại của bạn, tiến hành ngắt dòng (tối đa 4 câu/đoạn), định dạng H2/H3, blockquote cảm xúc và gợi ý các vị trí chèn ảnh trực quan.</p>
+            </div>
+
+            <!-- Thiết lập Curator Voice trực tiếp trong AI Sheet -->
+            <div class="form-group-ai-curator">
+              <label for="blog-curator-ai">Giọng văn Curator (Chú mèo đại diện)</label>
+              <select id="blog-curator-ai">
+                <option value="Tina">Tina (Thông thái, triết lý chữa lành)</option>
+                <option value="Latte">Latte (Tinh nghịch, vui vẻ)</option>
+                <option value="Muối">Muối (Ấm áp, thủ thỉ tâm sự)</option>
+              </select>
+            </div>
+
+            <!-- Nút chạy hiệu đính -->
+            <button type="button" class="btn-run-ai" id="btn-run-ai-action">
+              <span class="btn-text"><i class="ph-light ph-lightning"></i> Bắt đầu hiệu đính</span>
+              <span class="btn-loading hidden"><i class="ph-light ph-spinner-gap spin"></i> AI đang viết...</span>
+            </button>
+          </div>
+
+          <!-- Cột hiển thị kết quả Xem trước -->
+          <div class="ai-preview-panel">
+            <h4 class="preview-title"><i class="ph-light ph-eye"></i> Bản xem trước kết quả</h4>
+            <div class="ai-preview-container" id="ai-result-preview">
+              <span class="preview-placeholder">Gợi ý câu chữ và bố cục bài viết hiệu đính từ AI sẽ hiển thị ở đây...</span>
+            </div>
+            <div class="ai-preview-actions">
+              <button type="button" class="btn-apply-ai hidden" id="btn-apply-ai">
+                <i class="ph-light ph-check"></i> Áp dụng vào trang soạn thảo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts tải Tiptap client-side qua ESM -->
+<script>
+  import { Editor } from 'https://esm.sh/@tiptap/core';
+  import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
+  import Image from 'https://esm.sh/@tiptap/extension-image';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Biến lưu trữ ID của bài viết hiện đang soạn thảo (null nếu là bài viết mới)
+    let currentBlogId = null;
+    let allUserBlogs = []; // Lưu trữ danh sách bài viết để chuyển đổi nhanh
+
+    // 1. Khởi tạo Tiptap Editor
+    const editor = new Editor({
+      element: document.querySelector('#editor-canvas')!,
+      extensions: [
+        StarterKit,
+        Image.configure({
+          allowBase64: true,
+          HTMLAttributes: {
+            class: 'blog-body-inline-image',
+          },
+        }),
+      ],
+      content: '<p>Gõ những suy nghĩ thô mộc của bạn tại đây để bắt đầu câu chuyện...</p>',
+      onUpdate({ editor }) {
+        updateToolbarState();
+      }
+    });
+
+    // 2. Toolbar định dạng
+    const toolbar = document.getElementById('editor-toolbar')!;
+    toolbar.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const action = btn.getAttribute('data-action')!;
+        
+        if (action === 'bold') editor.chain().focus().toggleBold().run();
+        if (action === 'italic') editor.chain().focus().toggleItalic().run();
+        if (action === 'h2') editor.chain().focus().toggleHeading({ level: 2 }).run();
+        if (action === 'h3') editor.chain().focus().toggleHeading({ level: 3 }).run();
+        if (action === 'blockquote') editor.chain().focus().toggleBlockquote().run();
+        if (action === 'bulletList') editor.chain().focus().toggleBulletList().run();
+        updateToolbarState();
+      });
+    });
+
+    // Chèn ảnh
+    document.getElementById('insert-image-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = prompt('Nhập đường dẫn hình ảnh (Unsplash):', 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600');
+      if (url) {
+        editor.chain().focus().setImage({ src: url }).run();
+      }
+    });
+
+    // Chèn Card sản phẩm affiliate
+    document.getElementById('insert-product-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const slug = prompt('Nhập mã định danh sản phẩm (slug, ví dụ: sach-tam-ly-meo):');
+      if (slug) {
+        editor.chain().focus().insertContent(`<div class="inline-product-card" data-slug="${slug}">[Card Sản Phẩm: ${slug}]</div><p></p>`).run();
+      }
+    });
+
+    function updateToolbarState() {
+      toolbar.querySelectorAll('[data-action]').forEach(btn => {
+        const action = btn.getAttribute('data-action')!;
+        if (action === 'bold' && editor.isActive('bold')) btn.classList.add('active');
+        else if (action === 'italic' && editor.isActive('italic')) btn.classList.add('active');
+        else if (action === 'h2' && editor.isActive('heading', { level: 2 })) btn.classList.add('active');
+        else if (action === 'h3' && editor.isActive('heading', { level: 3 })) btn.classList.add('active');
+        else if (action === 'blockquote' && editor.isActive('blockquote')) btn.classList.add('active');
+        else if (action === 'bulletList' && editor.isActive('bulletList')) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+    }
+
+    // 3. Drawer Thiết Lập Bài Viết
+    const settingsDrawer = document.getElementById('editor-settings-drawer')!;
+    const btnToggleSettings = document.getElementById('btn-toggle-settings')!;
+    const btnCloseSettings = document.getElementById('btn-close-settings')!;
+
+    btnToggleSettings.addEventListener('click', () => {
+      settingsDrawer.classList.toggle('hidden');
+    });
+
+    btnCloseSettings.addEventListener('click', () => {
+      settingsDrawer.classList.add('hidden');
+    });
+
+    // 4. Toggle Left Sidebar
+    const btnToggleSidebar = document.getElementById('btn-toggle-sidebar')!;
+    const editorContainer = document.getElementById('editor-container')!;
+
+    btnToggleSidebar.addEventListener('click', () => {
+      editorContainer.classList.toggle('sidebar-collapsed');
+      btnToggleSidebar.classList.toggle('active');
+    });
+
+    // 5. Quản lý Bottom Sheet Hiệu Đính AI
+    const aiSheet = document.getElementById('ai-bottom-sheet')!;
+    const btnOpenAiSheet = document.getElementById('btn-open-ai-sheet')!;
+    const btnCloseAiSheet = document.getElementById('ai-sheet-close-btn')!;
+    const aiBackdrop = document.getElementById('ai-sheet-backdrop')!;
+    
+    btnOpenAiSheet.addEventListener('click', () => {
+      aiSheet.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+
+    function closeAiSheet() {
+      aiSheet.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    btnCloseAiSheet.addEventListener('click', closeAiSheet);
+    aiBackdrop.addEventListener('click', closeAiSheet);
+
+    // Chuyển đổi tabs AI
+    const aiTabs = aiSheet.querySelectorAll('.ai-tab-btn');
+    const aiTabContents = aiSheet.querySelectorAll('.ai-tab-content');
+    let activeAiMode = 'draft';
+
+    aiTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        aiTabs.forEach(t => t.classList.remove('active'));
+        aiTabContents.forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        const targetTab = tab.getAttribute('data-tab')!;
+        document.getElementById(targetTab)?.classList.add('active');
+        
+        activeAiMode = targetTab === 'tab-draft' ? 'draft' : 'format';
+      });
+    });
+
+    // Gọi API AI
+    let latestAiText = '';
+    const btnRunAi = document.getElementById('btn-run-ai-action') as HTMLButtonElement;
+    const aiPreviewContainer = document.getElementById('ai-result-preview')!;
+    const btnApplyAi = document.getElementById('btn-apply-ai')!;
+
+    btnRunAi.addEventListener('click', async () => {
+      let contentToProcess = '';
+      const curator = (document.getElementById('blog-curator-ai') as HTMLSelectElement).value;
+
+      if (activeAiMode === 'draft') {
+        contentToProcess = (document.getElementById('ai-draft-outline') as HTMLTextAreaElement).value.trim();
+        if (!contentToProcess) {
+          alert('Hãy gõ một vài ý chính để AI chấp bút nhé!');
+          return;
+        }
+      } else {
+        contentToProcess = editor.getText().trim();
+        if (!contentToProcess || contentToProcess === 'Gõ những suy nghĩ thô mộc của bạn tại đây để bắt đầu câu chuyện...') {
+          alert('Hãy viết nháp nội dung blog vào khung soạn thảo trước khi giàn trang nhé!');
+          return;
+        }
+      }
+
+      setLoading(true);
+      try {
+        const res = await fetch('/api/blog/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: activeAiMode, content: contentToProcess, curator })
+        });
+        
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        latestAiText = data.text;
+        aiPreviewContainer.innerHTML = convertMarkdownToHtml(latestAiText);
+        btnApplyAi.classList.remove('hidden');
+      } catch (err: any) {
+        alert('Lỗi hiệu đính: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    btnApplyAi.addEventListener('click', () => {
+      if (latestAiText) {
+        const html = convertMarkdownToHtml(latestAiText);
+        editor.commands.setContent(html);
+        closeAiSheet();
+      }
+    });
+
+    function setLoading(isLoading: boolean) {
+      btnRunAi.disabled = isLoading;
+      const textSpan = btnRunAi.querySelector('.btn-text');
+      const loadingSpan = btnRunAi.querySelector('.btn-loading');
+      if (isLoading) {
+        textSpan?.classList.add('hidden');
+        loadingSpan?.classList.remove('hidden');
+      } else {
+        textSpan?.classList.remove('hidden');
+        loadingSpan?.classList.add('hidden');
+      }
+    }
+
+    function convertMarkdownToHtml(markdown: string): string {
+      return markdown
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br/>')
+        .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
+        .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
+        .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+        .replace(/^\>\s+(.+)$/gm, '<blockquote>$1</blockquote>')
+        .replace(/^\*\s+(.+)$/gm, '<ul><li>$1</li></ul>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/^<\/p><p>$/, '');
+    }
+
+    // 6. Tải danh sách bài viết của Creator từ Supabase
+    async function loadBlogsList() {
+      const supabaseClient = (window as any).supabase;
+      const listContainer = document.getElementById('sidebar-blog-list')!;
+      const userEmailText = document.getElementById('sidebar-user-email')!;
+
+      if (!supabaseClient) {
+        listContainer.innerHTML = '<div class="sidebar-error">Lỗi kết nối database</div>';
+        return;
+      }
+
+      try {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+          listContainer.innerHTML = '<div class="sidebar-error">Vui lòng đăng nhập</div>';
+          userEmailText.innerText = 'Chưa đăng nhập';
+          return;
+        }
+
+        userEmailText.innerText = user.email || 'Creator Account';
+
+        const { data: blogs, error } = await supabaseClient
+          .from('creator_blogs')
+          .select('id, slug, title, description, content, pillar, category, cover_image, is_published')
+          .eq('author_id', user.id)
+          .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+
+        allUserBlogs = blogs || [];
+        renderSidebarList(allUserBlogs);
+      } catch (err: any) {
+        listContainer.innerHTML = `<div class="sidebar-error">Lỗi tải danh sách</div>`;
+      }
+    }
+
+    function renderSidebarList(blogs: any[]) {
+      const listContainer = document.getElementById('sidebar-blog-list')!;
+      
+      if (blogs.length === 0) {
+        listContainer.innerHTML = '<div class="sidebar-empty">Chưa viết bài nào 🐾</div>';
+        return;
+      }
+
+      listContainer.innerHTML = blogs.map(blog => `
+        <div class="sidebar-post-item ${blog.id === currentBlogId ? 'active' : ''}" data-id="${blog.id}">
+          <i class="ph-light ${blog.is_published ? 'ph-file-text' : 'ph-file-dashed'}"></i>
+          <div class="post-item-info">
+            <span class="post-item-title">${blog.title || 'Không tiêu đề'}</span>
+            <span class="post-item-badge ${blog.is_published ? 'published' : 'draft'}">
+              ${blog.is_published ? 'Đã đăng' : 'Bản nháp'}
+            </span>
+          </div>
+        </div>
+      `).join('');
+
+      // Add click listeners to items
+      listContainer.querySelectorAll('.sidebar-post-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const blogId = item.getAttribute('data-id')!;
+          loadBlogIntoEditor(blogId);
+        });
+      });
+    }
+
+    // Nạp dữ liệu bài viết được click vào editor
+    function loadBlogIntoEditor(blogId: string) {
+      const blog = allUserBlogs.find(b => b.id === blogId);
+      if (!blog) return;
+
+      currentBlogId = blog.id;
+      
+      // Cập nhật tiêu đề & nội dung editor
+      (document.getElementById('blog-title') as HTMLInputElement).value = blog.title;
+      editor.commands.setContent(blog.content);
+
+      // Cập nhật metadata drawer
+      (document.getElementById('blog-desc') as HTMLTextAreaElement).value = blog.description || '';
+      (document.getElementById('blog-category') as HTMLSelectElement).value = blog.category || 'vat_pham';
+      (document.getElementById('blog-pillar') as HTMLSelectElement).value = blog.pillar || 'nhip_tho';
+      (document.getElementById('blog-cover') as HTMLInputElement).value = blog.cover_image || '';
+
+      // Đánh dấu active trong sidebar
+      document.querySelectorAll('.sidebar-post-item').forEach(item => {
+        if (item.getAttribute('data-id') === blogId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    // Reset editor để tạo bài viết mới
+    const btnNewPost = document.getElementById('btn-new-post-sidebar')!;
+    btnNewPost.addEventListener('click', () => {
+      currentBlogId = null;
+      (document.getElementById('blog-title') as HTMLInputElement).value = '';
+      editor.commands.setContent('<p>Gõ những suy nghĩ thô mộc của bạn tại đây để bắt đầu câu chuyện...</p>');
+      
+      // Reset metadata fields
+      (document.getElementById('blog-desc') as HTMLTextAreaElement).value = '';
+      (document.getElementById('blog-category') as HTMLSelectElement).value = 'vat_pham';
+      (document.getElementById('blog-pillar') as HTMLSelectElement).value = 'nhip_tho';
+      (document.getElementById('blog-cover') as HTMLInputElement).value = '';
+
+      // Gỡ bỏ active trong sidebar
+      document.querySelectorAll('.sidebar-post-item').forEach(item => item.classList.remove('active'));
+    });
+
+    // Gọi load danh sách bài viết ban đầu
+    loadBlogsList();
+
+    // 7. Lưu và xuất bản tích hợp cập nhật danh sách
+    const btnSaveDraft = document.getElementById('btn-save-draft')!;
+    const btnPublishMain = document.getElementById('btn-publish-main')!;
+
+    btnSaveDraft.addEventListener('click', () => saveBlog(false));
+    btnPublishMain.addEventListener('click', () => saveBlog(true));
+
+    async function saveBlog(isPublish: boolean) {
+      const title = (document.getElementById('blog-title') as HTMLInputElement).value.trim();
+      const description = (document.getElementById('blog-desc') as HTMLTextAreaElement).value.trim();
+      const coverImage = (document.getElementById('blog-cover') as HTMLInputElement).value.trim();
+      const category = (document.getElementById('blog-category') as HTMLSelectElement).value;
+      const pillar = (document.getElementById('blog-pillar') as HTMLSelectElement).value;
+      const content = editor.getJSON();
+
+      if (!title || title === 'Tiêu đề bài viết...') {
+        alert('Hãy gõ một tiêu đề thật ấm áp trước nhé!');
+        return;
+      }
+
+      const slug = title.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d").replace(/Đ/g, "d")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+
+      const supabaseClient = (window as any).supabase;
+      if (!supabaseClient) {
+        alert('Lỗi: Supabase Client chưa được kết nối!');
+        return;
+      }
+
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) {
+        alert('Vui lòng đăng nhập để lưu trữ bài viết!');
+        return;
+      }
+
+      const payload: any = {
+        author_id: user.id,
+        slug,
+        title,
+        description: description || 'Mẩu chuyện nhỏ viết bởi người thương Doca.',
+        cover_image: coverImage || 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800',
+        content,
+        pillar,
+        category,
+        is_published: isPublish,
+        updated_at: new Date().toISOString()
+      };
+
+      // Nếu đang chỉnh sửa bài viết đã có, đính kèm ID để update thay vì tạo mới
+      if (currentBlogId) {
+        payload.id = currentBlogId;
+      }
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('creator_blogs')
+          .upsert(payload, { onConflict: 'slug' })
+          .select();
+
+        if (error) throw error;
+        
+        if (data && data[0]) {
+          currentBlogId = data[0].id;
+        }
+
+        alert(isPublish ? 'Chúc mừng! Bài viết đã được đăng lên Doca Pet! 🐾' : 'Đã lưu trữ bản nháp thành công! ✍️');
+        
+        // Tải lại danh sách thanh bên để cập nhật trạng thái
+        loadBlogsList();
+      } catch (err: any) {
+        alert('Không thể lưu: ' + err.message);
+      }
+    }
+  });
+</script>
+
+<style>
+  /* Cấu trúc chia 2 phần: Left Sidebar + Right Workspace */
+  .notion-editor-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--cozy-bg-pure);
+    color: var(--cozy-text-obsidian);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Left Sidebar kiểu Notion */
+  .editor-sidebar {
+    width: 260px;
+    background-color: var(--cozy-bg-beige);
+    border-right: 1px solid var(--cozy-border-light);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 40;
+  }
+
+  /* Trạng thái co gọn của Sidebar */
+  .notion-editor-container.sidebar-collapsed .editor-sidebar {
+    margin-left: -260px;
+    transform: translateX(-100%);
+  }
+
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid rgba(21, 23, 15, 0.05);
+  }
+
+  .sidebar-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #636366;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .btn-new-post {
+    background-color: var(--cozy-green-matcha);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: background-color 0.2s;
+  }
+
+  .btn-new-post:hover {
+    background-color: var(--cozy-green-matcha-forest);
+  }
+
+  .sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  /* Khung hiển thị từng bản ghi trong sidebar */
+  .sidebar-post-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .sidebar-post-item:hover {
+    background-color: rgba(21, 23, 15, 0.04);
+  }
+
+  .sidebar-post-item.active {
+    background-color: rgba(21, 23, 15, 0.07);
+    font-weight: 600;
+  }
+
+  .sidebar-post-item i {
+    font-size: 1.1rem;
+    color: #8e8e93;
+    margin-top: 2px;
+  }
+
+  .post-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    overflow: hidden;
+  }
+
+  .post-item-title {
+    font-size: 0.85rem;
+    color: var(--cozy-text-obsidian);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .post-item-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 4px;
+    width: fit-content;
+  }
+
+  .post-item-badge.draft {
+    background-color: var(--cozy-border-light);
+    color: #636366;
+  }
+
+  .post-item-badge.published {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .sidebar-loading,
+  .sidebar-empty,
+  .sidebar-error {
+    font-size: 0.8rem;
+    color: #8e8e93;
+    padding: 2rem 1rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(21, 23, 15, 0.05);
+    background-color: rgba(21, 23, 15, 0.02);
+  }
+
+  .user-capsule {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #636366;
+  }
+
+  .user-capsule i {
+    font-size: 1.2rem;
+  }
+
+  .user-email-text {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Right Workspace wrapper */
+  .editor-workspace-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* Header Bar Sticky với hiệu ứng kính mờ (Glassmorphism) */
+  .editor-header-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 2rem;
+    background-color: rgba(251, 250, 246, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(21, 23, 15, 0.08);
+  }
+
+  .header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Nút Toggle Sidebar */
+  .sidebar-toggle-btn {
+    opacity: 0.6;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  .sidebar-toggle-btn:hover {
+    opacity: 1;
+  }
+
+  .sidebar-toggle-btn.active {
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  /* Nút quay lại kiểu Minimalist */
+  .editor-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--cozy-text-obsidian);
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .editor-back-link:hover {
+    opacity: 1;
+    transform: translateX(-2px);
+  }
+
+  .header-divider-vertical {
+    width: 1px;
+    height: 18px;
+    background-color: var(--cozy-border-light);
+  }
+
+  /* Toolbar */
+  .editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: var(--cozy-text-obsidian);
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .toolbar-btn:hover {
+    background-color: var(--cozy-bg-beige);
+    transform: scale(1.05);
+  }
+
+  .toolbar-btn.active {
+    background-color: var(--cozy-green-matcha);
+    color: #fff;
+  }
+
+  .toolbar-divider {
+    width: 1px;
+    height: 16px;
+    background-color: var(--cozy-border-light);
+    margin: 0 0.35rem;
+  }
+
+  /* Nhóm nút bên phải */
+  .editor-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  /* Nút AI Hiệu Đính lấp lánh (Sparkle) */
+  .btn-ai-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--cozy-green-matcha-forest);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(74, 138, 46, 0.2);
+  }
+
+  .btn-ai-trigger:hover {
+    background-color: var(--cozy-green-matcha-dark);
+    transform: translateY(-1px);
+  }
+
+  /* Nút cấu hình & đăng bài */
+  .btn-settings-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: var(--cozy-bg-beige);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 10px;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-settings-toggle:hover {
+    background-color: var(--cozy-border-light);
+  }
+
+  .btn-publish-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--cozy-text-charcoal);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.45rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .btn-publish-action:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  /* Drawer cấu hình trượt nhẹ */
+  .editor-settings-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 340px;
+    background-color: var(--cozy-bg-pure);
+    border-left: 1px solid var(--cozy-border-light);
+    z-index: 100;
+    box-shadow: -6px 0 32px rgba(21, 23, 15, 0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .editor-settings-drawer.hidden {
+    transform: translateX(100%);
+    display: none;
+  }
+
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px dashed var(--cozy-border-light);
+  }
+
+  .drawer-header h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .btn-close-drawer {
+    border: none;
+    background: transparent;
+    font-size: 1.75rem;
+    cursor: pointer;
+    color: #8E8E93;
+    line-height: 1;
+  }
+
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .form-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    background-color: #fff;
+    outline: none;
+    transition: border-color 0.25s ease;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--cozy-green-matcha);
+  }
+
+  .drawer-footer-actions {
+    margin-top: auto;
+    padding-top: 1rem;
+  }
+
+  .btn-save-draft-secondary {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid var(--cozy-border-light);
+    color: var(--cozy-text-obsidian);
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    transition: background-color 0.2s;
+  }
+
+  .btn-save-draft-secondary:hover {
+    background-color: var(--cozy-bg-beige);
+  }
+
+  /* Notion Workspace Container */
+  .notion-workspace {
+    display: flex;
+    justify-content: center;
+    padding: 4rem 1rem 8rem;
+  }
+
+  .notion-sheet-page {
+    width: 100%;
+    max-width: 720px;
+    background-color: transparent;
+  }
+
+  /* Tiêu đề cỡ lớn không viền chuẩn Notion */
+  .notion-title-input {
+    font-size: 2.85rem;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    border: none;
+    background: transparent;
+    color: var(--cozy-text-obsidian);
+    outline: none;
+    margin-bottom: 2rem;
+    width: 100%;
+    padding: 0;
+    font-family: inherit;
+  }
+
+  .notion-title-input::placeholder {
+    color: #E2DFD5;
+  }
+
+  /* Vùng Canvas viết bài */
+  .tiptap-editor-container {
+    min-height: 500px;
+  }
+
+  #editor-canvas {
+    min-height: 480px;
+    outline: none;
+  }
+
+  :global(.ProseMirror) {
+    min-height: 480px;
+    outline: none;
+    font-size: 1.15rem;
+    line-height: 1.85;
+    color: #2C2E2A;
+  }
+
+  :global(.ProseMirror p) {
+    margin-bottom: 1.35rem;
+  }
+
+  :global(.ProseMirror p.is-editor-empty:first-child::before) {
+    content: attr(data-placeholder);
+    float: left;
+    color: var(--cozy-border-light);
+    pointer-events: none;
+    height: 0;
+  }
+
+  :global(.ProseMirror h2) {
+    font-size: 1.65rem;
+    font-weight: 700;
+    margin-top: 2.25rem;
+    margin-bottom: 0.85rem;
+    letter-spacing: -0.02em;
+  }
+
+  :global(.ProseMirror h3) {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.65rem;
+  }
+
+  :global(.ProseMirror blockquote) {
+    border-left: 3px solid var(--cozy-green-matcha);
+    padding-left: 1.35rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: #5A5D57;
+    background-color: var(--cozy-bg-beige);
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    border-radius: 0 10px 10px 0;
+  }
+
+  :global(.ProseMirror ul) {
+    padding-left: 1.75rem;
+    margin-bottom: 1.35rem;
+    list-style-type: disc;
+  }
+
+  :global(.blog-body-inline-image) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-card);
+    margin: 2rem auto;
+    box-shadow: 0 4px 16px rgba(21, 23, 15, 0.03);
+  }
+
+  :global(.inline-product-card) {
+    background-color: var(--cozy-bg-beige);
+    border: 1px dashed var(--cozy-green-matcha);
+    padding: 1.5rem;
+    border-radius: var(--radius-card);
+    margin: 1.75rem 0;
+    text-align: center;
+    color: var(--cozy-green-matcha-forest);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  /* Bottom Sheet trượt mở êm ái */
+  .cozy-bottom-sheet {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0.3s ease;
+  }
+
+  .cozy-bottom-sheet.open {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .cozy-sheet-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(21, 23, 15, 0.35);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .cozy-bottom-sheet.open .cozy-sheet-backdrop {
+    opacity: 1;
+  }
+
+  .cozy-sheet-content {
+    position: relative;
+    background-color: var(--cozy-bg-pure);
+    border-top: 1px solid var(--cozy-border-light);
+    border-radius: 28px 28px 0 0;
+    width: 100%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -8px 32px rgba(21, 23, 15, 0.08);
+  }
+
+  .cozy-bottom-sheet.open .cozy-sheet-content {
+    transform: translateY(0);
+  }
+
+  .cozy-sheet-drag-handle {
+    width: 36px;
+    height: 4px;
+    background-color: var(--cozy-border-light);
+    border-radius: 2px;
+    margin: 0.85rem auto 0;
+  }
+
+  .cozy-sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 2rem;
+    border-bottom: 1px dashed var(--cozy-border-light);
+  }
+
+  .ai-badge-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--cozy-green-matcha-forest);
+    color: #fff;
+    padding: 0.4rem 0.95rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .sheet-close-btn {
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #8E8E93;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+
+  .sheet-close-btn:hover {
+    color: var(--cozy-text-obsidian);
+  }
+
+  .cozy-sheet-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* Grid Layout phân bảng */
+  .ai-layout-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 2rem;
+    height: 100%;
+    min-height: 420px;
+  }
+
+  .ai-options-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    border-right: 1px solid var(--cozy-border-light);
+    padding-right: 2rem;
+  }
+
+  .ai-tabs {
+    display: flex;
+    gap: 0.25rem;
+    background-color: var(--cozy-bg-beige);
+    padding: 0.25rem;
+    border-radius: 10px;
+  }
+
+  .ai-tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #636366;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .ai-tab-btn.active {
+    background-color: #fff;
+    color: var(--cozy-text-obsidian);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+
+  .ai-tab-content {
+    display: none;
+  }
+
+  .ai-tab-content.active {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .ai-instructions {
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: #636366;
+  }
+
+  .form-group-ai,
+  .form-group-ai-curator {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .form-group-ai label,
+  .form-group-ai-curator label {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .form-group-ai textarea,
+  .form-group-ai-curator select {
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    background-color: #fff;
+  }
+
+  .form-group-ai textarea {
+    resize: none;
+  }
+
+  /* Nút chạy AI hiệu ứng Matcha */
+  .btn-run-ai {
+    background-color: var(--cozy-green-matcha-forest);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.85rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    transition: transform 0.2s, background-color 0.2s;
+    box-shadow: 0 4px 12px rgba(74, 138, 46, 0.15);
+  }
+
+  .btn-run-ai:hover {
+    background-color: var(--cozy-green-matcha-dark);
+    transform: translateY(-1px);
+  }
+
+  /* Preview Panel */
+  .ai-preview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+  }
+
+  .preview-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .ai-preview-container {
+    flex: 1;
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    overflow-y: auto;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    min-height: 280px;
+    max-height: 48vh;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.01);
+  }
+
+  .preview-placeholder {
+    color: #8E8E93;
+    font-style: italic;
+    font-size: 0.88rem;
+  }
+
+  .ai-preview-container h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .ai-preview-container p {
+    margin-bottom: 0.85rem;
+  }
+
+  .ai-preview-container blockquote {
+    border-left: 3px solid var(--cozy-green-matcha);
+    padding-left: 1rem;
+    margin: 1.25rem 0;
+    font-style: italic;
+    color: #555;
+    background-color: var(--cozy-bg-beige);
+    padding: 0.45rem 0.75rem;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .ai-preview-actions {
+    margin-top: auto;
+  }
+
+  .btn-apply-ai {
+    width: 100%;
+    background-color: var(--cozy-text-charcoal);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-apply-ai:hover {
+    opacity: 0.95;
+  }
+
+  .spin {
+    animation: rotate 1s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .ai-layout-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .ai-options-panel {
+      border-right: none;
+      padding-right: 0;
+      border-bottom: 1px solid var(--cozy-border-light);
+      padding-bottom: 1.5rem;
+      min-height: auto;
+    }
+    
+    .cozy-sheet-body {
+      padding: 1.25rem;
+    }
+  }
+</style>

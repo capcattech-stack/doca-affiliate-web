@@ -81,7 +81,7 @@ export async function loginWithGoogle() {
   
   // Tự động chuyển hướng sang chế độ đăng nhập thử nghiệm (Mock Login) nếu chạy localhost
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    const useMock = confirm("Google Cloud đang bị tạm dừng. Cô/chú có muốn sử dụng chế độ 'Đăng nhập thử nghiệm' (Mock Login) để vượt qua xác thực và test Ví Xu không?");
+    const useMock = confirm("Cô/chú có muốn sử dụng chế độ 'Đăng nhập thử nghiệm' (Mock Login) để test nhanh trên localhost không? (Chọn 'Cancel' để sử dụng đăng nhập qua Google thật)");
     if (useMock) {
       const mockUser = {
         id: 'd3b19c29-379e-4e31-8e99-4d929f123891', // UUID hợp lệ cho tài khoản test

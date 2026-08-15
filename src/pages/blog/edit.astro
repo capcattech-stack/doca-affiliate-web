@@ -1,0 +1,34 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import BlogEditor from '../../components/BlogEditor.astro';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+const geminiApiKey = import.meta.env.PUBLIC_GEMINI_API_KEY || '';
+---
+
+<Layout title="Soạn Thảo Blog AI | Doca Pet" description="Trang soạn thảo bài viết mới tích hợp công cụ hiệu đính bằng AI.">
+  <script is:inline define:vars={{ supabaseUrl, supabaseAnonKey, geminiApiKey }}>
+    window.PUBLIC_SUPABASE_URL = supabaseUrl;
+    window.PUBLIC_SUPABASE_ANON_KEY = supabaseAnonKey;
+    window.PUBLIC_GEMINI_API_KEY = geminiApiKey;
+  </script>
+
+  <main class="blog-edit-page-view">
+    <div class="edit-page-content-wrapper">
+      <BlogEditor />
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .blog-edit-page-view {
+    background-color: var(--cozy-bg-pure);
+    min-height: 100vh;
+  }
+
+  .edit-page-content-wrapper {
+    width: 100%;
+  }
+</style>

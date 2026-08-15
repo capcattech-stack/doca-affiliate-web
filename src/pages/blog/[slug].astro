@@ -1,22 +1,123 @@
 ---
-import { getCollection } from 'astro:content';
+export const prerender = false;
+import { getEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import NamiyaMailbox from '../../components/NamiyaMailbox.astro';
 import PolaroidSheet from '../../components/PolaroidSheet.astro';
+import { getSupabase } from '../../scripts/supabase';
 
-// 1. Định nghĩa getStaticPaths để sinh tĩnh tất cả các trang bài viết
-export async function getStaticPaths() {
-  const blogEntries = await getCollection('blog');
-  return blogEntries.map(entry => ({
-    params: { slug: entry.slug }, 
-    props: { entry },
-  }));
+const { slug } = Astro.params;
+if (!slug) {
+  return Astro.redirect('/404');
 }
 
-const { entry } = Astro.props;
-const { Content } = await entry.render();
-const { title, description, publishDate, coverImage, category, tags, relatedProducts = [], pillar } = entry.data;
+// 1. Kiểm tra bài viết tĩnh trong content collections trước
+let entry = await getEntry('blog', slug);
+let title = '';
+let description = '';
+let publishDate = '';
+let coverImage = '';
+let category = '';
+let tags: string[] = [];
+let relatedProducts: string[] = [];
+let pillar = '';
+let curatorName = 'Tina';
+let curatorQuote = 'Tina hi vọng bài viết này mang lại sự nhẹ nhõm cho cô/chú nha...';
+let isDbBlog = false;
+let dbContentHtml = '';
+let Content: any = null;
+
+if (entry) {
+  const rendered = await entry.render();
+  Content = rendered.Content;
+  title = entry.data.title;
+  description = entry.data.description;
+  publishDate = entry.data.publishDate;
+  coverImage = entry.data.coverImage;
+  category = entry.data.category;
+  tags = entry.data.tags || [];
+  relatedProducts = entry.data.relatedProducts || [];
+  pillar = entry.data.pillar || '';
+  curatorName = entry.data.curatorName || 'Tina';
+  curatorQuote = entry.data.curatorQuote || 'Tina hi vọng bài viết này mang lại sự nhẹ nhõm cho cô/chú nha...';
+} else {
+  // 2. Dự phòng: Tìm kiếm bài viết động từ Supabase
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data: dbBlog, error } = await supabase
+      .from('creator_blogs')
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .single();
+
+    if (dbBlog) {
+      isDbBlog = true;
+      title = dbBlog.title;
+      description = dbBlog.description || '';
+      publishDate = new Date(dbBlog.created_at).toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+      coverImage = dbBlog.cover_image || '';
+      category = dbBlog.category || 'vat_pham';
+      tags = dbBlog.tags || [];
+      relatedProducts = dbBlog.related_products || [];
+      pillar = dbBlog.pillar || '';
+      curatorName = 'Tina'; // Mặc định curator là Tina cho blog người dùng
+      curatorQuote = `${curatorName} hi vọng câu chuyện này sẽ giúp cô/chú thêm ấm lòng nha...`;
+      
+      // Khởi tạo hàm parser render Tiptap JSON sang HTML
+      const renderTiptapJson = (node: any): string => {
+        if (!node) return '';
+        if (node.type === 'text') {
+          let text = node.text || '';
+          if (node.marks) {
+            node.marks.forEach((mark: any) => {
+              if (mark.type === 'bold') text = `<strong>${text}</strong>`;
+              if (mark.type === 'italic') text = `<em>${text}</em>`;
+              if (mark.type === 'code') text = `<code>${text}</code>`;
+            });
+          }
+          return text;
+        }
+
+        const contentHtml = (node.content || []).map((child: any) => renderTiptapJson(child)).join('');
+
+        switch (node.type) {
+          case 'doc':
+            return `<div class="prosemirror-rendered">${contentHtml}</div>`;
+          case 'paragraph':
+            return `<p>${contentHtml}</p>`;
+          case 'heading':
+            const level = node.attrs?.level || 2;
+            return `<h${level}>${contentHtml}</h${level}>`;
+          case 'blockquote':
+            return `<blockquote>${contentHtml}</blockquote>`;
+          case 'bulletList':
+            return `<ul>${contentHtml}</ul>`;
+          case 'listItem':
+            return `<li>${contentHtml}</li>`;
+          case 'image':
+            const src = node.attrs?.src || '';
+            const alt = node.attrs?.alt || '';
+            return `<figure class="blog-body-inline-image-wrapper"><img src="${src}" alt="${alt}" class="blog-body-inline-image" /></figure>`;
+          default:
+            return contentHtml;
+        }
+      };
+      
+      dbContentHtml = renderTiptapJson(dbBlog.content);
+    }
+  }
+}
+
+if (!entry && !isDbBlog) {
+  // Không tìm thấy bài viết nào
+  return Astro.redirect('/404');
+}
 
 // 2. Fetch toàn bộ dữ liệu sản phẩm từ Supabase tại thời điểm build (SSG) để liên kết sản phẩm thật
 let allProducts: any[] = [];
@@ -220,9 +321,6 @@ if (products.length === 0) {
   }
 }
 
-// Lấy thông tin chú mèo tuyển chọn trực tiếp từ frontmatter bài viết
-const curatorName = entry.data.curatorName || "Tina";
-const curatorQuote = entry.data.curatorQuote || "Tina hi vọng bài viết này mang lại sự nhẹ nhõm cho cô/chú nha...";
 let curatorAvatar = "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=120&h=120&fit=crop&q=80"; // Tina
 
 if (curatorName === "Latte") {
@@ -331,7 +429,7 @@ const schemaMarkup = {
     <article class="blog-body">
       <div class="container">
         <div class="markdown-content">
-          <Content />
+          {isDbBlog ? <Fragment set:html={dbContentHtml} /> : <Content />}
         </div>
       </div>
     </article>

@@ -150,7 +150,8 @@ import Layout from '../../layouts/Layout.astro';
     getOrderStatus,
     getWalletBalance,
     getWalletHistory,
-    type CoinPackage
+    type CoinPackage,
+    COIN_HUB_API_URL
   } from '../../scripts/coinHubApi';
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -377,7 +378,23 @@ import Layout from '../../layouts/Layout.astro';
         if (provider === 'MOCK') {
           if (modalTitle) modalTitle.textContent = 'Mock Sandbox Đang Xử Lý';
           if (modalSubtitle) modalSubtitle.textContent = 'Hệ thống giả lập thanh toán tức thì trong môi trường Staging/Dev';
-          if (modalStatusText) modalStatusText.innerHTML = '<i class="ph-light ph-arrows-clockwise spin"></i> Đang giả lập thanh toán... (tự động sau 2s)';
+          if (modalStatusText) modalStatusText.innerHTML = '<i class="ph-light ph-arrows-clockwise spin"></i> Đang giả lập thanh toán... (tự động sau 1.5s)';
+
+          // Tự động kích hoạt Mock Payment Webhook sau 1.5s
+          setTimeout(async () => {
+            try {
+              await fetch(`${COIN_HUB_API_URL}/api/v1/webhooks/mock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderId: orderData.order_id,
+                  amountVnd: orderData.amount_vnd,
+                }),
+              });
+            } catch (mockErr) {
+              console.warn('[Mock Pay Trigger]', mockErr);
+            }
+          }, 1500);
         } else {
           if (modalTitle) modalTitle.textContent = 'Quét mã QR ZaloPay';
           if (modalSubtitle) modalSubtitle.textContent = 'Mở ứng dụng ZaloPay hoặc camera quét mã để hoàn tất';

@@ -474,3 +474,34 @@ input[type="email"].readonly-connected {
   cursor: not-allowed;
 }
 
+/* --- NAV COIN BADGE (Huy hiệu Ví Cá trên Navbar) --- */
+.nav-coin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 4px 10px;
+  background-color: var(--cozy-bg-pure);
+  border: 1px solid var(--cozy-border-light);
+  border-radius: 20px;
+  text-decoration: none;
+  color: var(--cozy-text-obsidian);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(21, 23, 15, 0.03);
+}
+
+.nav-coin-badge:hover {
+  background-color: var(--cozy-bg-beige);
+  border-color: var(--cozy-green-matcha-forest);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(74, 138, 46, 0.12);
+}
+
+.nav-coin-amount {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+

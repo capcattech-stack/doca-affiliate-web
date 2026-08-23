@@ -40,25 +40,23 @@ import Layout from '../layouts/Layout.astro';
             <i class="ph-fill ph-check-circle" style="color: var(--cozy-green-matcha-forest);"></i> Đã kết nối Google
           </div>
 
-          {import.meta.env.DEV && (
-            <div class="wallet-cta-box">
-              <div class="wallet-balance-row">
-                <div class="wallet-title">
-                  <i class="ph-light ph-fish" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
-                  <span>Ví của bạn</span>
-                </div>
-                <span class="wallet-balance-value" id="wallet-balance" style="display: inline-flex; align-items: center; gap: 0.25rem;">... <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></span>
+          <div class="wallet-cta-box">
+            <div class="wallet-balance-row">
+              <div class="wallet-title">
+                <i class="ph-light ph-fish" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
+                <span>Ví Cá của bạn</span>
               </div>
-              <div class="wallet-actions-row">
-                <a href="/profile/wallet" class="cozy-btn wallet-btn">
-                  Nạp thêm <i class="ph-light ph-plus-circle"></i>
-                </a>
-                <a href="/profile/wallet?tab=history" class="history-btn" id="wallet-history-btn">
-                  Lịch sử <i class="ph-light ph-clock-counter-clockwise"></i>
-                </a>
-              </div>
+              <span class="wallet-balance-value" id="wallet-balance" style="display: inline-flex; align-items: center; gap: 0.25rem;">... <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i></span>
             </div>
-          )}
+            <div class="wallet-actions-row">
+              <a href="/profile/wallet" class="cozy-btn wallet-btn">
+                Nạp thêm <i class="ph-light ph-plus-circle"></i>
+              </a>
+              <a href="/profile/wallet?tab=history" class="history-btn" id="wallet-history-btn">
+                Lịch sử <i class="ph-light ph-clock-counter-clockwise"></i>
+              </a>
+            </div>
+          </div>
 
           <!-- PHẦN THÔNG TIN KIOSK (DỰA VÀO TRẠNG THÁI DATABASE) -->
           <div class="kiosk-cta-box">
@@ -102,6 +100,7 @@ import Layout from '../layouts/Layout.astro';
 
 <script>
   import { getSupabase, logout } from '../scripts/supabase';
+  import { getWalletBalance } from '../scripts/coinHubApi';
 
   document.addEventListener('DOMContentLoaded', () => {
     const loadingCard = document.getElementById('profile-card-loading');
@@ -141,7 +140,7 @@ import Layout from '../layouts/Layout.astro';
       if (contentCard) contentCard.classList.remove('hidden');
 
       // Tải số dư ví xu & thông tin Kiosk
-      loadWalletInfo(user.id);
+      loadWalletInfo(user);
       loadKioskInfo(user.id);
     }).catch((err: any) => {
       console.error('Error fetching session on profile page:', err);
@@ -185,19 +184,21 @@ import Layout from '../layouts/Layout.astro';
       });
     }
 
-    // --- HÀM TẢI THÔNG TIN VÍ XU ---
-    function loadWalletInfo(userId: string) {
+    // --- HÀM TẢI THÔNG TIN VÍ XU TỪ COIN HUB ---
+    async function loadWalletInfo(user: any) {
       const walletBalanceEl = document.getElementById('wallet-balance');
       if (!walletBalanceEl) return;
       
-      fetch(`/api/billing/balance?userId=${userId}`)
-        .then(res => res.json())
-        .then((data: any) => {
-          walletBalanceEl.innerHTML = `${data.balance !== undefined ? data.balance : 0} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
-        })
-        .catch(err => {
-          console.error('Error loading wallet info:', err);
+      try {
+        const data = await getWalletBalance({
+          email: user?.email || undefined,
+          phone: user?.phone || undefined
         });
+        walletBalanceEl.innerHTML = `${Number(data.balance).toLocaleString('vi-VN')} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
+      } catch (err) {
+        console.error('Error loading wallet info from CoinHub:', err);
+        walletBalanceEl.innerHTML = `0 <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
+      }
     }
   });
 </script>

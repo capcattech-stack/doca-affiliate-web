@@ -1,4 +1,5 @@
 import { getSupabase, loginWithGoogle } from './supabase';
+import { getWalletBalance } from './coinHubApi';
 
 export function initNavbarAuth() {
   const client = getSupabase();
@@ -10,13 +11,28 @@ export function initNavbarAuth() {
   const desktopContainers = document.querySelectorAll('#nav-auth-container-desktop');
   const mobileContainers = document.querySelectorAll('#nav-auth-container-mobile');
 
-  function renderAuthUI(user: any) {
+  async function renderAuthUI(user: any) {
     if (user) {
-      // Giao diện đã kết nối: hiển thị avatar tròn dẫn tới trang hồ sơ cá nhân
+      // Giao diện đã kết nối: hiển thị huy hiệu Ví Cá và avatar tròn dẫn tới hồ sơ cá nhân
       const avatarUrl = user.user_metadata?.avatar_url || '/images/default-avatar.png';
       
+      let coinDisplay = '...';
+      try {
+        const balanceData = await getWalletBalance({
+          email: user.email || undefined,
+          phone: user.phone || undefined,
+        });
+        coinDisplay = Number(balanceData.balance).toLocaleString('vi-VN');
+      } catch (e) {
+        coinDisplay = '0';
+      }
+
       const desktopHtml = `
-        <div class="nav-auth-user">
+        <div class="nav-auth-user" style="display: flex; align-items: center; gap: 0.6rem;">
+          <a href="/profile/wallet" class="nav-coin-badge" title="Ví Cá của bạn - Bấm để nạp thêm">
+            <span class="nav-coin-amount">${coinDisplay}</span>
+            <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest); font-size: 0.95rem;"></i>
+          </a>
           <a href="/profile" class="nav-avatar-link" title="Xem hồ sơ cá nhân của bạn">
             <img src="${avatarUrl}" alt="Avatar" class="nav-avatar-img" />
           </a>
@@ -24,10 +40,14 @@ export function initNavbarAuth() {
       `;
 
       const mobileHtml = `
-        <div class="mobile-nav-auth-user">
-          <a href="/profile" class="mobile-avatar-link">
+        <div class="mobile-nav-auth-user" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <a href="/profile" class="mobile-avatar-link" style="display: flex; align-items: center; gap: 0.5rem;">
             <img src="${avatarUrl}" alt="Avatar" class="mobile-avatar-img" />
             <span class="mobile-avatar-name">Hồ sơ cá nhân</span>
+          </a>
+          <a href="/profile/wallet" class="nav-coin-badge" title="Ví Cá">
+            <span class="nav-coin-amount">${coinDisplay}</span>
+            <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest); font-size: 0.95rem;"></i>
           </a>
         </div>
       `;

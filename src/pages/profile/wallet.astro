@@ -60,14 +60,14 @@ import Layout from '../../layouts/Layout.astro';
                   <input type="radio" name="payment-provider" value="ZALOPAY" checked />
                   <div class="method-details">
                     <i class="ph-light ph-credit-card" style="font-size: 1.25rem; color: #008FE5;"></i>
-                    <span>Ví điện tử ZaloPay (Quét mã / App)</span>
+                    <span>Ví điện tử ZaloPay (Quét mã QR / App)</span>
                   </div>
                 </label>
                 <label class="method-item">
-                  <input type="radio" name="payment-provider" value="MOMO" />
+                  <input type="radio" name="payment-provider" value="MOCK" />
                   <div class="method-details">
-                    <i class="ph-light ph-wallet" style="font-size: 1.25rem; color: #A50064;"></i>
-                    <span>Ví điện tử MoMo (Web to App)</span>
+                    <i class="ph-light ph-lightning" style="font-size: 1.25rem; color: var(--cozy-green-matcha-forest);"></i>
+                    <span>Mock Sandbox (Thử nghiệm tức thì - 0đ)</span>
                   </div>
                 </label>
               </div>
@@ -90,26 +90,50 @@ import Layout from '../../layouts/Layout.astro';
         </div>
       </div>
 
-      <!-- MODAL CHỜ THANH TOÁN (POLISHING STATE) -->
+      <!-- MODAL CHỜ THANH TOÁN & QUÉT QR (COZY MUJI MODAL) -->
       <div class="cozy-modal-overlay hidden" id="payment-modal">
         <div class="cozy-modal-card">
           <div class="modal-header">
-            <h3>Đang chờ thanh toán</h3>
-            <p>Vui lòng hoàn tất thanh toán trên ứng dụng Ví điện tử của bạn</p>
+            <h3 id="modal-title">Quét mã để nạp Cá</h3>
+            <p id="modal-subtitle">Mở ứng dụng ZaloPay hoặc Camera trên điện thoại để quét mã</p>
           </div>
           <div class="modal-body text-center">
-            <div class="spinner-large">
-              <i class="ph-light ph-spinner-gap spin" style="font-size: 3rem; color: var(--cozy-green-matcha-forest);"></i>
+            <!-- QR Code Container -->
+            <div id="qr-code-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin: 0.5rem 0;">
+              <div id="qr-image-container" style="background: #ffffff; padding: 12px; border-radius: 12px; border: 1px solid var(--cozy-border-light); box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+                <img id="qr-code-img" src="" alt="Mã QR ZaloPay" style="width: 180px; height: 180px; display: block; border-radius: 8px;" />
+              </div>
+              <div style="font-size: 0.78rem; color: var(--cozy-text-charcoal); opacity: 0.85;">
+                Mã đơn: <b id="modal-order-id" style="font-family: monospace;">--</b>
+              </div>
             </div>
-            <p class="status-text">Hệ thống đang kiểm tra trạng thái thanh toán tự động...</p>
-            <p class="info-text">Sau khi thanh toán thành công, trang này sẽ tự động cập nhật số dư.</p>
+
+            <!-- Loading Spinner State -->
+            <div id="modal-spinner-state" class="hidden">
+              <div class="spinner-large">
+                <i class="ph-light ph-spinner-gap spin" style="font-size: 3rem; color: var(--cozy-green-matcha-forest);"></i>
+              </div>
+            </div>
+
+            <!-- Success State -->
+            <div id="modal-success-state" class="hidden" style="padding: 1rem 0;">
+              <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(118, 193, 35, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--cozy-green-matcha-forest); font-size: 32px;">
+                <i class="ph-fill ph-check-circle"></i>
+              </div>
+              <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--cozy-text-obsidian); margin-bottom: 0.25rem;">Nạp Cá Thành Công!</h4>
+              <p style="font-size: 0.82rem; color: var(--cozy-text-charcoal); opacity: 0.85;" id="modal-success-msg">Số dư mới của bạn đã được cập nhật tức thì.</p>
+            </div>
+
+            <p class="status-text" id="modal-status-text" style="margin-top: 0.25rem;">
+              <i class="ph-light ph-arrows-clockwise spin" style="font-size: 0.9rem; vertical-align: middle;"></i> Đang chờ nhận thanh toán...
+            </p>
             
             <a href="#" id="modal-payment-link" target="_blank" class="cozy-btn link-btn">
-              Mở link thanh toán lại <i class="ph-light ph-arrow-square-out"></i>
+              Mở link thanh toán trực tiếp <i class="ph-light ph-arrow-square-out"></i>
             </a>
           </div>
           <div class="modal-footer">
-            <button class="close-modal-btn" id="close-modal-btn">Hủy giao dịch</button>
+            <button class="close-modal-btn" id="close-modal-btn">Đóng / Hủy giao dịch</button>
           </div>
         </div>
       </div>
@@ -120,8 +144,16 @@ import Layout from '../../layouts/Layout.astro';
 
 <script>
   import { getSupabase } from '../../scripts/supabase';
+  import {
+    getCoinPackages,
+    createRechargeOrder,
+    getOrderStatus,
+    getWalletBalance,
+    getWalletHistory,
+    type CoinPackage
+  } from '../../scripts/coinHubApi';
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     const balanceEl = document.getElementById('current-balance');
     const packagesContainer = document.getElementById('packages-container');
     const confirmPayBtn = document.getElementById('confirm-pay-btn') as HTMLButtonElement;
@@ -144,41 +176,54 @@ import Layout from '../../layouts/Layout.astro';
 
     // Modal elements
     const paymentModal = document.getElementById('payment-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalSubtitle = document.getElementById('modal-subtitle');
+    const qrCodeWrapper = document.getElementById('qr-code-wrapper');
+    const qrCodeImg = document.getElementById('qr-code-img') as HTMLImageElement;
+    const modalOrderId = document.getElementById('modal-order-id');
+    const modalSpinnerState = document.getElementById('modal-spinner-state');
+    const modalSuccessState = document.getElementById('modal-success-state');
+    const modalStatusText = document.getElementById('modal-status-text');
     const modalPaymentLink = document.getElementById('modal-payment-link') as HTMLAnchorElement;
     const closeModalBtn = document.getElementById('close-modal-btn');
 
     let selectedPackageId = '';
     let currentBalance = 0;
     let pollInterval: any = null;
-    let activeSessionUser: any = null;
+    let activeUserIdentifier: { email?: string; phone?: string } = {};
 
+    // 1. Kiểm tra session Supabase Auth
     const client = getSupabase();
-    if (!client) {
-      window.location.href = '/';
-      return;
+    let currentUser: any = null;
+
+    if (client) {
+      const { data: { session } } = await client.auth.getSession();
+      currentUser = session?.user;
     }
 
-    // 1. Kiểm tra session và tải dữ liệu
-    client.auth.getSession().then(({ data: { session } }: any) => {
-      const user = session?.user;
-      if (!user) {
-        window.location.href = '/';
-        return;
-      }
-      activeSessionUser = user;
-      
-      // Tải số dư xu ban đầu
-      refreshBalance(user.id);
+    // Nếu chưa đăng nhập, sử dụng định danh tạm cho sandbox hoặc yêu cầu đăng nhập
+    if (currentUser) {
+      activeUserIdentifier = {
+        email: currentUser.email || undefined,
+        phone: currentUser.phone || undefined
+      };
+    } else {
+      activeUserIdentifier = {
+        email: 'guest_user@capcat.vn'
+      };
+    }
 
-      // Tải danh sách các gói nạp
-      loadPackages();
+    // Tải số dư ban đầu từ CoinHub API
+    await refreshBalance();
 
-      // Kiểm tra tab query param
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('tab') === 'history') {
-        activateTab('history');
-      }
-    });
+    // Tải danh sách các gói nạp từ CoinHub Backend
+    await loadPackages();
+
+    // Kiểm tra tab query param
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'history') {
+      activateTab('history');
+    }
 
     // 2. Chuyển đổi giữa các Tabs
     tabRechargeBtn?.addEventListener('click', () => activateTab('recharge'));
@@ -195,38 +240,40 @@ import Layout from '../../layouts/Layout.astro';
         tabRechargeBtn?.classList.remove('active');
         sectionHistory?.classList.remove('hidden');
         sectionRecharge?.classList.add('hidden');
-        if (activeSessionUser) {
-          loadHistory(activeSessionUser.id);
-        }
+        loadHistory();
       }
     }
 
-    // 3. Hàm tải các gói nạp từ API
+    // 3. Tải danh sách gói nạp từ CoinHub Microservice
     async function loadPackages() {
+      if (!packagesContainer) return;
+      
       try {
-        const res = await fetch('/api/billing/packages');
-        const packages = await res.json();
+        const packages = await getCoinPackages('doca');
         
-        if (!packagesContainer) return;
-        packagesContainer.innerHTML = '';
+        if (!packages || packages.length === 0) {
+          packagesContainer.innerHTML = '<div class="whisper-mono text-center" style="grid-column: 1/-1; padding: 2rem 0; opacity: 0.7;">Chưa có gói nạp nào được kích hoạt.</div>';
+          return;
+        }
 
-        packages.forEach((pkg: any) => {
+        packagesContainer.innerHTML = '';
+        packages.forEach((pkg: CoinPackage) => {
           const card = document.createElement('div');
           card.className = 'package-card';
           card.dataset.id = pkg.id;
           
-          const bonusBadge = pkg.bonus_coin > 0 
-            ? `<div class="bonus-badge" style="display: inline-flex; align-items: center; gap: 0.15rem;">+${pkg.bonus_coin} <i class="ph-fill ph-fish" style="font-size: 0.75rem;"></i></div>` 
+          const bonusBadge = pkg.bonusPercentage > 0 
+            ? `<div class="bonus-badge" style="display: inline-flex; align-items: center; gap: 0.15rem;">+${pkg.bonusPercentage}% <i class="ph-fill ph-sparkle" style="font-size: 0.75rem;"></i></div>` 
             : '';
 
           card.innerHTML = `
             ${bonusBadge}
             <div class="package-name">${pkg.name}</div>
             <div class="package-coin">
-              <span>${pkg.coin_amount} <i class="ph-fill ph-fish" style="font-size: 0.85rem; color: var(--cozy-green-matcha-forest);"></i></span>
+              <span>${Number(pkg.coinAmount).toLocaleString('vi-VN')} <i class="ph-fill ph-fish" style="font-size: 0.85rem; color: var(--cozy-green-matcha-forest);"></i></span>
             </div>
-            <div class="package-price">${pkg.amount_vnd.toLocaleString('vi-VN')} đ</div>
-            <div class="package-desc">${pkg.description}</div>
+            <div class="package-price">${Number(pkg.amountVnd).toLocaleString('vi-VN')} đ</div>
+            <div class="package-desc" style="font-size: 0.72rem; color: var(--cozy-text-charcoal); opacity: 0.75; margin-top: 0.25rem;">Nạp tức thì qua ZaloPay</div>
           `;
 
           card.addEventListener('click', () => {
@@ -236,16 +283,16 @@ import Layout from '../../layouts/Layout.astro';
             
             // Cập nhật thông tin gói trên Bottom Sheet
             if (selectedPkgName) selectedPkgName.textContent = pkg.name;
-            if (selectedPkgDesc) selectedPkgDesc.textContent = pkg.description;
-            if (selectedPkgCoin) selectedPkgCoin.innerHTML = `${pkg.coin_amount} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest); font-size: 1.15rem;"></i>`;
-            if (selectedPkgPrice) selectedPkgPrice.textContent = `${pkg.amount_vnd.toLocaleString('vi-VN')}đ`;
+            if (selectedPkgDesc) selectedPkgDesc.textContent = `Quy đổi ${Number(pkg.amountVnd).toLocaleString('vi-VN')}đ thành ${Number(pkg.coinAmount)} Cá`;
+            if (selectedPkgCoin) selectedPkgCoin.innerHTML = `${Number(pkg.coinAmount).toLocaleString('vi-VN')} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest); font-size: 1.15rem;"></i>`;
+            if (selectedPkgPrice) selectedPkgPrice.textContent = `${Number(pkg.amountVnd).toLocaleString('vi-VN')}đ`;
 
             // Mở Bottom Sheet
             if (paymentSheetOverlay) paymentSheetOverlay.classList.remove('hidden');
             if (paymentSheet) {
               setTimeout(() => paymentSheet.classList.add('open'), 10);
             }
-            document.body.classList.add('overflow-hidden'); // Lock background scroll
+            document.body.classList.add('overflow-hidden');
 
             if (confirmPayBtn) {
               confirmPayBtn.removeAttribute('disabled');
@@ -255,11 +302,12 @@ import Layout from '../../layouts/Layout.astro';
           packagesContainer.appendChild(card);
         });
       } catch (err) {
-        console.error('Lỗi load packages:', err);
+        console.error('[CoinHub] Lỗi load packages:', err);
+        packagesContainer.innerHTML = '<div class="text-center" style="grid-column: 1/-1; color: #d32f2f;">Không thể kết nối Backend Coin Hub (:3005).</div>';
       }
     }
 
-    // 4. Lắng nghe thay đổi phương thức thanh toán và Đóng Bottom Sheet
+    // 4. Lắng nghe thay đổi phương thức thanh toán & Đóng Bottom Sheet
     const methodItems = document.querySelectorAll('.method-item');
     methodItems.forEach(item => {
       item.addEventListener('click', () => {
@@ -275,7 +323,7 @@ import Layout from '../../layouts/Layout.astro';
       setTimeout(() => {
         if (paymentSheetOverlay) paymentSheetOverlay.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
-      }, 300); // Khớp thời gian animation transition 0.3s
+      }, 300);
     }
 
     sheetCloseBtn?.addEventListener('click', closePaymentSheet);
@@ -285,79 +333,110 @@ import Layout from '../../layouts/Layout.astro';
       }
     });
 
-    // 5. Nút bấm tiến hành thanh toán
+    // 5. Nút bấm Tạo Đơn & Tiến Hành Thanh Toán
     confirmPayBtn?.addEventListener('click', async () => {
-      if (!selectedPackageId || !activeSessionUser) return;
+      if (!selectedPackageId) return;
       
       confirmPayBtn.disabled = true;
-      confirmPayBtn.innerHTML = `Đang khởi tạo... <i class="ph-light ph-spinner-gap spin"></i>`;
+      confirmPayBtn.innerHTML = `Đang tạo đơn... <i class="ph-light ph-spinner-gap spin"></i>`;
 
-      const provider = (document.querySelector('input[name="payment-provider"]:checked') as HTMLInputElement)?.value || 'ZALOPAY';
+      const provider = (document.querySelector('input[name="payment-provider"]:checked') as HTMLInputElement)?.value as 'ZALOPAY' | 'MOCK' || 'ZALOPAY';
 
       try {
-        const response = await fetch('/api/billing/recharge', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: activeSessionUser.id,
-            packageId: selectedPackageId,
-            provider
-          })
+        const orderData = await createRechargeOrder({
+          email: activeUserIdentifier.email,
+          phone: activeUserIdentifier.phone,
+          packageId: selectedPackageId,
+          gateway: provider,
+          tenantId: 'doca',
         });
 
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-
-        // Mở cổng thanh toán trong tab mới
-        window.open(data.paymentUrl, '_blank');
-
-        // Đóng Bottom Sheet nạp tiền
+        // Đóng Bottom Sheet
         closePaymentSheet();
 
-        // Hiển thị modal chờ thanh toán
+        // Mở Modal Quét QR / Chờ thanh toán
         if (paymentModal) paymentModal.classList.remove('hidden');
-        if (modalPaymentLink) modalPaymentLink.href = data.paymentUrl;
+        
+        // Reset modal states
+        if (modalSuccessState) modalSuccessState.classList.add('hidden');
+        if (modalSpinnerState) modalSpinnerState.classList.add('hidden');
+        if (qrCodeWrapper) qrCodeWrapper.classList.remove('hidden');
+        if (modalPaymentLink) modalPaymentLink.classList.remove('hidden');
 
-        // Bắt đầu vòng lặp đối soát (auto-polling) kiểm tra số dư cá tăng
-        startPolling(activeSessionUser.id);
+        if (modalOrderId) modalOrderId.textContent = orderData.order_id.substring(0, 8) + '...';
+        if (modalPaymentLink) modalPaymentLink.href = orderData.order_url;
+
+        // Render QR Code cho ZaloPay hoặc Mock
+        if (orderData.qr_code || orderData.order_url) {
+          const qrPayload = orderData.qr_code || orderData.order_url;
+          if (qrCodeImg) {
+            qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrPayload)}`;
+          }
+        }
+
+        if (provider === 'MOCK') {
+          if (modalTitle) modalTitle.textContent = 'Mock Sandbox Đang Xử Lý';
+          if (modalSubtitle) modalSubtitle.textContent = 'Hệ thống giả lập thanh toán tức thì trong môi trường Staging/Dev';
+          if (modalStatusText) modalStatusText.innerHTML = '<i class="ph-light ph-arrows-clockwise spin"></i> Đang giả lập thanh toán... (tự động sau 2s)';
+        } else {
+          if (modalTitle) modalTitle.textContent = 'Quét mã QR ZaloPay';
+          if (modalSubtitle) modalSubtitle.textContent = 'Mở ứng dụng ZaloPay hoặc camera quét mã để hoàn tất';
+          if (modalStatusText) modalStatusText.innerHTML = '<i class="ph-light ph-arrows-clockwise spin"></i> Đang chờ nhận thanh toán từ ZaloPay...';
+        }
+
+        // Bắt đầu vòng lặp Polling trạng thái đơn hàng
+        startPolling(orderData.order_id);
 
       } catch (err: any) {
-        console.error('Lỗi thanh toán:', err);
-        alert(err.message || 'Có lỗi xảy ra trong quá trình kết nối với cổng thanh toán.');
+        console.error('[CoinHub] Lỗi tạo đơn thanh toán:', err);
+        alert(err.message || 'Có lỗi xảy ra khi kết nối tới cổng thanh toán.');
       } finally {
         confirmPayBtn.disabled = false;
         confirmPayBtn.innerHTML = `Tiến hành thanh toán <i class="ph-light ph-arrow-right"></i>`;
       }
     });
 
-    // 6. Đóng modal và dừng vòng lặp
+    // 6. Đóng Modal & Dừng Polling
     closeModalBtn?.addEventListener('click', () => {
       stopPolling();
       if (paymentModal) paymentModal.classList.add('hidden');
     });
 
-    function startPolling(userId: string) {
+    function startPolling(orderId: string) {
       stopPolling();
-      const oldBalance = currentBalance;
 
       pollInterval = setInterval(async () => {
-        fetch(`/api/billing/balance?userId=${userId}`)
-          .then(res => res.json())
-          .then((data: any) => {
-            if (data.balance !== undefined && Number(data.balance) > oldBalance) {
-              stopPolling();
-              if (paymentModal) paymentModal.classList.add('hidden');
-              
-              // Cập nhật số dư hiển thị mới
-              currentBalance = Number(data.balance);
-              if (balanceEl) balanceEl.innerHTML = `${currentBalance} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
+        try {
+          const statusResult = await getOrderStatus(orderId);
 
-              // Bắn hoạt ảnh ăn mừng hoặc thông báo
-              alert('🎉 Nạp thành công! Số dư của bạn đã được cập nhật.');
-              window.location.href = '/profile';
+          if (statusResult && statusResult.status === 'SUCCESS') {
+            stopPolling();
+
+            // Hiển thị trạng thái thành công
+            if (qrCodeWrapper) qrCodeWrapper.classList.add('hidden');
+            if (modalPaymentLink) modalPaymentLink.classList.add('hidden');
+            if (modalStatusText) modalStatusText.classList.add('hidden');
+            if (modalSuccessState) modalSuccessState.classList.remove('hidden');
+            if (modalTitle) modalTitle.textContent = 'Giao Dịch Hoàn Tất 🎉';
+            if (modalSubtitle) modalSubtitle.textContent = 'Cảm ơn bạn đã đồng hành cùng Doca Pet!';
+
+            // Cập nhật số dư mới tức thì
+            await refreshBalance();
+
+            // Tự động đóng modal sau 2.5s
+            setTimeout(() => {
+              if (paymentModal) paymentModal.classList.add('hidden');
+            }, 2500);
+          } else if (statusResult && (statusResult.status === 'FAILED' || statusResult.status === 'EXPIRED')) {
+            stopPolling();
+            if (modalStatusText) {
+              modalStatusText.innerHTML = '<span style="color: #d32f2f;"><i class="ph-light ph-x-circle"></i> Đơn hàng đã hết hạn hoặc thất bại.</span>';
             }
-          });
-      }, 3000);
+          }
+        } catch (err) {
+          console.warn('[CoinHub Polling]', err);
+        }
+      }, 2500);
     }
 
     function stopPolling() {
@@ -367,38 +446,37 @@ import Layout from '../../layouts/Layout.astro';
       }
     }
 
-    // 7. Hàm tải số dư cá
-    function refreshBalance(userId: string) {
-      fetch(`/api/billing/balance?userId=${userId}`)
-        .then(res => res.json())
-        .then((data: any) => {
-          currentBalance = data.balance !== undefined ? Number(data.balance) : 0;
-          if (balanceEl) balanceEl.innerHTML = `${currentBalance} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
-        })
-        .catch(err => {
-          console.error('Error loading balance:', err);
-        });
+    // 7. Hàm làm mới số dư Cá từ Backend CoinHub
+    async function refreshBalance() {
+      try {
+        const balanceData = await getWalletBalance(activeUserIdentifier);
+        currentBalance = balanceData.balance;
+        if (balanceEl) {
+          balanceEl.innerHTML = `${Number(currentBalance).toLocaleString('vi-VN')} <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
+        }
+      } catch (err) {
+        console.error('[CoinHub] Lỗi tải số dư:', err);
+        if (balanceEl) {
+          balanceEl.innerHTML = `0 <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest);"></i>`;
+        }
+      }
     }
 
-    // 8. Tải lịch sử giao dịch
-    async function loadHistory(userId: string) {
+    // 8. Tải lịch sử biến động số dư Sổ cái bất biến
+    async function loadHistory() {
       if (!historyContainer) return;
       
       try {
-        const res = await fetch(`/api/billing/history?userId=${userId}`);
-        const data = await res.json();
-        
-        if (data.error) throw new Error(data.error);
-        const txs = data.history || [];
+        const transactions = await getWalletHistory(activeUserIdentifier, 30);
 
-        if (txs.length === 0) {
-          historyContainer.innerHTML = '<div class="no-history text-center whisper-mono" style="font-size: 0.82rem; padding: 2rem 0; opacity: 0.7;">Chưa có lịch sử giao dịch nào. 🐾</div>';
+        if (!transactions || transactions.length === 0) {
+          historyContainer.innerHTML = '<div class="no-history text-center whisper-mono" style="font-size: 0.82rem; padding: 2.5rem 0; opacity: 0.7;">Chưa có biến động số dư nào trong ví. 🐾</div>';
           return;
         }
 
         historyContainer.innerHTML = '';
-        txs.forEach((tx: any) => {
-          const date = new Date(tx.created_at).toLocaleString('vi-VN', {
+        transactions.forEach((tx: any) => {
+          const date = new Date(tx.createdAt || tx.created_at).toLocaleString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
             day: '2-digit',
@@ -406,25 +484,38 @@ import Layout from '../../layouts/Layout.astro';
             year: 'numeric'
           });
 
-          const isPlus = tx.amount > 0;
+          const amountNum = Number(tx.amount);
+          const isPlus = amountNum > 0;
           const classAmount = isPlus ? 'tx-amount plus' : 'tx-amount minus';
           const symbol = isPlus ? '+' : '';
+
+          let typeLabel = 'Biến động số dư';
+          if (tx.type === 'RECHARGE') typeLabel = 'Nạp Cá (ZaloPay/Mock)';
+          else if (tx.type === 'SPEND') typeLabel = 'Chi tiêu mở khóa dịch vụ';
+          else if (tx.type === 'BONUS') typeLabel = 'Thưởng khuyến mại';
+          else if (tx.type === 'MANUAL_CREDIT') typeLabel = 'Bù Cá từ quản trị viên';
+          else if (tx.type === 'REFUND') typeLabel = 'Hoàn trả số dư';
 
           const item = document.createElement('div');
           item.className = 'history-item';
           item.innerHTML = `
             <div class="tx-left">
-              <div class="tx-type">${tx.description || (isPlus ? 'Nạp' : 'Tiêu dùng')}</div>
-              <div class="tx-date">${date}</div>
+              <div class="tx-type" style="display: flex; align-items: center; gap: 0.35rem;">
+                <i class="ph-light ${isPlus ? 'ph-arrow-down-left' : 'ph-arrow-up-right'}" style="color: ${isPlus ? 'var(--cozy-green-matcha-forest)' : 'var(--cozy-text-obsidian)'}; font-size: 1rem;"></i>
+                ${typeLabel}
+              </div>
+              <div class="tx-date">${date} ${tx.sourceRef ? `• Mã: ${tx.sourceRef.substring(0, 8)}...` : ''}</div>
             </div>
-            <div class="${classAmount}" style="display: inline-flex; align-items: center; gap: 0.15rem;">${symbol}${tx.amount} <i class="ph-fill ph-fish" style="font-size: 0.82rem;"></i></div>
+            <div class="${classAmount}" style="display: inline-flex; align-items: center; gap: 0.15rem;">
+              ${symbol}${amountNum.toLocaleString('vi-VN')} <i class="ph-fill ph-fish" style="font-size: 0.85rem;"></i>
+            </div>
           `;
           historyContainer.appendChild(item);
         });
 
       } catch (err) {
-        console.error('Lỗi load lịch sử:', err);
-        historyContainer.innerHTML = '<div class="no-history text-center">Không thể tải dữ liệu lịch sử.</div>';
+        console.error('[CoinHub] Lỗi load lịch sử:', err);
+        historyContainer.innerHTML = '<div class="no-history text-center" style="padding: 2rem 0; color: #d32f2f;">Không thể tải lịch sử giao dịch từ Coin Hub.</div>';
       }
     }
   });

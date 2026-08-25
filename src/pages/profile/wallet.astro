@@ -202,16 +202,14 @@ import Layout from '../../layouts/Layout.astro';
       currentUser = session?.user;
     }
 
-    // Nếu chưa đăng nhập, sử dụng định danh tạm cho sandbox hoặc yêu cầu đăng nhập
+    // Kiểm tra thông tin người dùng đã đăng nhập
     if (currentUser) {
       activeUserIdentifier = {
         email: currentUser.email || undefined,
         phone: currentUser.phone || undefined
       };
     } else {
-      activeUserIdentifier = {
-        email: 'guest_user@capcat.vn'
-      };
+      activeUserIdentifier = null;
     }
 
     // Tải số dư ban đầu từ CoinHub API
@@ -337,6 +335,12 @@ import Layout from '../../layouts/Layout.astro';
     // 5. Nút bấm Tạo Đơn & Tiến Hành Thanh Toán
     confirmPayBtn?.addEventListener('click', async () => {
       if (!selectedPackageId) return;
+
+      if (!activeUserIdentifier || (!activeUserIdentifier.email && !activeUserIdentifier.phone)) {
+        alert('Vui lòng đăng nhập tài khoản DOCA để tiến hành nạp Cá vào ví của bạn.');
+        window.location.href = '/profile';
+        return;
+      }
       
       confirmPayBtn.disabled = true;
       confirmPayBtn.innerHTML = `Đang tạo đơn... <i class="ph-light ph-spinner-gap spin"></i>`;

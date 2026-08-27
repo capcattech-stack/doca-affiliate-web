@@ -11,26 +11,15 @@ export function initNavbarAuth() {
   const desktopContainers = document.querySelectorAll('#nav-auth-container-desktop');
   const mobileContainers = document.querySelectorAll('#nav-auth-container-mobile');
 
-  async function renderAuthUI(user: any) {
+  function renderAuthUI(user: any) {
     if (user) {
       // Giao diện đã kết nối: hiển thị huy hiệu Ví Cá và avatar tròn dẫn tới hồ sơ cá nhân
       const avatarUrl = user.user_metadata?.avatar_url || '/images/default-avatar.png';
-      
-      let coinDisplay = '...';
-      try {
-        const balanceData = await getWalletBalance({
-          email: user.email || undefined,
-          phone: user.phone || undefined,
-        });
-        coinDisplay = Number(balanceData.balance).toLocaleString('vi-VN');
-      } catch (e) {
-        coinDisplay = '0';
-      }
 
       const desktopHtml = `
         <div class="nav-auth-user" style="display: flex; align-items: center; gap: 0.6rem;">
           <a href="/profile/wallet" class="nav-coin-badge" title="Ví Cá của bạn - Bấm để nạp thêm">
-            <span class="nav-coin-amount">${coinDisplay}</span>
+            <span class="nav-coin-amount">...</span>
             <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest); font-size: 0.95rem;"></i>
           </a>
           <a href="/profile" class="nav-avatar-link" title="Xem hồ sơ cá nhân của bạn">
@@ -46,7 +35,7 @@ export function initNavbarAuth() {
             <span class="mobile-avatar-name">Hồ sơ cá nhân</span>
           </a>
           <a href="/profile/wallet" class="nav-coin-badge" title="Ví Cá">
-            <span class="nav-coin-amount">${coinDisplay}</span>
+            <span class="nav-coin-amount">...</span>
             <i class="ph-fill ph-fish" style="color: var(--cozy-green-matcha-forest); font-size: 0.95rem;"></i>
           </a>
         </div>
@@ -58,6 +47,22 @@ export function initNavbarAuth() {
 
       mobileContainers.forEach(container => {
         container.innerHTML = mobileHtml;
+      });
+
+      // Tải số dư bất đồng bộ không làm chậm UI
+      getWalletBalance({
+        email: user.email || undefined,
+        phone: user.phone || undefined,
+      }).then(balanceData => {
+        const coinDisplay = Number(balanceData.balance).toLocaleString('vi-VN');
+        document.querySelectorAll('.nav-coin-amount').forEach(el => {
+          el.textContent = coinDisplay;
+        });
+      }).catch(err => {
+        console.warn('[NavbarAuth] Error fetching balance:', err);
+        document.querySelectorAll('.nav-coin-amount').forEach(el => {
+          el.textContent = '0';
+        });
       });
     } else {
       // Giao diện chưa kết nối: hiển thị nút Google hình tròn nhỏ gọn trên Desktop (đồng bộ kích thước với Avatar)

@@ -1,0 +1,1271 @@
+---
+// ShopeeAffiliateTool.astro - Công cụ tạo Link Shopee Affiliate 1-Chạm phong cách Muji Minimalist
+---
+
+<div class="shopee-aff-tool-wrapper" id="shopee-aff-tool-section">
+  <div class="shopee-aff-card">
+    <!-- Header của Công Cụ -->
+    <div class="tool-header">
+      <div class="tool-header-left">
+        <div class="tool-badge-icon">
+          <i class="ph-light ph-link-simple-horizontal"></i>
+        </div>
+        <div>
+          <h4 class="tool-title">Tạo Link Shopee Affiliate</h4>
+          <p class="tool-desc">Dán link sản phẩm Shopee bất kỳ để tạo link hoa hồng 1-chạm</p>
+        </div>
+      </div>
+      <div class="tool-header-right">
+        <button id="open-aff-settings-btn" class="tool-icon-btn" title="Cài đặt mã Affiliate" aria-label="Cài đặt mã Affiliate">
+          <i class="ph-light ph-gear"></i>
+        </button>
+        <button id="toggle-history-btn" class="tool-icon-btn" title="Lịch sử tạo link" aria-label="Lịch sử tạo link">
+          <i class="ph-light ph-clock-counter-clockwise"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Thanh nhập Link chính -->
+    <div class="tool-input-row">
+      <div class="tool-input-wrapper">
+        <i class="ph-light ph-magnifying-glass input-leading-icon"></i>
+        <input 
+          type="url" 
+          id="shopee-raw-url-input" 
+          class="shopee-url-input" 
+          placeholder="Dán link Shopee gốc vào đây (shopee.vn, s.shopee.vn, shp.ee...)" 
+          autocomplete="off" 
+          spellcheck="false"
+        />
+        <button id="paste-clipboard-btn" class="input-action-btn" title="Dán từ bộ nhớ đệm" aria-label="Dán từ Clipboard">
+          <i class="ph-light ph-clipboard-text"></i> Dán
+        </button>
+        <button id="clear-input-btn" class="input-clear-btn hidden" title="Xóa nội dung" aria-label="Xóa nội dung">
+          <i class="ph-light ph-x"></i>
+        </button>
+      </div>
+      <button id="generate-aff-btn" class="generate-btn">
+        <span class="btn-text">Tạo Link</span>
+        <i class="ph-light ph-sparkle"></i>
+      </button>
+    </div>
+
+    <!-- Thẻ chọn nhanh Sub ID / Kênh (Quick Sub ID Chips) -->
+    <div class="subid-chips-row">
+      <span class="subid-label"><i class="ph-light ph-tag"></i> Kênh gắn tag:</span>
+      <div class="chips-list">
+        <button type="button" class="subid-chip active" data-subid="doca_web">doca_web</button>
+        <button type="button" class="subid-chip" data-subid="tiktok">tiktok</button>
+        <button type="button" class="subid-chip" data-subid="facebook">facebook</button>
+        <button type="button" class="subid-chip" data-subid="youtube">youtube</button>
+        <button type="button" class="subid-chip" data-subid="zalo">zalo</button>
+      </div>
+    </div>
+
+    <!-- Thông báo lỗi (Error Banner) -->
+    <div id="tool-error-banner" class="tool-error-banner hidden">
+      <i class="ph-light ph-warning-circle"></i>
+      <span id="tool-error-text">Đường dẫn không hợp lệ.</span>
+    </div>
+
+    <!-- Khung kết quả (Result Card) -->
+    <div id="tool-result-container" class="tool-result-container hidden">
+      <div class="result-divider"></div>
+      
+      <div class="result-product-card">
+        <div class="result-img-wrapper">
+          <img id="result-prod-img" src="/images/brand/symbol-green.png" alt="Sản phẩm Shopee" />
+        </div>
+        <div class="result-info">
+          <div class="result-meta-top">
+            <span class="platform-pill"><i class="ph-light ph-shopping-bag"></i> Shopee Affiliate</span>
+            <span id="result-short-badge" class="shortlink-pill hidden">ShortLink</span>
+          </div>
+          <h5 id="result-prod-title" class="result-title">Tên sản phẩm Shopee</h5>
+          <div class="result-tracking-info">
+            <span>Partner ID: <strong id="result-partner-id" class="whisper-mono">17342530259</strong></span>
+            <span>Tag: <strong id="result-sub-id" class="whisper-mono">doca_web</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hộp link kết quả -->
+      <div class="result-url-box">
+        <div class="result-url-text whisper-mono" id="result-aff-url">https://shopee.vn/...</div>
+        <div class="result-actions">
+          <button id="copy-result-btn" class="action-btn primary-action">
+            <i class="ph-light ph-copy" id="copy-icon"></i>
+            <span id="copy-btn-text">Sao chép Link</span>
+          </button>
+          <a id="open-result-link" href="#" target="_blank" rel="noopener noreferrer" class="action-btn secondary-action">
+            <i class="ph-light ph-arrow-square-out"></i> Mở thử
+          </a>
+          <button id="toggle-qr-btn" class="action-btn secondary-action" title="Xem mã QR">
+            <i class="ph-light ph-qr-code"></i> Mã QR
+          </button>
+        </div>
+      </div>
+
+      <!-- QR Code Viewer -->
+      <div id="result-qr-container" class="result-qr-box hidden">
+        <div class="qr-image-wrapper">
+          <img id="result-qr-img" src="" alt="Mã QR Mua hàng Shopee" />
+        </div>
+        <p class="qr-caption">Quét mã QR bằng Camera điện thoại để mở trực tiếp trên app Shopee 🐾</p>
+      </div>
+    </div>
+
+    <!-- Lịch sử các link tạo gần nhất (History Accordion) -->
+    <div id="tool-history-container" class="tool-history-container hidden">
+      <div class="result-divider"></div>
+      <div class="history-header">
+        <h5><i class="ph-light ph-clock-counter-clockwise"></i> Lịch sử link đã tạo (5 link gần nhất)</h5>
+        <button id="clear-history-btn" class="clear-history-btn">Xóa lịch sử</button>
+      </div>
+      <div id="history-items-list" class="history-items-list">
+        <!-- Render bằng Javascript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Cài Đặt Mã Affiliate (Affiliate Settings Modal) -->
+  <div id="aff-settings-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="ph-light ph-sliders-horizontal"></i> Cài Đặt Mã Shopee Affiliate</h3>
+        <button id="close-aff-settings-btn" class="modal-close-btn" aria-label="Đóng"><i class="ph-light ph-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group">
+          <label for="cfg-partner-id">Mã Shopee Partner ID (hoặc Affiliate ID cá nhân)</label>
+          <input type="text" id="cfg-partner-id" class="modal-input" placeholder="Ví dụ: 17342530259 hoặc mã ID của bạn" />
+          <small class="setting-help">Mã này sẽ được tự động gắn vào tham số <code>utm_source=an_[ID]</code> để ghi nhận hoa hồng.</small>
+        </div>
+
+        <div class="setting-group">
+          <label for="cfg-default-subid">Tag mặc định (Sub ID)</label>
+          <input type="text" id="cfg-default-subid" class="modal-input" placeholder="doca_web" />
+          <small class="setting-help">Dùng để phân loại nguồn đơn hàng trong bảng báo cáo Shopee Affiliate.</small>
+        </div>
+
+        <div class="setting-group advanced-group">
+          <div class="advanced-header">
+            <span>Tích hợp Shopee Open API (Tùy chọn)</span>
+            <span class="advanced-badge">Dành cho Developer</span>
+          </div>
+          <p class="advanced-desc">Nếu bạn có App ID & Secret từ cổng Shopee Affiliate Open Platform, hãy điền vào đây để hệ thống tự động sinh link rút gọn <code>s.shopee.vn</code>.</p>
+          <input type="text" id="cfg-app-id" class="modal-input" placeholder="Shopee App ID" style="margin-bottom: 0.5rem;" />
+          <input type="password" id="cfg-app-secret" class="modal-input" placeholder="Shopee App Secret" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-aff-settings-btn" class="modal-save-btn">
+          Lưu cài đặt <i class="ph-light ph-check"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .shopee-aff-tool-wrapper {
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .shopee-aff-card {
+    background-color: var(--cozy-bg-pure);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: var(--radius-card, 16px);
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 16px rgba(21, 23, 15, 0.03);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .shopee-aff-card:hover {
+    box-shadow: 0 6px 20px rgba(21, 23, 15, 0.05);
+  }
+
+  /* Header */
+  .tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .tool-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .tool-badge-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background-color: #EBF5E5;
+    color: var(--cozy-green-matcha-forest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(74, 138, 46, 0.15);
+  }
+
+  .tool-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .tool-desc {
+    font-size: 0.78rem;
+    color: #6E6E73;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .tool-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .tool-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background-color: var(--cozy-bg-oatmeal);
+    border: 1px solid var(--cozy-border-light);
+    color: var(--cozy-text-obsidian);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.05rem;
+    transition: all 0.2s ease;
+  }
+
+  .tool-icon-btn:hover {
+    background-color: var(--cozy-green-matcha-forest);
+    color: #FFFFFF;
+    border-color: var(--cozy-green-matcha-forest);
+  }
+
+  /* Input Row */
+  .tool-input-row {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tool-input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-leading-icon {
+    position: absolute;
+    left: 1rem;
+    color: #8E8E93;
+    font-size: 1.1rem;
+    pointer-events: none;
+  }
+
+  .shopee-url-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 5.5rem 0 2.6rem;
+    border: 1.5px solid var(--cozy-border-light);
+    border-radius: var(--radius-button, 12px);
+    background-color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    color: var(--cozy-text-obsidian);
+    transition: all 0.25s ease;
+    outline: none;
+  }
+
+  .shopee-url-input:focus {
+    border-color: var(--cozy-green-matcha-forest);
+    box-shadow: 0 0 0 3px rgba(74, 138, 46, 0.12);
+  }
+
+  .input-action-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--cozy-bg-beige);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+  }
+
+  .input-action-btn:hover {
+    background-color: var(--cozy-bg-oatmeal);
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .input-clear-btn {
+    position: absolute;
+    right: 4.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #8E8E93;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+  }
+
+  .input-clear-btn:hover {
+    color: #15170F;
+  }
+
+  .generate-btn {
+    height: 44px;
+    padding: 0 1.25rem;
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-button, 12px);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .generate-btn:hover {
+    background-color: var(--cozy-green-matcha-forest);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(74, 138, 46, 0.25);
+  }
+
+  .generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Sub ID Chips Row */
+  .subid-chips-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .subid-label {
+    font-size: 0.75rem;
+    color: #6E6E73;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .chips-list {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .subid-chip {
+    background-color: #FFFFFF;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 14px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.72rem;
+    font-family: 'Space Mono', monospace;
+    color: #5D5E56;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .subid-chip:hover {
+    border-color: var(--cozy-green-matcha-forest);
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  .subid-chip.active {
+    background-color: #EBF5E5;
+    border-color: var(--cozy-green-matcha-forest);
+    color: var(--cozy-green-matcha-forest);
+    font-weight: 700;
+  }
+
+  /* Error Banner */
+  .tool-error-banner {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.85rem;
+    background-color: #FDE8E8;
+    border: 1px solid #F8B4B4;
+    border-radius: 8px;
+    color: #9B1C1C;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* Result Container */
+  .result-divider {
+    height: 1px;
+    border-top: 1px dashed var(--cozy-border-light);
+    margin: 1.25rem 0;
+  }
+
+  .tool-result-container {
+    animation: slideDown 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-product-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background-color: var(--cozy-bg-beige);
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--cozy-border-light);
+    margin-bottom: 0.75rem;
+  }
+
+  .result-img-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    border: 1px solid var(--cozy-border-light);
+    flex-shrink: 0;
+  }
+
+  .result-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .result-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .result-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .platform-pill {
+    background-color: #EE4D2D;
+    color: #FFFFFF;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .shortlink-pill {
+    background-color: var(--cozy-green-matcha-forest);
+    color: #FFFFFF;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+  }
+
+  .result-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    margin: 0 0 0.25rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .result-tracking-info {
+    font-size: 0.72rem;
+    color: #6E6E73;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .result-url-box {
+    background-color: #FFFFFF;
+    border: 1.5px solid var(--cozy-border-light);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .result-url-text {
+    font-size: 0.8rem;
+    color: var(--cozy-green-matcha-forest);
+    word-break: break-all;
+    user-select: all;
+    background-color: #F8FBF6;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid rgba(74, 138, 46, 0.15);
+  }
+
+  .result-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .primary-action {
+    background-color: var(--cozy-green-matcha-forest);
+    color: #FFFFFF;
+    border: none;
+    box-shadow: 0 2px 8px rgba(74, 138, 46, 0.2);
+  }
+
+  .primary-action:hover {
+    background-color: var(--cozy-green-matcha-dark);
+    transform: translateY(-1px);
+  }
+
+  .primary-action.copied {
+    background-color: #2E7D32;
+  }
+
+  .secondary-action {
+    background-color: var(--cozy-bg-beige);
+    color: var(--cozy-text-obsidian);
+    border: 1px solid var(--cozy-border-light);
+  }
+
+  .secondary-action:hover {
+    background-color: var(--cozy-bg-oatmeal);
+    color: var(--cozy-green-matcha-forest);
+  }
+
+  /* QR Code Viewer Box */
+  .result-qr-box {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 12px;
+    text-align: center;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .qr-image-wrapper {
+    display: inline-block;
+    padding: 8px;
+    background: #FFFFFF;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+  }
+
+  .qr-image-wrapper img {
+    width: 140px;
+    height: 140px;
+    display: block;
+  }
+
+  .qr-caption {
+    font-size: 0.75rem;
+    color: #6E6E73;
+    margin: 0;
+  }
+
+  /* History Box */
+  .tool-history-container {
+    animation: slideDown 0.3s ease;
+  }
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+  }
+
+  .history-header h5 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .clear-history-btn {
+    background: none;
+    border: none;
+    font-size: 0.72rem;
+    color: #8E8E93;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .clear-history-btn:hover {
+    color: #D32F2F;
+  }
+
+  .history-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  :global(.history-item) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.65rem;
+    background-color: var(--cozy-bg-beige);
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 8px;
+    gap: 0.5rem;
+  }
+
+  :global(.history-item-title) {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--cozy-text-obsidian);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  :global(.history-copy-btn) {
+    background: none;
+    border: none;
+    color: var(--cozy-green-matcha-forest);
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 2px 4px;
+  }
+
+  /* Modal Cài Đặt */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-card {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    max-width: 460px;
+    width: 100%;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--cozy-border-light);
+    padding-bottom: 0.75rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--cozy-text-obsidian);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #8E8E93;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .modal-close-btn:hover {
+    color: #15170F;
+  }
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .setting-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--cozy-text-obsidian);
+    margin-bottom: 0.35rem;
+  }
+
+  .modal-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--cozy-border-light);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+  }
+
+  .modal-input:focus {
+    border-color: var(--cozy-green-matcha-forest);
+  }
+
+  .setting-help {
+    display: block;
+    font-size: 0.72rem;
+    color: #8E8E93;
+    margin-top: 0.25rem;
+  }
+
+  .advanced-group {
+    background-color: var(--cozy-bg-beige);
+    padding: 0.85rem;
+    border-radius: 10px;
+    border: 1px dashed var(--cozy-border-light);
+  }
+
+  .advanced-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .advanced-badge {
+    background-color: #E2ECD2;
+    color: var(--cozy-green-matcha-dark);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .advanced-desc {
+    font-size: 0.72rem;
+    color: #6E6E73;
+    margin-bottom: 0.6rem;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .modal-save-btn {
+    background-color: var(--cozy-text-obsidian);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+  }
+
+  .modal-save-btn:hover {
+    background-color: var(--cozy-green-matcha-forest);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 640px) {
+    .shopee-aff-card {
+      padding: 1rem;
+    }
+    .tool-input-row {
+      flex-direction: column;
+    }
+    .generate-btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .result-actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    .action-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // --- Elements ---
+    const rawUrlInput = document.getElementById('shopee-raw-url-input') as HTMLInputElement;
+    const pasteBtn = document.getElementById('paste-clipboard-btn');
+    const clearBtn = document.getElementById('clear-input-btn');
+    const generateBtn = document.getElementById('generate-aff-btn') as HTMLButtonElement;
+    const errorBanner = document.getElementById('tool-error-banner');
+    const errorText = document.getElementById('tool-error-text');
+
+    const resultContainer = document.getElementById('tool-result-container');
+    const resultProdImg = document.getElementById('result-prod-img') as HTMLImageElement;
+    const resultProdTitle = document.getElementById('result-prod-title');
+    const resultPartnerId = document.getElementById('result-partner-id');
+    const resultSubId = document.getElementById('result-sub-id');
+    const resultAffUrl = document.getElementById('result-aff-url');
+    const resultShortBadge = document.getElementById('result-short-badge');
+    const copyResultBtn = document.getElementById('copy-result-btn');
+    const copyBtnText = document.getElementById('copy-btn-text');
+    const openResultLink = document.getElementById('open-result-link') as HTMLAnchorElement;
+    const toggleQrBtn = document.getElementById('toggle-qr-btn');
+    const qrContainer = document.getElementById('result-qr-container');
+    const qrImg = document.getElementById('result-qr-img') as HTMLImageElement;
+
+    // History elements
+    const toggleHistoryBtn = document.getElementById('toggle-history-btn');
+    const historyContainer = document.getElementById('tool-history-container');
+    const historyItemsList = document.getElementById('history-items-list');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+    // Settings elements
+    const openSettingsBtn = document.getElementById('open-aff-settings-btn');
+    const closeSettingsBtn = document.getElementById('close-aff-settings-btn');
+    const settingsModal = document.getElementById('aff-settings-modal');
+    const cfgPartnerId = document.getElementById('cfg-partner-id') as HTMLInputElement;
+    const cfgDefaultSubid = document.getElementById('cfg-default-subid') as HTMLInputElement;
+    const cfgAppId = document.getElementById('cfg-app-id') as HTMLInputElement;
+    const cfgAppSecret = document.getElementById('cfg-app-secret') as HTMLInputElement;
+    const saveSettingsBtn = document.getElementById('save-aff-settings-btn');
+
+    const subidChips = document.querySelectorAll('.subid-chip');
+
+    // Local Storage Keys
+    const LS_KEY_PARTNER_ID = 'doca_shopee_partner_id';
+    const LS_KEY_DEFAULT_SUBID = 'doca_shopee_default_subid';
+    const LS_KEY_APP_ID = 'doca_shopee_app_id';
+    const LS_KEY_APP_SECRET = 'doca_shopee_app_secret';
+    const LS_KEY_HISTORY = 'doca_shopee_converted_history';
+
+    let currentSelectedSubid = 'doca_web';
+
+    // Helper: Toast notification
+    const notifyToast = (msg: string) => {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast(msg);
+      } else {
+        const toastEl = document.getElementById('cozy-toast-element');
+        const toastText = document.getElementById('cozy-toast-text');
+        if (toastEl && toastText) {
+          toastText.textContent = msg;
+          toastEl.classList.add('show');
+          setTimeout(() => toastEl.classList.remove('show'), 3000);
+        }
+      }
+    };
+
+    // Load initial settings from localStorage
+    const loadSettings = () => {
+      const savedPartnerId = localStorage.getItem(LS_KEY_PARTNER_ID) || '17342530259';
+      const savedDefaultSubid = localStorage.getItem(LS_KEY_DEFAULT_SUBID) || 'doca_web';
+      const savedAppId = localStorage.getItem(LS_KEY_APP_ID) || '';
+      const savedAppSecret = localStorage.getItem(LS_KEY_APP_SECRET) || '';
+
+      if (cfgPartnerId) cfgPartnerId.value = savedPartnerId;
+      if (cfgDefaultSubid) cfgDefaultSubid.value = savedDefaultSubid;
+      if (cfgAppId) cfgAppId.value = savedAppId;
+      if (cfgAppSecret) cfgAppSecret.value = savedAppSecret;
+
+      currentSelectedSubid = savedDefaultSubid;
+      updateSubidChipSelection(savedDefaultSubid);
+    };
+
+    const updateSubidChipSelection = (subid: string) => {
+      subidChips.forEach((chip) => {
+        if (chip.getAttribute('data-subid') === subid) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+    };
+
+    // --- Sub ID Chip Clicks ---
+    subidChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const subid = chip.getAttribute('data-subid') || 'doca_web';
+        currentSelectedSubid = subid;
+        updateSubidChipSelection(subid);
+      });
+    });
+
+    // --- Input clear / paste handlers ---
+    const updateInputState = () => {
+      if (!rawUrlInput || !clearBtn) return;
+      if (rawUrlInput.value.trim().length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+    };
+
+    rawUrlInput?.addEventListener('input', () => {
+      updateInputState();
+      hideError();
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      if (rawUrlInput) {
+        rawUrlInput.value = '';
+        rawUrlInput.focus();
+        updateInputState();
+        hideError();
+      }
+    });
+
+    pasteBtn?.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && rawUrlInput) {
+          rawUrlInput.value = text.trim();
+          updateInputState();
+          hideError();
+          notifyToast('Đã dán link từ bộ nhớ đệm 📋');
+          // Tự động kích hoạt tạo link nếu đường dẫn hợp lệ
+          if (/shopee|shp\.ee/i.test(text)) {
+            handleConvert();
+          }
+        }
+      } catch {
+        notifyToast('Vui lòng cấp quyền truy cập Clipboard hoặc dán thủ công 🐾');
+      }
+    });
+
+    const showError = (msg: string) => {
+      if (errorBanner && errorText) {
+        errorText.textContent = msg;
+        errorBanner.classList.remove('hidden');
+      }
+    };
+
+    const hideError = () => {
+      if (errorBanner) errorBanner.classList.add('hidden');
+    };
+
+    // --- History Management ---
+    const getHistory = (): any[] => {
+      try {
+        const raw = localStorage.getItem(LS_KEY_HISTORY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    };
+
+    const saveToHistory = (item: { title: string; affiliateUrl: string; image: string }) => {
+      try {
+        let history = getHistory();
+        history = [item, ...history.filter(h => h.affiliateUrl !== item.affiliateUrl)].slice(0, 5);
+        localStorage.setItem(LS_KEY_HISTORY, JSON.stringify(history));
+        renderHistory();
+      } catch (e) {
+        console.warn('Could not save history:', e);
+      }
+    };
+
+    const renderHistory = () => {
+      if (!historyItemsList) return;
+      const history = getHistory();
+      if (history.length === 0) {
+        historyItemsList.innerHTML = '<p style="font-size: 0.75rem; color: #8E8E93; text-align: center; margin: 0.5rem 0;">Chưa có link nào được tạo.</p>';
+        return;
+      }
+
+      historyItemsList.innerHTML = history.map((item, index) => `
+        <div class="history-item" data-index="${index}">
+          <span class="history-item-title" title="${item.title}">${item.title}</span>
+          <button class="history-copy-btn" data-url="${item.affiliateUrl}" title="Sao chép link">
+            <i class="ph-light ph-copy"></i>
+          </button>
+        </div>
+      `).join('');
+
+      historyItemsList.querySelectorAll('.history-copy-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = (btn as HTMLElement).getAttribute('data-url') || '';
+          if (url) {
+            navigator.clipboard.writeText(url);
+            notifyToast('Đã sao chép link từ lịch sử! 🐾');
+          }
+        });
+      });
+    };
+
+    toggleHistoryBtn?.addEventListener('click', () => {
+      if (historyContainer) {
+        const isHidden = historyContainer.classList.contains('hidden');
+        if (isHidden) {
+          renderHistory();
+          historyContainer.classList.remove('hidden');
+        } else {
+          historyContainer.classList.add('hidden');
+        }
+      }
+    });
+
+    clearHistoryBtn?.addEventListener('click', () => {
+      localStorage.removeItem(LS_KEY_HISTORY);
+      renderHistory();
+      notifyToast('Đã xóa toàn bộ lịch sử tạo link.');
+    });
+
+    // --- Modal Settings Handlers ---
+    openSettingsBtn?.addEventListener('click', () => {
+      loadSettings();
+      if (settingsModal) settingsModal.classList.remove('hidden');
+    });
+
+    closeSettingsBtn?.addEventListener('click', () => {
+      if (settingsModal) settingsModal.classList.add('hidden');
+    });
+
+    settingsModal?.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.add('hidden');
+      }
+    });
+
+    saveSettingsBtn?.addEventListener('click', () => {
+      const partnerId = cfgPartnerId?.value.trim() || '17342530259';
+      const defaultSubid = cfgDefaultSubid?.value.trim() || 'doca_web';
+      const appId = cfgAppId?.value.trim() || '';
+      const appSecret = cfgAppSecret?.value.trim() || '';
+
+      localStorage.setItem(LS_KEY_PARTNER_ID, partnerId);
+      localStorage.setItem(LS_KEY_DEFAULT_SUBID, defaultSubid);
+      localStorage.setItem(LS_KEY_APP_ID, appId);
+      localStorage.setItem(LS_KEY_APP_SECRET, appSecret);
+
+      currentSelectedSubid = defaultSubid;
+      updateSubidChipSelection(defaultSubid);
+
+      if (settingsModal) settingsModal.classList.add('hidden');
+      notifyToast('Đã lưu cấu hình Shopee Affiliate thành công! ✨');
+    });
+
+    // --- Main Link Conversion Handler ---
+    const handleConvert = async () => {
+      const rawUrl = rawUrlInput?.value.trim();
+      if (!rawUrl) {
+        showError('Vui lòng nhập hoặc dán đường dẫn sản phẩm Shopee.');
+        rawUrlInput?.focus();
+        return;
+      }
+
+      hideError();
+      if (generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="ph-light ph-circle-notch spin"></i> Đang tạo...';
+      }
+
+      const partnerId = localStorage.getItem(LS_KEY_PARTNER_ID) || '17342530259';
+      const appId = localStorage.getItem(LS_KEY_APP_ID) || '';
+      const appSecret = localStorage.getItem(LS_KEY_APP_SECRET) || '';
+
+      try {
+        const response = await fetch('/api/shopee/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: rawUrl,
+            affiliateId: partnerId,
+            subId: currentSelectedSubid,
+            appId,
+            appSecret
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Không thể tạo link affiliate. Vui lòng thử lại.');
+        }
+
+        // Hiển thị kết quả
+        if (resultProdTitle) resultProdTitle.textContent = data.title || 'Sản phẩm Shopee';
+        if (resultProdImg) resultProdImg.src = data.image || '/images/brand/symbol-green.png';
+        if (resultPartnerId) resultPartnerId.textContent = data.affiliateId || partnerId;
+        if (resultSubId) resultSubId.textContent = data.subId || currentSelectedSubid;
+        if (resultAffUrl) resultAffUrl.textContent = data.affiliateUrl;
+        if (openResultLink) openResultLink.href = data.affiliateUrl;
+
+        if (resultShortBadge) {
+          if (data.isShortLink) {
+            resultShortBadge.classList.remove('hidden');
+          } else {
+            resultShortBadge.classList.add('hidden');
+          }
+        }
+
+        // Cập nhật QR Code
+        if (qrImg) {
+          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.affiliateUrl)}`;
+        }
+        if (qrContainer) qrContainer.classList.add('hidden');
+
+        if (resultContainer) {
+          resultContainer.classList.remove('hidden');
+          resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Lưu vào lịch sử
+        saveToHistory({
+          title: data.title || 'Sản phẩm Shopee',
+          affiliateUrl: data.affiliateUrl,
+          image: data.image
+        });
+
+        notifyToast('Tạo link Affiliate thành công! 🎉');
+
+        // Track GA4 event
+        if (typeof (window as any).gtag === 'function') {
+          (window as any).gtag('event', 'generate_shopee_affiliate_link', {
+            sub_id: currentSelectedSubid,
+            is_short_link: data.isShortLink
+          });
+        }
+      } catch (err: any) {
+        showError(err.message || 'Lỗi khi kết nối máy chủ tạo link.');
+      } finally {
+        if (generateBtn) {
+          generateBtn.disabled = false;
+          generateBtn.innerHTML = '<span class="btn-text">Tạo Link</span> <i class="ph-light ph-sparkle"></i>';
+        }
+      }
+    };
+
+    generateBtn?.addEventListener('click', handleConvert);
+
+    rawUrlInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleConvert();
+      }
+    });
+
+    // --- Copy Generated Link Handler ---
+    copyResultBtn?.addEventListener('click', async () => {
+      const url = resultAffUrl?.textContent?.trim();
+      if (!url) return;
+
+      try {
+        await navigator.clipboard.writeText(url);
+        if (copyBtnText) copyBtnText.textContent = 'Đã sao chép!';
+        copyResultBtn.classList.add('copied');
+        notifyToast('Đã sao chép link Affiliate vào bộ nhớ đệm! 🐾');
+
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.textContent = 'Sao chép Link';
+          copyResultBtn.classList.remove('copied');
+        }, 2500);
+      } catch {
+        notifyToast('Không thể sao chép tự động, vui lòng bôi đen link.');
+      }
+    });
+
+    // --- Toggle QR Code Handler ---
+    toggleQrBtn?.addEventListener('click', () => {
+      if (qrContainer) {
+        qrContainer.classList.toggle('hidden');
+      }
+    });
+
+    // Khởi chạy ban đầu
+    loadSettings();
+  });
+</script>

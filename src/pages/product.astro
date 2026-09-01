@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import PolaroidSheet from '../components/PolaroidSheet.astro';
+import ShopeeAffiliateTool from '../components/ShopeeAffiliateTool.astro';
 
 // Fetch danh sách sản phẩm từ Supabase tại thời điểm build (SSG)
 let products: any[] = [];
@@ -258,6 +259,9 @@ const getCategoryLabel = (cat: string) => {
             <span class="shelf-subtitle">Thức quả lành tính mẹ Lin chọn cho tụi con.</span>
           </div>
         </div>
+
+        <!-- Công cụ Tạo Link Shopee Affiliate 1-Chạm -->
+        <ShopeeAffiliateTool />
 
         <!-- Các tab phân loại (Catalogue Tabs) -->
         <div class="category-tabs-container">

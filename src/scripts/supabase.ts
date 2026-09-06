@@ -33,8 +33,8 @@ export function getSupabase() {
     return supabaseInstance;
   }
 
-  const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL) || (typeof window !== 'undefined' ? (window as any).PUBLIC_SUPABASE_URL : '') || '';
-  const supabaseKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY) || (typeof window !== 'undefined' ? (window as any).PUBLIC_SUPABASE_ANON_KEY : '') || '';
+  const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL) || (typeof window !== 'undefined' ? (window as any).PUBLIC_SUPABASE_URL : '') || 'https://fkilmtcjyommdbtogmeo.supabase.co';
+  const supabaseKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY) || (typeof window !== 'undefined' ? (window as any).PUBLIC_SUPABASE_ANON_KEY : '') || 'sb_publishable_yn5gGSPs2UlfGpItdWsrmw_ka8Nz3d-';
 
   if (typeof window !== 'undefined') {
     console.log('[Supabase getSupabase] URL:', supabaseUrl, 'Key Length:', supabaseKey ? supabaseKey.length : 0);

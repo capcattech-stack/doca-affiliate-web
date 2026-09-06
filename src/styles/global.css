@@ -293,24 +293,26 @@ h3, .title-large {
 }
 
 .nav-google-btn-circular {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
   border: 1px solid var(--cozy-border-light);
   background-color: var(--cozy-bg-pure);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--cozy-text-obsidian);
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 1.5px 3px rgba(21, 23, 15, 0.03);
-  padding: 0;
+  box-shadow: 0 1.5px 3px rgba(21, 23, 15, 0.04);
 }
 
 .nav-google-btn-circular:hover {
   background-color: var(--cozy-bg-beige);
   border-color: var(--cozy-text-obsidian);
-  transform: scale(1.05);
+  transform: translateY(-1px);
   box-shadow: 0 3px 6px rgba(21, 23, 15, 0.08);
 }
 

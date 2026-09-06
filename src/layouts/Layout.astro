@@ -14,6 +14,8 @@ const {
 } = Astro.props;
 
 const googleAnalyticsId = import.meta.env.PUBLIC_GA_ID || 'G-0RCGZRPEGR';
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 const canonicalUrl = new URL(Astro.url.pathname, 'https://doca.capcat.vn').toString();
 ---
 
@@ -24,6 +26,11 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://doca.capcat.vn').toStr
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/png" href="/images/brand/symbol-green.png" />
 		<meta name="generator" content={Astro.generator} />
+		
+		<script is:inline define:vars={{ supabaseUrl, supabaseKey }}>
+			window.PUBLIC_SUPABASE_URL = supabaseUrl;
+			window.PUBLIC_SUPABASE_ANON_KEY = supabaseKey;
+		</script>
 		
 		<!-- SEO Meta Tags -->
 		<title>{title}</title>

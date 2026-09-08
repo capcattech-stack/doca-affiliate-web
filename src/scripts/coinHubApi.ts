@@ -5,7 +5,7 @@
 
 export const COIN_HUB_API_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_COIN_HUB_API_URL) ||
-  'https://coin-hub-406a.onrender.com';
+  'https://coin-hub-5vkl.onrender.com';
 
 export interface CoinPackage {
   id: string;

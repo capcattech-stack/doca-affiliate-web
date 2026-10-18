@@ -7,9 +7,12 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node -e \"const fs=require('fs'),p='.vercel/output/functions/_render.func/.vc-config.json';if(fs.existsSync(p))fs.writeFileSync(p,fs.readFileSync(p,'utf8').replace('nodejs18.x','nodejs20.x'))\"",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "crawl:library": "node scripts/crawlPetLibrary.mjs",
+    "sync:supabase": "node scripts/syncToSupabase.mjs",
+    "test:library": "node --test src/tests/library.test.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "^7.8.2",

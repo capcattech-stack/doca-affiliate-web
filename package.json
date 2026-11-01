@@ -2,12 +2,9 @@
   "name": "doca-affiliate-web",
   "type": "module",
   "version": "0.0.1",
-  "engines": {
-    "node": "20.x"
-  },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node -e \"const fs=require('fs'),p='.vercel/output/functions/_render.func/.vc-config.json';if(fs.existsSync(p))fs.writeFileSync(p,fs.readFileSync(p,'utf8').replace('nodejs18.x','nodejs20.x'))\"",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "crawl:library": "node scripts/crawlPetLibrary.mjs",
